@@ -7,3 +7,4 @@ Route::get('/', function () {
 });
 
 Route::view('dashboard', 'dashboard')->name('dashboard');
+Route::view('lecturer', 'lecturer')->name('lecturer');

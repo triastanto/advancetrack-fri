@@ -17,21 +17,21 @@
             <ul class="space-y-2 mt-4">
                 <!-- Dashboard Link -->
                 <li>
-                    <a href="/dashboard" class="flex items-center gap-3 px-3 py-2 rounded-lg text-[var(--color-primary)] bg-[var(--color-primary-bg)] font-semibold">
+                    <a href="/dashboard" class="flex items-center gap-3 px-3 py-2 rounded-lg {{ request()->routeIs('dashboard') ? 'text-[var(--color-primary)] bg-[var(--color-primary-bg)]' : 'text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)]' }}">
                         <span class="material-icons-outlined">dashboard</span>
                         Dashboard
                     </a>
                 </li>
                 <!-- Lecturers Link -->
                 <li>
-                    <a href="/lecturers" class="flex items-center gap-3 px-3 py-2 rounded-lg text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)]">
+                    <a href="{{ route('lecturer') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg {{ request()->routeIs('lecturer') ? 'text-[var(--color-primary)] bg-[var(--color-primary-bg)] font-semibold' : 'text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)]' }}">
                         <span class="material-icons-outlined">groups</span>
                         Lecturers
                     </a>
                 </li>
                 <!-- Verifications Link with Badge -->
                 <li>
-                    <a href="/verifications" class="flex items-center gap-3 px-3 py-2 rounded-lg text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)] relative">
+                    <a href="/verifications" class="flex items-center gap-3 px-3 py-2 rounded-lg relative {{ request()->is('verifications*') ? 'text-[var(--color-primary)] bg-[var(--color-primary-bg)] font-semibold' : 'text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)]' }}">
                         <span class="material-icons-outlined">verified</span>
                         Verifications
                         <span class="ml-auto inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-bold bg-[var(--color-primary)] text-white absolute right-3 top-1/2 -translate-y-1/2">3</span>
@@ -39,7 +39,7 @@
                 </li>
                 <!-- Official Document Link with Badge -->
                 <li>
-                    <a href="/official-documents" class="flex items-center gap-3 px-3 py-2 rounded-lg text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)] relative">
+                    <a href="/official-documents" class="flex items-center gap-3 px-3 py-2 rounded-lg relative {{ request()->is('official-documents*') ? 'text-[var(--color-primary)] bg-[var(--color-primary-bg)] font-semibold' : 'text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)]' }}">
                         <span class="material-icons-outlined">description</span>
                         Official Document
                         <span class="ml-auto inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-bold bg-[var(--color-primary)] text-white absolute right-3 top-1/2 -translate-y-1/2">5</span>
@@ -47,14 +47,14 @@
                 </li>
                 <!-- Reports Link -->
                 <li>
-                    <a href="/reports" class="flex items-center gap-3 px-3 py-2 rounded-lg text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)]">
+                    <a href="/reports" class="flex items-center gap-3 px-3 py-2 rounded-lg {{ request()->is('reports*') ? 'text-[var(--color-primary)] bg-[var(--color-primary-bg)] font-semibold' : 'text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)]' }}">
                         <span class="material-icons-outlined">bar_chart</span>
                         Reports
                     </a>
                 </li>
                 <!-- Notifications Link with Badge -->
                 <li>
-                    <a href="/notifications" class="flex items-center gap-3 px-3 py-2 rounded-lg text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)] relative">
+                    <a href="/notifications" class="flex items-center gap-3 px-3 py-2 rounded-lg relative {{ request()->is('notifications*') ? 'text-[var(--color-primary)] bg-[var(--color-primary-bg)] font-semibold' : 'text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)]' }}">
                         <span class="material-icons-outlined">notifications</span>
                         Notifications
                         <span class="ml-auto inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-bold bg-[var(--color-primary)] text-white absolute right-3 top-1/2 -translate-y-1/2">8</span>

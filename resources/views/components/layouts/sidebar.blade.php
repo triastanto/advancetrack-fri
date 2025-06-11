@@ -31,7 +31,7 @@
                 </li>
                 <!-- Verifications Link with Badge -->
                 <li>
-                    <a href="/verifications" class="flex items-center gap-3 px-3 py-2 rounded-lg relative {{ request()->is('verifications*') ? 'text-[var(--color-primary)] bg-[var(--color-primary-bg)] font-semibold' : 'text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)]' }}">
+                    <a href="{{ route('verification') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg relative {{ request()->is('verifications*') ? 'text-[var(--color-primary)] bg-[var(--color-primary-bg)] font-semibold' : 'text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)]' }}">
                         <span class="material-icons-outlined">verified</span>
                         Verifications
                         <span class="ml-auto inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-bold bg-[var(--color-primary)] text-white absolute right-3 top-1/2 -translate-y-1/2">3</span>

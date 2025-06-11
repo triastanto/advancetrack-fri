@@ -45,7 +45,7 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">{{ $doc->employee->employee_number }}</td>
                         <td class="px-6 py-4 whitespace-nowrap">{{ ucfirst(str_replace('_', ' ', $doc->document_type)) }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">{{ $doc->uploaded_at ? date('d/m/Y', strtotime($doc->uploaded_at)) : '-' }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">{{ $doc->created_at ? date('d/m/Y', strtotime($doc->created_at)) : '-' }}</td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             @if ($doc->verification_status === 'pending')
                                 <span class="px-3 py-1 rounded-full bg-yellow-100 text-yellow-800 text-xs font-semibold">Menunggu</span>
@@ -87,8 +87,8 @@
                         </div>
                     </div>
                     <div class="text-sm text-gray-600 mb-2">Jenis Dokumen: <span class="font-semibold">{{ ucfirst(str_replace('_', ' ', $selectedDocument->document_type)) }}</span></div>
-                    <div class="text-sm text-gray-600 mb-2">Tanggal Upload: <span class="font-semibold">{{ $selectedDocument->uploaded_at ? date('d/m/Y', strtotime($selectedDocument->uploaded_at)) : '-' }}</span></div>
-                    <div class="text-sm text-gray-600 mb-2">Status: 
+                    <div class="text-sm text-gray-600 mb-2">Tanggal Upload: <span class="font-semibold">{{ $selectedDocument->created_at ? date('d/m/Y', strtotime($selectedDocument->created_at)) : '-' }}</span></div>
+                    <div class="text-sm text-gray-600 mb-2">Status:
                         @if ($selectedDocument->verification_status === 'pending')
                             <span class="px-3 py-1 rounded-full bg-yellow-100 text-yellow-800 text-xs font-semibold">Menunggu</span>
                         @elseif ($selectedDocument->verification_status === 'rejected')

@@ -41,7 +41,7 @@ class Verification extends Component
             });
         }
 
-        $documents = $query->orderBy('uploaded_at', 'desc')->paginate(10);
+        $documents = $query->orderBy('created_at', 'desc')->paginate(10);
         $documentTypes = Document::select('document_type')->distinct()->pluck('document_type');
         $studyPrograms = StudyProgram::all();
 

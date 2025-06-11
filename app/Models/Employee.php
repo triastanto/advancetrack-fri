@@ -28,12 +28,12 @@ class Employee extends Model
 
     public function semesterReports()
     {
-        return $this->hasMany(SemesterReport::class);
+        return $this->hasMany(Document::class)->where('document_type', 'semester_report');
     }
 
     public function serviceBondAgreements()
     {
-        return $this->hasMany(ServiceBondAgreement::class);
+        return $this->hasMany(Document::class)->where('document_type', 'service_bond_agreement');
     }
 
     public function studyCalendars()

@@ -7,8 +7,6 @@ use App\Models\User;
 use App\Models\Employee;
 use App\Models\StudyProgram;
 use App\Models\Document;
-use App\Models\SemesterReport;
-use App\Models\ServiceBondAgreement;
 use App\Models\StudyCalendar;
 
 class AdvancedTrackSeeder extends Seeder
@@ -18,15 +16,22 @@ class AdvancedTrackSeeder extends Seeder
         // Study Programs
         $studyPrograms = StudyProgram::factory(3)->create();
 
-        // Users & Employees
-        $users = User::factory(30)->create();
+        // Create employees with their associated users
         $employees = collect();
-        foreach ($users as $user) {
-            $role = fake()->randomElement(['lecturer', 'fsdp_staff', 'head_of_affairs', 'vice_dean']);
+        $roles = ['lecturer', 'fsdp_staff', 'head_of_affairs', 'vice_dean'];
+
+        // Create 30 employees with their respective users
+        for ($i = 0; $i < 30; $i++) {
+            $role = fake()->randomElement($roles);
+            // Create a user first
+            $user = User::factory()->create();
+
+            // Then create an employee related to this user
             $employee = Employee::factory()->create([
                 'user_id' => $user->id,
                 'role' => $role,
             ]);
+
             $employees->push($employee);
         }
 
@@ -38,11 +43,30 @@ class AdvancedTrackSeeder extends Seeder
             }
         }
 
-        // Documents, Semester Reports, Service Bond Agreements, Study Calendars
+        // Documents and Study Calendars
         foreach ($employees as $employee) {
+            // Regular documents
             Document::factory(rand(2, 6))->create(['employee_id' => $employee->id]);
-            SemesterReport::factory(rand(1, 4))->create(['employee_id' => $employee->id]);
-            ServiceBondAgreement::factory(rand(0, 2))->create(['employee_id' => $employee->id]);
+
+            // Semester reports (now as documents)
+            for ($i = 0; $i < rand(1, 4); $i++) {
+                Document::factory()->create([
+                    'employee_id' => $employee->id,
+                    'document_type' => 'semester_report',
+                    'semester' => rand(1, 8),
+                    'year' => rand(2023, 2025),
+                ]);
+            }
+
+            // Service bond agreements (now as documents)
+            for ($i = 0; $i < rand(0, 2); $i++) {
+                Document::factory()->create([
+                    'employee_id' => $employee->id,
+                    'document_type' => 'service_bond_agreement',
+                    'upload_date' => now()->subDays(rand(1, 365)),
+                ]);
+            }
+
             StudyCalendar::factory()->create(['employee_id' => $employee->id]);
         }
     }

@@ -4,6 +4,8 @@ namespace Database\Factories;
 
 use App\Models\Document;
 use App\Models\Employee;
+use App\Models\DocumentType;
+use App\Constants\DocumentTypeConstants;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class DocumentFactory extends Factory
@@ -12,12 +14,14 @@ class DocumentFactory extends Factory
 
     public function definition(): array
     {
-        $types = ['personal_data', 'requirement', 'semester_report', 'final_report', 'graduation', 'additional', 'minutes', 'nde', 'pid', 'service_bond_agreement'];
         $statuses = ['draft', 'pending', 'verified', 'rejected'];
-        $type = $this->faker->randomElement($types);
+
+        // Get a random document type from the database, preferring predefined types
+        $documentType = DocumentType::inRandomOrder()->first() ?? DocumentType::factory()->predefined()->create();
+
         $data = [
             'employee_id' => Employee::factory(),
-            'document_type' => $type,
+            'document_type_id' => $documentType->id,
             'file_name' => $this->faker->lexify('document_????.pdf'),
             'file_path' => 'uploads/' . $this->faker->uuid . '.pdf',
             'verification_status' => $this->faker->randomElement($statuses),
@@ -26,13 +30,67 @@ class DocumentFactory extends Factory
         ];
 
         // Add specific fields based on document type
-        if ($type === 'semester_report') {
+        if ($documentType->name === 'semester_report') {
             $data['semester'] = $this->faker->numberBetween(1, 8);
             $data['year'] = $this->faker->year();
-        } elseif ($type === 'service_bond_agreement') {
+        } elseif (in_array($documentType->name, ['pid'])) {
             $data['upload_date'] = $this->faker->date();
         }
 
         return $data;
+    }
+
+    /**
+     * Create a document with a specific document type from constants
+     */
+    public function withDocumentType(string $documentTypeName = null): self
+    {
+        return $this->state(function (array $attributes) use ($documentTypeName) {
+            $documentType = null;
+
+            if ($documentTypeName) {
+                // Get specific document type from constants
+                $documentTypeData = DocumentTypeConstants::getByName($documentTypeName);
+                if (!$documentTypeData) {
+                    throw new \InvalidArgumentException("Document type '{$documentTypeName}' not found in constants.");
+                }
+
+                $documentType = DocumentType::where('name', $documentTypeName)->first()
+                    ?? DocumentType::factory()->ofType($documentTypeName)->create();
+            } else {
+                // Get random document type from constants
+                $randomTypeName = $this->faker->randomElement(DocumentTypeConstants::getAllNames());
+                $documentType = DocumentType::where('name', $randomTypeName)->first()
+                    ?? DocumentType::factory()->ofType($randomTypeName)->create();
+            }
+
+            $stateData = [
+                'document_type_id' => $documentType->id,
+            ];
+
+            // Add type-specific attributes based on document type name
+            if ($documentType->name === 'semester_report') {
+                $stateData['semester'] = $attributes['semester'] ?? $this->faker->numberBetween(1, 8);
+                $stateData['year'] = $attributes['year'] ?? $this->faker->year();
+            } elseif ($documentType->name === 'pid') {
+                $stateData['upload_date'] = $attributes['upload_date'] ?? $this->faker->date();
+            }
+
+            return $stateData;
+        });
+    }
+
+    /**
+     * Create a document for a specific predefined document type category
+     */
+    public function forCategory(string $category): self
+    {
+        $categoryTypes = DocumentTypeConstants::getByCategory($category);
+        if (empty($categoryTypes)) {
+            throw new \InvalidArgumentException("Category '{$category}' not found or empty.");
+        }
+
+        $randomType = $this->faker->randomElement($categoryTypes);
+        return $this->withDocumentType($randomType['name']);
     }
 }

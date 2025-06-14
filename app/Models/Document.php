@@ -15,4 +15,9 @@ class Document extends Model
     {
         return $this->belongsTo(Employee::class);
     }
+
+    public function documentType()
+    {
+        return $this->belongsTo(DocumentType::class);
+    }
 }

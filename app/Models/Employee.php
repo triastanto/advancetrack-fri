@@ -18,7 +18,7 @@ class Employee extends Model
 
     public function studyPrograms()
     {
-        return $this->belongsToMany(StudyProgram::class)->withTimestamps();;
+        return $this->belongsToMany(StudyProgram::class)->withTimestamps();
     }
 
     public function documents()

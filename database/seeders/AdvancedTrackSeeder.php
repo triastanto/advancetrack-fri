@@ -7,7 +7,9 @@ use App\Models\User;
 use App\Models\Employee;
 use App\Models\StudyProgram;
 use App\Models\Document;
+use App\Models\DocumentType;
 use App\Models\StudyCalendar;
+use App\Constants\DocumentTypeConstants;
 
 class AdvancedTrackSeeder extends Seeder
 {
@@ -45,27 +47,32 @@ class AdvancedTrackSeeder extends Seeder
 
         // Documents and Study Calendars
         foreach ($employees as $employee) {
-            // Regular documents
-            Document::factory(rand(2, 6))->create(['employee_id' => $employee->id]);
+            // Generate at least one document for every predefined document type
+            foreach (DocumentTypeConstants::getAllNames() as $documentTypeName) {
+                // Create 1-3 documents for each type to add variety
+                $documentsToCreate = rand(1, 3);
 
-            // Semester reports (now as documents)
-            for ($i = 0; $i < rand(1, 4); $i++) {
-                Document::factory()->create([
-                    'employee_id' => $employee->id,
-                    'document_type' => 'semester_report',
-                    'semester' => rand(1, 8),
-                    'year' => rand(2023, 2025),
-                ]);
+                for ($i = 0; $i < $documentsToCreate; $i++) {
+                    $documentType = DocumentType::where('name', $documentTypeName)->first();
+
+                    if ($documentType) {
+                        $documentData = ['employee_id' => $employee->id];
+
+                        // Add specific fields based on document type
+                        if ($documentTypeName === 'semester_report') {
+                            $documentData['semester'] = rand(1, 8);
+                            $documentData['year'] = rand(2023, 2025);
+                        } elseif ($documentTypeName === 'pid') {
+                            $documentData['upload_date'] = now()->subDays(rand(1, 365));
+                        }
+
+                        Document::factory()->withDocumentType($documentTypeName)->create($documentData);
+                    }
+                }
             }
 
-            // Service bond agreements (now as documents)
-            for ($i = 0; $i < rand(0, 2); $i++) {
-                Document::factory()->create([
-                    'employee_id' => $employee->id,
-                    'document_type' => 'service_bond_agreement',
-                    'upload_date' => now()->subDays(rand(1, 365)),
-                ]);
-            }
+            // Create additional random documents to simulate realistic variety
+            Document::factory(rand(2, 5))->withDocumentType()->create(['employee_id' => $employee->id]);
 
             StudyCalendar::factory()->create(['employee_id' => $employee->id]);
         }

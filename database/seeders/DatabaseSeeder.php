@@ -13,6 +13,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // Seed document types first (required for other seeders)
+        $this->call(DocumentTypeSeeder::class);
+
         // Call the main app seeder
         $this->call(AdvancedTrackSeeder::class);
     }

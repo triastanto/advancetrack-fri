@@ -1,0 +1,40 @@
+/* Page Container Component Styles */
+
+.page-container {
+    --container-padding: var(--container-padding, 2.5rem); /* Inherits from global or falls back to 2.5rem */
+    --container-margin: 0 auto;
+    --title-color: var(--color-primary);
+    --title-size: 1.875rem; /* text-3xl */
+    --title-weight: 700; /* font-bold */
+    --title-margin: 1.5rem;
+    --title-padding: 1.5rem;
+}
+
+/* Base Container Styles */
+.page-container {
+    padding: var(--container-padding);
+    margin: var(--container-margin);
+    width: 100%;
+}
+
+/* Title Styles */
+.page-container__title {
+    color: var(--title-color);
+    font-size: var(--title-size);
+    font-weight: var(--title-weight);
+    padding-top: var(--title-padding);
+    padding-left: var(--title-padding);
+    padding-right: var(--title-padding);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 640px) {
+    .page-container {
+        --container-padding: 1.25rem; /* Smaller padding on mobile */
+    }
+
+    .page-container__title {
+        --title-size: 1.5rem;
+        --title-margin: 1rem;
+    }
+}

@@ -1,0 +1,46 @@
+/* Card Component Styles */
+
+/* Card Variants */
+.card {
+    --card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --card-border-radius: 1rem;
+    --card-transition: all 0.2s ease-in-out;
+}
+
+.card--default {
+    --card-bg: var(--color-bg);
+    --card-text: var(--color-text-main);
+}
+
+.card--primary {
+    --card-bg: var(--color-primary);
+    --card-text: white;
+}
+
+.card--table {
+    --card-bg: white;
+    --card-text: var(--color-text-main);
+    --card-overflow: auto;
+}
+
+/* Card Base Styles */
+.card {
+    background-color: var(--card-bg);
+    color: var(--card-text);
+    border-radius: var(--card-border-radius);
+    box-shadow: var(--card-shadow);
+    transition: var(--card-transition);
+}
+
+.card--table {
+    overflow-x: var(--card-overflow);
+}
+
+/* Card Hover States */
+.card--default:hover {
+    --card-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+.card--primary:hover {
+    filter: brightness(1.05);
+} 

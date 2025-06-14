@@ -1,6 +1,6 @@
-<div class="flex flex-col gap-8 p-6">
+<x-page-container>
     <!-- Search & Filter Bar -->
-    <div class="flex flex-wrap gap-4 justify-between items-center">
+    <div class="flex flex-wrap gap-4 justify-between items-center mb-8">
         <div class="flex gap-3">
             <select wire:model="documentType" class="rounded-xl border-2 px-4 py-2">
                 <option value="">Semua Jenis Dokumen</option>
@@ -22,7 +22,7 @@
     </div>
 
     <!-- Document Table -->
-    <div class="overflow-x-auto bg-white rounded-2xl shadow-md">
+    <x-card variant="table">
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-[#E6F4EC]">
                 <tr>
@@ -67,12 +67,12 @@
             </tbody>
         </table>
         <div class="p-4">{{ $documents->links() }}</div>
-    </div>
+    </x-card>
 
     <!-- Modal for Document Details & Verification -->
     @if ($showModal && $selectedDocument)
         <div class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-            <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg p-8 relative">
+            <x-card class="w-full max-w-lg relative">
                 <button wire:click="closeModal" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
@@ -110,7 +110,7 @@
                     <button wire:click="rejectDocument" class="bg-red-100 text-red-700 px-4 py-2 rounded-lg font-semibold hover:bg-red-200 transition">Tolak</button>
                     <button wire:click="verifyDocument" class="bg-[#009444] text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition">Verifikasi</button>
                 </div>
-            </div>
+            </x-card>
         </div>
     @endif
 
@@ -124,4 +124,4 @@
             {{ session('error') }}
         </div>
     @endif
-</div>
+</x-page-container>

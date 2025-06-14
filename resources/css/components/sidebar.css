@@ -1,0 +1,99 @@
+/* Sidebar Component Styles */
+
+.sidebar {
+    --sidebar-width: 280px;
+    --sidebar-bg: white;
+    --sidebar-border: 1px solid var(--color-border);
+    --sidebar-transition: var(--transition-base);
+    --sidebar-z-index: 50;
+    
+    /* Navigation Items */
+    --nav-item-padding: 0.75rem 1rem;
+    --nav-item-color: var(--color-text-main);
+    --nav-item-hover-bg: var(--color-primary-bg);
+    --nav-item-active-bg: var(--color-primary);
+    --nav-item-active-color: white;
+    --nav-item-icon-size: 1.25rem;
+    
+    /* Mobile Styles */
+    --mobile-sidebar-width: 100%;
+    --mobile-sidebar-bg: rgba(0, 0, 0, 0.5);
+}
+
+/* Base Sidebar Styles */
+.sidebar {
+    width: var(--sidebar-width);
+    background-color: var(--sidebar-bg);
+    border-right: var(--sidebar-border);
+    transition: var(--sidebar-transition);
+    z-index: var(--sidebar-z-index);
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+/* Navigation Items */
+.sidebar__nav-item {
+    padding: var(--nav-item-padding);
+    color: var(--nav-item-color);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    transition: var(--sidebar-transition);
+}
+
+.sidebar__nav-item:hover {
+    background-color: var(--nav-item-hover-bg);
+}
+
+.sidebar__nav-item--active {
+    background-color: var(--nav-item-active-bg);
+    color: var(--nav-item-active-color);
+}
+
+.sidebar__nav-icon {
+    width: var(--nav-item-icon-size);
+    height: var(--nav-item-icon-size);
+}
+
+/* Mobile Menu Button */
+.sidebar__mobile-toggle {
+    display: none;
+}
+
+/* Mobile Styles */
+@media (max-width: 768px) {
+    .sidebar {
+        transform: translateX(-100%);
+    }
+    
+    .sidebar--open {
+        transform: translateX(0);
+    }
+    
+    .sidebar__mobile-toggle {
+        display: block;
+        position: fixed;
+        top: 1rem;
+        left: 1rem;
+        z-index: var(--sidebar-z-index);
+    }
+    
+    .sidebar__overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: var(--mobile-sidebar-bg);
+        opacity: 0;
+        visibility: hidden;
+        transition: var(--sidebar-transition);
+    }
+    
+    .sidebar--open + .sidebar__overlay {
+        opacity: 1;
+        visibility: visible;
+    }
+} 

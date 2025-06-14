@@ -1,6 +1,6 @@
-<div class="flex flex-col gap-8 p-6">
+<x-page-container>
     <!-- Study Program Filter -->
-    <div class="flex flex-wrap gap-4 justify-start md:justify-between items-center">
+    <div class="flex flex-wrap gap-4 justify-start md:justify-between items-center mb-8">
         <div class="flex gap-3">
             <button wire:click="$set('studyProgram', null)"
                 class="flex items-center gap-2 px-6 py-3 rounded-xl border-2 transition font-semibold text-lg
@@ -25,22 +25,22 @@
     </div>
 
     <!-- Lecturer Card Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-2">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         @forelse($lecturers as $lecturer)
-            <div class="bg-[#009444] rounded-2xl shadow-lg flex flex-col items-center p-8 text-white">
+            <x-card variant="primary" padding="p-8" class="flex flex-col items-center">
                 <div class="w-20 h-20 rounded-full bg-white flex items-center justify-center mb-4 shadow-md">
                     <span class="text-3xl font-bold text-[#009444]">{{ strtoupper(Str::substr($lecturer->user->name, 0, 1)) }}</span>
                 </div>
                 <div class="text-xl font-semibold text-center">{{ $lecturer->user->name }}</div>
                 <div class="text-base text-center opacity-80">NIP: {{ $lecturer->user->email }}</div>
-            </div>
+            </x-card>
         @empty
             <div class="col-span-3 text-center text-gray-400 py-12">Tidak ada dosen ditemukan.</div>
         @endforelse
     </div>
 
     <!-- Pagination & Summary -->
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mt-4">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mt-8">
         <div class="text-gray-600 text-sm">
             Menampilkan {{ $lecturers->firstItem() ?? 0 }} - {{ $lecturers->lastItem() ?? 0 }} dari {{ $lecturers->total() }} dosen
         </div>
@@ -48,4 +48,4 @@
             {{ $lecturers->links() }}
         </div>
     </div>
-</div>
+</x-page-container>

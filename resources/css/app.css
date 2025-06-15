@@ -5,19 +5,21 @@
     /* Typography */
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
-    
+
     /* Colors */
     --color-primary: #009444;
+    --color-primary-light: #E6F4EC;
+    --color-primary-dark: #007a39;
     --color-primary-bg: #E6F4EC;
     --color-bg: #F8F9FB;
     --color-border: #E5E7EB;
     --color-text-main: #101419;
     --color-text-secondary: #58728d;
-    
+
     /* Spacing */
     --spacing-unit: 0.25rem;
-    --container-padding: 2.5rem; /* Default padding for page containers */
-        
+    --container-padding: 1.5rem; /* Default padding for page containers */
+
     /* Transitions */
     --transition-base: all 0.2s ease-in-out;
 }

@@ -2,6 +2,7 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     @include('partials.head')
+    @livewireStyles
 </head>
 
 <body class="flex min-h-screen">
@@ -19,5 +20,6 @@
             menu.classList.toggle('hidden');
         });
     </script>
+    @livewireScripts
 </body>
 </html>

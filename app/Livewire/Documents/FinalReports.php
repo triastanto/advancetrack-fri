@@ -3,6 +3,8 @@
 namespace App\Livewire\Documents;
 
 use App\Models\Document;
+use App\Models\DocumentType;
+use App\Constants\DocumentTypeConstants;
 use Carbon\Carbon;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
@@ -16,29 +18,67 @@ class FinalReports extends Component
 
     public $documentFile;
     public $fileName;
-    public $documentSubtype;
+    public $selectedDocumentTypeId;
     public $uploadModalOpen = false;
     public $viewModalOpen = false;
     public $currentDocument;
-
-    // Document subtypes for final reports
-    public $documentSubtypes = [
-        'thesis' => 'Disertasi/Tesis',
-        'graduation_letter' => 'Surat Kelulusan',
-        'diploma' => 'Ijazah Akhir',
-        'transcript' => 'Transkrip Akhir'
-    ];
+    public $availableDocumentTypes;
 
     protected $rules = [
-        'documentFile' => 'required|file|max:10240',
+        'documentFile' => 'required|file|mimes:pdf|max:10240', // 10MB limit, PDF only
         'fileName' => 'required|string|max:255',
-        'documentSubtype' => 'required|string|in:thesis,graduation_letter,diploma,transcript'
+        'selectedDocumentTypeId' => 'required|exists:document_types,id'
     ];
 
+    protected $messages = [
+        'documentFile.required' => 'File dokumen wajib dipilih.',
+        'documentFile.file' => 'File yang dipilih tidak valid.',
+        'documentFile.mimes' => 'File harus berformat PDF.',
+        'documentFile.max' => 'Ukuran file maksimal 10MB.',
+        'fileName.required' => 'Nama dokumen wajib diisi.',
+        'fileName.max' => 'Nama dokumen maksimal 255 karakter.',
+        'selectedDocumentTypeId.required' => 'Jenis dokumen laporan akhir wajib dipilih.',
+        'selectedDocumentTypeId.exists' => 'Jenis dokumen yang dipilih tidak valid.',
+    ];
+
+    // Helper method to get employee
+    protected function getEmployee()
+    {
+        $employee = Auth::user()->employee;
+        if (!$employee) {
+            throw new \Exception('Employee data not found.');
+        }
+        return $employee;
+    }
+
+    // Helper method to get final document types
+    protected function getFinalDocumentTypes()
+    {
+        $finalDocumentNames = array_column(
+            DocumentTypeConstants::getByCategory('final_documents'),
+            'name'
+        );
+
+        return DocumentType::whereIn('name', $finalDocumentNames)
+            ->orderBy('display_name')
+            ->get();
+    }
+
+    public function mount()
+    {
+        $this->selectedDocumentTypeId = '';
+        $this->availableDocumentTypes = $this->getFinalDocumentTypes();
+    }
+
+    // Modal Methods
     public function openUploadModal()
     {
+        if (!$this->selectedDocumentTypeId) {
+            return;
+        }
+
         $this->uploadModalOpen = true;
-        $this->reset(['fileName', 'documentFile', 'documentSubtype']);
+        $this->reset(['fileName', 'documentFile']);
     }
 
     public function closeUploadModal()
@@ -58,142 +98,173 @@ class FinalReports extends Component
         $this->currentDocument = null;
     }
 
+    // Document Management Methods
     public function uploadDocument()
     {
-        $this->validate();
+        try {
+            $this->validate();
+            $employee = $this->getEmployee();
 
-        $user = Auth::user();
-        $employee = $user->employee;
+            if (!$this->documentFile) {
+                throw new \Exception('No file was uploaded.');
+            }
 
-        $filePath = $this->documentFile->store('final-reports/' . $employee->id, 'public');
+            $filePath = $this->documentFile->store('final-reports/' . $employee->id, 'public');
+            $documentType = DocumentType::findOrFail($this->selectedDocumentTypeId);
 
-        // Add metadata to the file name to identify the subtype
-        $metaFileName = '[' . $this->documentSubtypes[$this->documentSubtype] . '] ' . $this->fileName;
+            Document::create([
+                'employee_id' => $employee->id,
+                'document_type_id' => $documentType->id,
+                'file_name' => $this->fileName,
+                'file_path' => $filePath,
+                'verification_status' => 'pending',
+            ]);
 
-        Document::create([
-            'employee_id' => $employee->id,
-            'document_type' => $this->documentSubtype === 'thesis' ? 'final_report' : 'graduation',
-            'file_name' => $metaFileName,
-            'file_path' => $filePath,
-            'verification_status' => 'pending',
-            'uploaded_at' => now()
-        ]);
+            $this->closeUploadModal();
+            session()->flash('message', 'Dokumen berhasil diunggah dan menunggu verifikasi.');
 
-        $this->closeUploadModal();
-        session()->flash('message', 'Dokumen laporan akhir berhasil diunggah.');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            session()->flash('error', 'Terjadi kesalahan saat mengunggah dokumen: ' . $e->getMessage());
+        }
     }
 
     public function deleteDocument($documentId)
     {
-        $document = Document::find($documentId);
-        if ($document) {
-            // Delete file from storage
+        try {
+            $document = Document::findOrFail($documentId);
+            
             if (Storage::disk('public')->exists($document->file_path)) {
                 Storage::disk('public')->delete($document->file_path);
             }
+            
             $document->delete();
-            session()->flash('message', 'Dokumen laporan akhir berhasil dihapus.');
+            session()->flash('message', 'Dokumen berhasil dihapus.');
+        } catch (\Exception $e) {
+            session()->flash('error', 'Terjadi kesalahan saat menghapus dokumen: ' . $e->getMessage());
         }
     }
 
-    // Helper method to get document completion status
+    // Status and Info Methods
     public function getCompletionStatus()
     {
-        $employee = Auth::user()->employee;;
+        try {
+            $employee = $this->getEmployee();
+            $documentTypes = $this->getFinalDocumentTypes();
+            $documentTypeIds = $documentTypes->pluck('id')->toArray();
 
-        // Check if all required document types have been uploaded
-        $uploadedTypes = Document::where('employee_id', $employee->id)
-            ->whereIn('document_type', ['final_report', 'graduation'])
-            ->get()
-            ->pluck('file_name')
-            ->toArray();
+            $uploadedDocuments = Document::where('employee_id', $employee->id)
+                ->whereIn('document_type_id', $documentTypeIds)
+                ->with('documentType')
+                ->get();
 
-        // Check for each required document subtype
-        $completionStatus = [];
-        $allCompleted = true;
+            $completionStatus = [];
+            $allCompleted = true;
 
-        foreach ($this->documentSubtypes as $key => $label) {
-            $isUploaded = false;
-            // Check if any document name contains the label (which was prefixed to the filename)
-            foreach ($uploadedTypes as $uploadedDoc) {
-                if (strpos($uploadedDoc, '[' . $label . ']') !== false) {
-                    $isUploaded = true;
-                    break;
+            foreach ($this->availableDocumentTypes as $docType) {
+                $isUploaded = $uploadedDocuments->contains('document_type_id', $docType->id);
+                $completionStatus[$docType->name] = $isUploaded;
+
+                if (!$isUploaded) {
+                    $allCompleted = false;
                 }
             }
 
-            $completionStatus[$key] = $isUploaded;
-            if (!$isUploaded) {
-                $allCompleted = false;
-            }
+            return [
+                'status' => $allCompleted ? 'Lengkap' : 'Belum Lengkap',
+                'details' => $completionStatus
+            ];
+        } catch (\Exception $e) {
+            return [
+                'status' => 'Error',
+                'details' => []
+            ];
         }
-
-        return [
-            'status' => $allCompleted ? 'Lengkap' : 'Belum Lengkap',
-            'details' => $completionStatus
-        ];
     }
 
     public function getActiveStudyInfo()
     {
-        $employee = Auth::user()->employee;;
+        try {
+            $employee = $this->getEmployee();
 
-        // First try to get an active study
-        $activeStudy = $employee->studyCalendars()
-            ->where('study_status', 'active')
-            ->latest()
-            ->first();
-
-        // If no active study, get the most recent one of any status
-        if (!$activeStudy) {
             $activeStudy = $employee->studyCalendars()
+                ->where('study_status', 'active')
                 ->latest()
                 ->first();
 
-            // If still no study calendar found
             if (!$activeStudy) {
-                return null;
+                $activeStudy = $employee->studyCalendars()
+                    ->latest()
+                    ->first();
+
+                if (!$activeStudy) {
+                    return null;
+                }
             }
+
+            $studyProgram = $employee->studyPrograms()->first();
+            $programName = $studyProgram ? $studyProgram->name : 'Tidak tersedia';
+
+            $startDate = Carbon::parse($activeStudy->study_start);
+            $now = Carbon::now();
+            $monthsDiff = $startDate->diffInMonths($now);
+            $currentSemester = floor($monthsDiff / 6) + 1;
+
+            return [
+                'program' => $programName,
+                'status' => $activeStudy->study_status,
+                'start_date' => $startDate->format('F Y'),
+                'estimated_end' => Carbon::parse($activeStudy->estimated_study_end)->format('F Y'),
+                'current_semester' => $currentSemester,
+                'has_multiple_studies' => $employee->studyCalendars()->count() > 1,
+            ];
+        } catch (\Exception $e) {
+            return null;
         }
+    }
 
-        // Get the most recent study program
-        $studyProgram = $employee->studyPrograms()->first();
-        $programName = $studyProgram ? $studyProgram->name : 'Tidak tersedia';
+    // Livewire Update Methods
+    public function updatedSelectedDocumentTypeId()
+    {
+        // Reserved for future enhancements
+    }
 
-        // Calculate current semester based on study start date
-        $startDate = Carbon::parse($activeStudy->study_start);
-        $now = Carbon::now();
+    public function updatedDocumentFile()
+    {
+        $this->validateOnly('documentFile');
+    }
 
-        // Assume 6 months per semester, starting from study_start
-        $monthsDiff = $startDate->diffInMonths($now);
-        $currentSemester = floor($monthsDiff / 6) + 1;
-
-        return [
-            'program' => $programName,
-            'status' => $activeStudy->study_status,
-            'start_date' => $startDate->format('F Y'),
-            'estimated_end' => Carbon::parse($activeStudy->estimated_study_end)->format('F Y'),
-            'current_semester' => $currentSemester,
-            'has_multiple_studies' => $employee->studyCalendars()->count() > 1,
-        ];
+    public function updatedFileName()
+    {
+        $this->validateOnly('fileName');
     }
 
     public function render()
     {
-        $employee = Auth::user()->employee;;
+        try {
+            $employee = $this->getEmployee();
+            $documentTypes = $this->getFinalDocumentTypes();
+            $documentTypeIds = $documentTypes->pluck('id')->toArray();
 
-        $finalReports = Document::where('employee_id', $employee->id)
-            ->whereIn('document_type', ['final_report', 'graduation'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
+            $finalReports = Document::where('employee_id', $employee->id)
+                ->whereIn('document_type_id', $documentTypeIds)
+                ->with('documentType')
+                ->orderBy('created_at', 'desc')
+                ->paginate(10);
 
-        $completionStatus = $this->getCompletionStatus();
-        $activeStudyInfo = $this->getActiveStudyInfo();
-
-        return view('livewire.documents.final-reports', [
-            'documents' => $finalReports,
-            'completionStatus' => $completionStatus,
-            'activeStudyInfo' => $activeStudyInfo
-        ]);
+            return view('livewire.documents.final-reports', [
+                'documents' => $finalReports,
+                'completionStatus' => $this->getCompletionStatus(),
+                'activeStudyInfo' => $this->getActiveStudyInfo()
+            ]);
+        } catch (\Exception $e) {
+            session()->flash('error', 'Terjadi kesalahan: ' . $e->getMessage());
+            return view('livewire.documents.final-reports', [
+                'documents' => collect(),
+                'completionStatus' => ['status' => 'Error', 'details' => []],
+                'activeStudyInfo' => null
+            ]);
+        }
     }
 }

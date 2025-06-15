@@ -1,7 +1,6 @@
 /* Page Container Component Styles */
 
 .page-container {
-    --container-padding: var(--container-padding, 2.5rem); /* Inherits from global or falls back to 2.5rem */
     --container-margin: 0 auto;
     --title-color: var(--color-primary);
     --title-size: 1.875rem; /* text-3xl */
@@ -22,9 +21,7 @@
     color: var(--title-color);
     font-size: var(--title-size);
     font-weight: var(--title-weight);
-    padding-top: var(--title-padding);
-    padding-left: var(--title-padding);
-    padding-right: var(--title-padding);
+    padding-bottom: var(--title-padding);
 }
 
 /* Responsive Adjustments */

@@ -6,7 +6,7 @@
     --sidebar-border: 1px solid var(--color-border);
     --sidebar-transition: var(--transition-base);
     --sidebar-z-index: 50;
-    
+
     /* Navigation Items */
     --nav-item-padding: 0.75rem 1rem;
     --nav-item-color: var(--color-text-main);
@@ -14,7 +14,7 @@
     --nav-item-active-bg: var(--color-primary);
     --nav-item-active-color: white;
     --nav-item-icon-size: 1.25rem;
-    
+
     /* Mobile Styles */
     --mobile-sidebar-width: 100%;
     --mobile-sidebar-bg: rgba(0, 0, 0, 0.5);
@@ -67,11 +67,11 @@
     .sidebar {
         transform: translateX(-100%);
     }
-    
+
     .sidebar--open {
         transform: translateX(0);
     }
-    
+
     .sidebar__mobile-toggle {
         display: block;
         position: fixed;
@@ -79,7 +79,7 @@
         left: 1rem;
         z-index: var(--sidebar-z-index);
     }
-    
+
     .sidebar__overlay {
         position: fixed;
         top: 0;
@@ -91,9 +91,9 @@
         visibility: hidden;
         transition: var(--sidebar-transition);
     }
-    
+
     .sidebar--open + .sidebar__overlay {
         opacity: 1;
         visibility: visible;
     }
-} 
+}

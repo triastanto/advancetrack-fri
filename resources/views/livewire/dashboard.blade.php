@@ -1,5 +1,5 @@
-<x-page-container title="Dashboard">
-    <x-card>
+<x-ui.page-container title="Dashboard">
+    <x-ui.card>
         <!-- Dashboard content will be added here -->
-    </x-card>
+    </x-ui.card>
 </x-page-container> 

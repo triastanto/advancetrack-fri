@@ -25,7 +25,7 @@ Route::get('/', function () {
 Route::middleware('auth')->group(function () {
     Route::view('dashboard', 'dashboard')->name('dashboard');
     Route::view('lecturer', 'lecturer')->name('lecturer');
-    Route::view('verification', 'verification')->name('verification');
+    Route::view('verification', 'pages.administrations.verification')->name('verification');
 
     // Data Pribadi Routes
     Route::view('profile','profile.index')->name('lecturer.profile');
@@ -37,7 +37,7 @@ Route::middleware('auth')->group(function () {
 Route::prefix('documents')->name('documents.')->middleware('auth')->group(function () {
     Route::view('study-requirements', 'documents.study-requirements')->name('study-requirements');
     Route::view('semester-reports', 'documents.semester-reports')->name('semester-reports');
-    Route::view('final-reports', 'documents.final-reports')->name('final-reports');
+    Route::view('final-reports', 'pages.documents.final-reports')->name('final-reports');
     Route::view('additional', 'documents.additional')->name('additional');
     Route::view('service-bond', 'documents.service-bond')->name('service-bond');
 });

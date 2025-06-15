@@ -59,11 +59,43 @@
         <div class="grid grid-cols-2 gap-4">
             @foreach ($availableDocumentTypes as $docType)
                 <div class="flex items-center">
-                    @if (isset($completionStatus['details'][$docType->name]) && $completionStatus['details'][$docType->name])
-                        <svg class="h-5 w-5 text-green-500 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                    @php
+                        $docStatus = $completionStatus['details'][$docType->name] ?? null;
+                        $isUploaded = $docStatus['uploaded'] ?? false;
+                        $stateInfo = $docStatus['state_info'] ?? null;
+                    @endphp
+                    
+                    @if ($isUploaded && $stateInfo)
+                        {{-- Show actual workflow state icon --}}
+                        @php
+                            $iconClass = match($stateInfo['color']) {
+                                'warning' => 'text-yellow-500',
+                                'success' => 'text-green-500',
+                                'info' => 'text-blue-500',
+                                'danger' => 'text-red-500',
+                                default => 'text-gray-500'
+                            };
+                        @endphp
+                        <svg class="h-5 w-5 {{ $iconClass }} mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            @switch($stateInfo['icon'])
+                                @case('clock')
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
+                                    @break
+                                @case('check-circle')
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                    @break
+                                @case('x-circle')
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                    @break
+                                @case('edit')
+                                    <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                                    @break
+                                @default
+                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+                            @endswitch
                         </svg>
                     @else
+                        {{-- Show gray circle for not uploaded --}}
                         <svg class="h-5 w-5 text-gray-300 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
                         </svg>

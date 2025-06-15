@@ -2,10 +2,16 @@
 
 namespace App\Providers;
 
+use App\Events\Workflow\WorkflowTransitionApplied;
+use App\Events\Workflow\WorkflowTransitionAttempted;
+use App\Listeners\LogTransitionAttempt;
+use App\Listeners\NotifyStakeholders;
+use App\Listeners\UpdateRelatedModels;
 use App\Services\Workflow\WorkflowManager;
 use App\Services\Workflow\Guards\EmployeeRoleWorkflowGuard;
 use App\Services\Workflow\Guards\RoleBasedWorkflowGuard;
 use App\Services\Workflow\Guards\TimeBasedWorkflowGuard;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
 class WorkflowServiceProvider extends ServiceProvider
@@ -36,6 +42,9 @@ class WorkflowServiceProvider extends ServiceProvider
     {
         // Configure workflow guards after all services are registered
         $this->configureWorkflowGuards();
+        
+        // Register workflow event listeners
+        $this->registerEventListeners();
     }
 
     /**
@@ -74,5 +83,26 @@ class WorkflowServiceProvider extends ServiceProvider
 
         // Guards will be added based on configuration in loadGuards() method
         // But they need to be resolved from the container now
+    }
+
+    /**
+     * Register workflow event listeners
+     */
+    protected function registerEventListeners(): void
+    {
+        Event::listen(
+            WorkflowTransitionAttempted::class,
+            [LogTransitionAttempt::class, 'handle']
+        );
+
+        Event::listen(
+            WorkflowTransitionApplied::class,
+            [NotifyStakeholders::class, 'handle']
+        );
+
+        Event::listen(
+            WorkflowTransitionApplied::class,
+            [UpdateRelatedModels::class, 'handle']
+        );
     }
 }

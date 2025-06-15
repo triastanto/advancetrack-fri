@@ -17,8 +17,7 @@ return new class extends Migration
             $table->foreignId('document_type_id')->constrained('document_types')->onDelete('restrict');
             $table->string('file_name');
             $table->string('file_path');
-            $table->enum('verification_status', ['draft', 'pending', 'verified', 'rejected'])->default('draft');
-            $table->text('verification_note')->nullable();
+            $table->unsignedBigInteger('state_id')->default(1); // Default to DRAFT state for workflow
             $table->string('semester')->nullable();
             $table->year('year')->nullable();
             $table->date('upload_date')->nullable();

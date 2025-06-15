@@ -16,7 +16,21 @@ class DatabaseSeeder extends Seeder
         // Seed document types first (required for other seeders)
         $this->call(DocumentTypeSeeder::class);
 
-        // Call the main app seeder
-        $this->call(AdvancedTrackSeeder::class);
+        // Seed study programs
+        $this->call(StudyProgramSeeder::class);
+
+        // Seed users with their corresponding employee records
+        $this->call(UserSeeder::class);
+        
+        // If there are users without employee records, create them
+        $this->call(EmployeeSeeder::class);
+
+        // Create many-to-many relationships between employees and study programs
+        // This will also create study calendars for lecturers
+        $this->call(EmployeeStudyProgramSeeder::class);
+
+        // Create study calendars for any lecturers who might not have them
+        // (This acts as a safety net)
+        $this->call(StudyCalendarSeeder::class);
     }
 }

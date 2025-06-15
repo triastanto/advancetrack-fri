@@ -14,7 +14,8 @@ class DocumentFactory extends Factory
 
     public function definition(): array
     {
-        $statuses = ['draft', 'pending', 'verified', 'rejected'];
+        // Workflow states: 1=DRAFT, 2=PENDING, 3=VERIFIED, 4=REJECTED
+        $workflowStates = [1, 2, 3, 4];
 
         // Get a random document type from the database, preferring predefined types
         $documentType = DocumentType::inRandomOrder()->first() ?? DocumentType::factory()->predefined()->create();
@@ -24,8 +25,7 @@ class DocumentFactory extends Factory
             'document_type_id' => $documentType->id,
             'file_name' => $this->faker->lexify('document_????.pdf'),
             'file_path' => 'uploads/' . $this->faker->uuid . '.pdf',
-            'verification_status' => $this->faker->randomElement($statuses),
-            'verification_note' => $this->faker->optional()->sentence(),
+            'state_id' => $this->faker->randomElement($workflowStates), // Use workflow states instead
             'created_at' => $this->faker->dateTimeThisYear(),
         ];
 
@@ -92,5 +92,45 @@ class DocumentFactory extends Factory
 
         $randomType = $this->faker->randomElement($categoryTypes);
         return $this->withDocumentType($randomType['name']);
+    }
+
+    /**
+     * Create a document in DRAFT state (state_id = 1)
+     */
+    public function draft(): self
+    {
+        return $this->state(['state_id' => 1]);
+    }
+
+    /**
+     * Create a document in PENDING state (state_id = 2)
+     */
+    public function pending(): self
+    {
+        return $this->state(['state_id' => 2]);
+    }
+
+    /**
+     * Create a document in VERIFIED state (state_id = 3)
+     */
+    public function verified(): self
+    {
+        return $this->state(['state_id' => 3]);
+    }
+
+    /**
+     * Create a document in REJECTED state (state_id = 4)
+     */
+    public function rejected(): self
+    {
+        return $this->state(['state_id' => 4]);
+    }
+
+    /**
+     * Create a document with specific workflow state
+     */
+    public function inState(int $stateId): self
+    {
+        return $this->state(['state_id' => $stateId]);
     }
 }

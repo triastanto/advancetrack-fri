@@ -35,24 +35,22 @@
                         };
                     @endphp
                     <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full {{ $iconBgClass }} sm:mx-0 sm:h-10 sm:w-10">
-                        <svg class="h-6 w-6 {{ $iconTextClass }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            @switch($transition['icon'] ?? 'arrow-right')
-                                @case('check-circle')
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    @break
-                                @case('x-circle')
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    @break
-                                @case('truck')
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7l4-4m0 0l4 4m-4-4v18" />
-                                    @break
-                                @case('refresh-cw')
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                    @break
-                                @default
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                            @endswitch
-                        </svg>
+                        @switch($transition['icon'] ?? 'arrow-right')
+                            @case('check-circle')
+                                <x-heroicon-o-check-circle class="h-6 w-6 {{ $iconTextClass }}" />
+                                @break
+                            @case('x-circle')
+                                <x-heroicon-o-x-circle class="h-6 w-6 {{ $iconTextClass }}" />
+                                @break
+                            @case('truck')
+                                <x-heroicon-o-truck class="h-6 w-6 {{ $iconTextClass }}" />
+                                @break
+                            @case('refresh-cw')
+                                <x-heroicon-o-arrow-path class="h-6 w-6 {{ $iconTextClass }}" />
+                                @break
+                            @default
+                                <x-heroicon-o-arrow-right class="h-6 w-6 {{ $iconTextClass }}" />
+                        @endswitch
                     </div>
 
                     <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left flex-1">

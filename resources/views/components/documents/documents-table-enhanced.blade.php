@@ -11,9 +11,7 @@
 <div class="bg-white rounded-lg shadow-md overflow-hidden">
     <div class="px-6 py-4 border-b border-[var(--color-border)]">
         <h3 class="text-lg font-semibold text-gray-900 flex items-center">
-            <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-            </svg>
+            <x-heroicon-o-document-text class="w-5 h-5 mr-2 text-blue-600" />
             {{ $title }}
         </h3>
     </div>
@@ -143,9 +141,7 @@
                                                 wire:confirm="Apakah Anda yakin ingin mengirim dokumen ini untuk verifikasi?"
                                                 class="inline-flex items-center justify-center w-8 h-8 text-white bg-green-600 rounded-md hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-1 transition-all duration-200"
                                                 title="Kirim untuk verifikasi">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                                                </svg>
+                                                <x-heroicon-o-paper-airplane class="w-4 h-4" />
                                             </button>
                                         @endif
 
@@ -154,10 +150,7 @@
                                             wire:click="openViewModal({{ $document->id }})"
                                             class="inline-flex items-center justify-center w-8 h-8 text-indigo-700 bg-indigo-100 rounded-md hover:bg-indigo-200 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 transition-all duration-200"
                                             title="Lihat dokumen">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                            </svg>
+                                            <x-heroicon-o-eye class="w-4 h-4" />
                                         </button>
 
                                         {{-- Workflow Actions for Admin/Verifier --}}
@@ -180,15 +173,13 @@
                                                     wire:click="openWorkflowModal({{ $document->id }}, {{ $transition['id'] }})"
                                                     class="inline-flex items-center justify-center w-8 h-8 rounded-md focus:ring-2 focus:ring-offset-1 transition-all duration-200 {{ $buttonClass }}"
                                                     title="{{ $transition['label'] }}">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        @if($transition['icon'] == 'check-circle')
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                        @elseif($transition['icon'] == 'x-circle')
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                        @else
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                                        @endif
-                                                    </svg>
+                                                    @if($transition['icon'] == 'check-circle')
+                                                        <x-heroicon-o-check-circle class="w-4 h-4" />
+                                                    @elseif($transition['icon'] == 'x-circle')
+                                                        <x-heroicon-o-x-circle class="w-4 h-4" />
+                                                    @else
+                                                        <x-heroicon-o-arrow-path class="w-4 h-4" />
+                                                    @endif
                                                 </button>
                                             @elseif(count($transitions) > 1)
                                                 {{-- Multiple transitions dropdown --}}
@@ -197,9 +188,7 @@
                                                         @click="open = !open"
                                                         class="inline-flex items-center justify-center w-8 h-8 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:ring-2 focus:ring-gray-500 focus:ring-offset-1 transition-all duration-200"
                                                         title="Pilih aksi workflow">
-                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                                                        </svg>
+                                                        <x-heroicon-o-ellipsis-vertical class="w-4 h-4" />
                                                     </button>
                                                     
                                                     <div x-show="open" 
@@ -227,15 +216,13 @@
                                                                             default => 'text-gray-600'
                                                                         };
                                                                     @endphp
-                                                                    <svg class="w-4 h-4 mr-3 {{ $iconColor }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                        @if($transition['icon'] == 'check-circle')
-                                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                                        @elseif($transition['icon'] == 'x-circle')
-                                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                                        @else
-                                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                                                        @endif
-                                                                    </svg>
+                                                                    @if($transition['icon'] == 'check-circle')
+                                                                        <x-heroicon-o-check-circle class="w-4 h-4 mr-3 {{ $iconColor }}" />
+                                                                    @elseif($transition['icon'] == 'x-circle')
+                                                                        <x-heroicon-o-x-circle class="w-4 h-4 mr-3 {{ $iconColor }}" />
+                                                                    @else
+                                                                        <x-heroicon-o-arrow-path class="w-4 h-4 mr-3 {{ $iconColor }}" />
+                                                                    @endif
                                                                     {{ $transition['label'] }}
                                                                 </button>
                                                             @endforeach
@@ -252,9 +239,7 @@
                                                 wire:confirm="Apakah Anda yakin ingin menghapus dokumen ini?"
                                                 class="inline-flex items-center justify-center w-8 h-8 text-red-700 bg-red-100 rounded-md hover:bg-red-200 focus:ring-2 focus:ring-red-500 focus:ring-offset-1 transition-all duration-200"
                                                 title="Hapus dokumen">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                </svg>
+                                                <x-heroicon-o-trash class="w-4 h-4" />
                                             </button>
                                         @endif
                                     </div>

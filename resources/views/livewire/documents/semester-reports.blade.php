@@ -9,40 +9,46 @@
     <x-documents.completion-status-card
         :available-document-types="$availableDocumentTypes"
         :completion-status="$completionStatus"
-        title="Status Kelengkapan Dokumen Laporan Akhir"
-        :supports-semester="false" />
+        title="Status Kelengkapan Laporan Semester"
+        :supports-semester="true"
+        :active-study-info="$activeStudyInfo" />
 
-    {{-- Upload Section --}}
+    {{-- Upload Section with Semester Selection --}}
     <x-documents.document-upload-section
         :available-document-types="$availableDocumentTypes"
         :selected-document-type-id="$selectedDocumentTypeId"
         :completion-status="$completionStatus"
-        title="Unggah Dokumen"
-        upload-button-text="Unggah Dokumen" />
+        title="Unggah Laporan Semester"
+        upload-button-text="Unggah Laporan"
+        :supports-semester="true"
+        :active-study-info="$activeStudyInfo" />
 
-    {{-- Documents table --}}
+    {{-- Documents table with semester column --}}
     <x-documents.documents-table-enhanced
         :documents="$documents"
         :can-manage-workflow="$canManageWorkflow"
-        title="Dokumen Laporan Akhir & Kelulusan"
-        empty-message="Tidak ada dokumen laporan akhir dan kelulusan yang telah diunggah." />
+        mode="semester"
+        title="Laporan Semester Tersimpan"
+        empty-message="Tidak ada laporan semester yang telah diunggah." />
 
-    {{-- Enhanced Upload Document Modal --}}
+    {{-- Enhanced Upload Modal with Semester Selection --}}
     <x-documents.document-upload-modal-enhanced
         :modal-open="$uploadModalOpen"
         :available-document-types="$availableDocumentTypes"
         :selected-document-type-id="$selectedDocumentTypeId"
         :file-name="$fileName"
         :document-file="$documentFile"
-        :supports-semester="false" />
+        :supports-semester="true"
+        :selected-semester="$selectedSemester"
+        :active-study-info="$activeStudyInfo" />
 
-    {{-- View Document Modal --}}
+    {{-- Reuse existing view modal --}}
     <x-documents.document-view-modal
         :modal-open="$viewModalOpen"
         :document="$currentDocument"
         :show-workflow-history="$showWorkflowHistory" />
 
-    {{-- Workflow Transition Modal --}}
+    {{-- Reuse existing workflow modal --}}
     <x-workflow.workflow-transition-modal
         :modal-open="$workflowModalOpen"
         :document="$currentDocument"

@@ -7,14 +7,54 @@ class DocumentTypeConstants
     public const DOCUMENT_TYPES = [
         // 1. Dokumen Kelengkapan Studi Lanjut (Dosen)
         [
-            'name' => 'personal_data',
-            'display_name' => 'Data Pribadi',
-            'description' => 'Data pribadi dan dokumen persyaratan awal untuk pengajuan studi lanjut (surat izin, ijazah sebelumnya, SK pengangkatan, dll)',
+            'name' => 'letter_of_acceptance',
+            'display_name' => 'Letter of Acceptance',
+            'description' => 'Surat penerimaan resmi dari institusi pendidikan',
         ],
         [
-            'name' => 'requirement',
-            'display_name' => 'Dokumen Persyaratan',
-            'description' => 'Dokumen-dokumen persyaratan untuk pengajuan studi lanjut',
+            'name' => 'scholarship_cover_letter',
+            'display_name' => 'Surat Pengantar Beasiswa',
+            'description' => 'Surat pengantar resmi untuk pengajuan beasiswa',
+        ],
+        [
+            'name' => 'rector_permit_letter',
+            'display_name' => 'Surat Izin Rektor',
+            'description' => 'Surat izin resmi dari Rektor untuk melanjutkan studi',
+        ],
+        [
+            'name' => 'permanent_lecturer_decree',
+            'display_name' => 'SK Dosen Tetap Yayasan',
+            'description' => 'Surat Keputusan pengangkatan sebagai dosen tetap yayasan',
+        ],
+        [
+            'name' => 'diploma_certificate',
+            'display_name' => 'Ijazah',
+            'description' => 'Ijazah terakhir yang dimiliki sebagai persyaratan studi lanjut',
+        ],
+        [
+            'name' => 's1_transcript',
+            'display_name' => 'Transkrip Nilai S1',
+            'description' => 'Transkrip nilai lengkap jenjang Sarjana (S1)',
+        ],
+        [
+            'name' => 's2_transcript',
+            'display_name' => 'Transkrip Nilai S2',
+            'description' => 'Transkrip nilai lengkap jenjang Magister (S2)',
+        ],
+        [
+            'name' => 'inpassing_decree',
+            'display_name' => 'SK Inpassing',
+            'description' => 'Surat Keputusan Inpassing kepangkatan',
+        ],
+        [
+            'name' => 'jad_decree',
+            'display_name' => 'SK JAD',
+            'description' => 'Surat Keputusan Jabatan Akademik Dosen',
+        ],
+        [
+            'name' => 'graduation_report_statement',
+            'display_name' => 'Surat Pernyataan Melaporkan Kelulusan',
+            'description' => 'Surat pernyataan kesediaan melaporkan kelulusan setelah menyelesaikan studi',
         ],
 
         // 2. Dokumen Kesesuaian Studi Lanjut, Berita Acara, dan NDE (Staf FSDP)
@@ -43,22 +83,37 @@ class DocumentTypeConstants
 
         // 4. Dokumen Laporan Per Semester (LKS)
         [
-            'name' => 'semester_report',
-            'display_name' => 'Laporan Kemajuan Studi (LKS)',
-            'description' => 'Laporan akademik, transkrip, atau form pemantauan studi per semester',
+            'name' => 'lecturer_cover_letter',
+            'display_name' => 'Surat Pengantar dari Dosen',
+            'description' => 'Surat pengantar resmi dari dosen pembimbing untuk laporan kemajuan studi',
+        ],
+        [
+            'name' => 'transcript',
+            'display_name' => 'Transkrip Nilai',
+            'description' => 'Transkrip nilai resmi dari institusi pendidikan per semester',
+        ],
+        [
+            'name' => 'active_student_certificate',
+            'display_name' => 'Surat Keterangan Aktif',
+            'description' => 'Surat keterangan status mahasiswa aktif dari institusi pendidikan',
+        ],
+        [
+            'name' => 'igracias_publication_proof',
+            'display_name' => 'Bukti Unggah Publikasi di Igracias',
+            'description' => 'Bukti screenshot atau dokumen unggah publikasi ilmiah di sistem Igracias',
+        ],
+        [
+            'name' => 'tuition_payment_proof',
+            'display_name' => 'Bukti Pembayaran Biaya Pendidikan',
+            'description' => 'Bukti pembayaran SPP atau biaya pendidikan lainnya',
+        ],
+        [
+            'name' => 'study_progress_certificate',
+            'display_name' => 'Surat Keterangan Progres Studi',
+            'description' => 'Surat keterangan kemajuan studi dari institusi atau pembimbing',
         ],
 
         // 5. Dokumen Laporan Akhir dan Kelulusan
-        [
-            'name' => 'final_report',
-            'display_name' => 'Laporan Akhir (Disertasi/Tesis)',
-            'description' => 'Dokumen disertasi atau tesis sebagai laporan akhir studi',
-        ],
-        [
-            'name' => 'graduation_letter',
-            'display_name' => 'Surat Kelulusan',
-            'description' => 'Surat resmi kelulusan dari institusi pendidikan',
-        ],
         [
             'name' => 'diploma',
             'display_name' => 'Ijazah',
@@ -66,8 +121,18 @@ class DocumentTypeConstants
         ],
         [
             'name' => 'final_transcript',
-            'display_name' => 'Transkrip Akhir',
-            'description' => 'Transkrip nilai akhir lengkap dari seluruh mata kuliah',
+            'display_name' => 'Transkrip Nilai Akhir',
+            'description' => 'Transkrip nilai akhir lengkap dari seluruh mata kuliah yang telah diselesaikan',
+        ],
+        [
+            'name' => 'graduation_certificate',
+            'display_name' => 'Surat Keterangan Lulus',
+            'description' => 'Surat keterangan resmi bahwa mahasiswa telah lulus dari program studi',
+        ],
+        [
+            'name' => 'study_completion_statement',
+            'display_name' => 'Surat Pernyataan Telah Menyelesaikan Studi',
+            'description' => 'Surat pernyataan resmi bahwa mahasiswa telah menyelesaikan seluruh program studi',
         ],
 
         // Bonus: Dokumen Tambahan (Opsional)
@@ -84,12 +149,10 @@ class DocumentTypeConstants
     public static function getByCategory(string $category): array
     {
         $categories = [
-            'lecturer_requirements' => ['personal_data', 'requirement'],
-            'fsdp_documents' => ['study_compatibility', 'minutes', 'nde'],
-            'service_agreement' => ['pid'],
-            'semester_reports' => ['semester_report'],
-            'final_documents' => ['final_report', 'graduation_letter', 'diploma', 'final_transcript'],
-            'additional' => ['additional'],
+            'study_requirements' => self::getStudyRequirementNames(),
+            'fsdp_documents' => ['study_compatibility', 'minutes', 'nde', 'pid'],
+            'semester_documents' => self::getSemesterDocumentNames(),
+            'final_documents' => self::getFinalDocumentNames(),
         ];
 
         if (!isset($categories[$category])) {
@@ -121,5 +184,40 @@ class DocumentTypeConstants
     public static function getAllNames(): array
     {
         return array_column(self::DOCUMENT_TYPES, 'name');
+    }
+
+    /**
+     * Get study requirement document type names for reusability
+     */
+    public static function getStudyRequirementNames(): array
+    {
+        return [
+            'letter_of_acceptance',
+            'scholarship_cover_letter', 
+            'rector_permit_letter',
+            'permanent_lecturer_decree',
+            'diploma_certificate',
+            's1_transcript',
+            's2_transcript',
+            'inpassing_decree',
+            'jad_decree',
+            'graduation_report_statement'
+        ];
+    }
+
+    /**
+     * Get semester document type names for reusability
+     */
+    public static function getSemesterDocumentNames(): array
+    {
+        return ['lecturer_cover_letter', 'transcript', 'active_student_certificate', 'igracias_publication_proof', 'tuition_payment_proof', 'study_progress_certificate'];
+    }
+
+    /**
+     * Get final document type names for reusability
+     */
+    public static function getFinalDocumentNames(): array
+    {
+        return ['diploma', 'final_transcript', 'graduation_certificate', 'study_completion_statement'];
     }
 }

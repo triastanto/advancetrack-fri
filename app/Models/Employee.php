@@ -28,7 +28,10 @@ class Employee extends Model
 
     public function semesterReports()
     {
-        return $this->hasMany(Document::class)->where('document_type', 'semester_report');
+        return $this->hasMany(Document::class)
+            ->whereHas('documentType', function ($query) {
+                $query->whereIn('name', \App\Constants\DocumentTypeConstants::getSemesterDocumentNames());
+            });
     }
 
     public function serviceBondAgreements()

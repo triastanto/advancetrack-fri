@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('file_name');
             $table->string('file_path');
             $table->unsignedBigInteger('state_id')->default(1); // Default to DRAFT state for workflow
-            $table->string('semester')->nullable();
+            $table->integer('semester')->nullable(); // Semester number (1, 2, 3, etc.)
             $table->year('year')->nullable();
             $table->date('upload_date')->nullable();
             $table->timestamps();

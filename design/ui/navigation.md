@@ -12,30 +12,79 @@
 │   └── Informasi Kontak
 
 ├── 📁 Dokumen Saya (Dosen)
-│   ├── 📂 Kelengkapan Studi Lanjut
+│   ├── 📂 Kelengkapan Studi Lanjut (Study Requirements)
+│   │   ├── Letter of Acceptance
+│   │   ├── Surat Pengantar Beasiswa  
+│   │   ├── Surat Izin Rektor
+│   │   ├── SK Dosen Tetap Yayasan
+│   │   ├── Ijazah
+│   │   ├── Transkrip Nilai S1
+│   │   ├── Transkrip Nilai S2
+│   │   ├── SK Inpassing
+│   │   ├── SK JAD
+│   │   └── Surat Pernyataan Melaporkan Kelulusan
 │   ├── 📂 Laporan Per Semester (LKS)
+│   │   ├── Surat Pengantar dari Dosen
+│   │   ├── Transkrip Nilai
+│   │   ├── Surat Keterangan Aktif
+│   │   ├── Bukti Unggah Publikasi di Igracias
+│   │   ├── Bukti Pembayaran Biaya Pendidikan
+│   │   └── Surat Keterangan Progres Studi
 │   ├── 📂 Laporan Akhir & Kelulusan
-│   ├── 📂 Dokumen Tambahan
-│   └── 🔐 Perjanjian Ikatan Dinas (view only)
+│   │   ├── Ijazah
+│   │   ├── Transkrip Nilai Akhir
+│   │   ├── Surat Keterangan Lulus
+│   │   └── Surat Pernyataan Telah Menyelesaikan Studi
+│   └── 📂 Dokumen FSDP (View Only - Managed by FSDP Staff)
+│       ├── Dokumen Kesesuaian Studi Lanjut
+│       ├── Berita Acara Studi Lanjut
+│       ├── NDE Studi Lanjut
+│       └── Perjanjian Ikatan Dinas (PID)
 
 ├── 🗂️ Administrasi Dokumen (Staf FSDP / Kepala Urusan)
 │   ├── 🔍 Cari & Pilih Dosen
-│   ├── 📥 Unggah Dokumen:
-│   │   ├── ☐ Kesesuaian Studi Lanjut
-│   │   ├── ☐ Berita Acara
-│   │   ├── ☐ NDE Permintaan Studi
-│   │   └── ☐ Perjanjian Ikatan Dinas (PID)
-│   └── ✅ Verifikasi Dokumen Persyaratan
+│   ├── 📥 Unggah Dokumen FSDP:
+│   │   ├── Dokumen Kesesuaian Studi Lanjut
+│   │   ├── Berita Acara Studi Lanjut
+│   │   ├── NDE Studi Lanjut
+│   │   └── Perjanjian Ikatan Dinas (PID)
+│   └── ✅ Verifikasi Dokumen
 
-├── 📊 Monitoring & Laporan
-│   ├── Rekap Dosen Studi Lanjut per Semester / Prodi
-│   ├── Status Verifikasi Dokumen
-│   └── Log Aktivitas Pengguna
+## 📊 Monitoring & Laporan
+*Fitur monitoring dan pelaporan untuk keperluan manajemen dan audit*
+
+### 📈 Dashboard Analytics
+*Visualisasi data dan statistik studi lanjut secara real-time*
+├── Overview Statistik Umum (Grafik jumlah dosen aktif, lulus, dan dropout)
+├── Tren Studi Lanjut per Tahun (Analisis tren pertumbuhan studi lanjut)
+├── Distribusi Program Studi (Sebaran dosen berdasarkan program yang diambil)
+└── Rata-rata Masa Studi (Analisis durasi penyelesaian studi)
+
+### 📋 Laporan Dosen
+*Pelaporan terkait data dan status dosen studi lanjut*
+├── Rekap Dosen Studi Lanjut per Semester (Daftar dosen aktif per periode)
+├── Rekap Dosen per Program Studi (Pengelompokan berdasarkan prodi asal)
+├── Dosen Mendekati Batas Studi (Alert dosen yang akan habis masa studi)
+└── Laporan Kelulusan Dosen (Rekap dosen yang telah lulus)
+
+### 📄 Status Dokumen
+*Monitoring kelengkapan dan verifikasi dokumen*
+├── Status Verifikasi Dokumen (Overview status verifikasi semua dokumen)
+├── Dokumen Belum Lengkap (Daftar dosen dengan dokumen yang kurang)
+├── Dokumen Pending Verifikasi (Dokumen yang menunggu approval)
+└── Riwayat Perubahan Dokumen (Log perubahan dan update dokumen)
+
+### 🔍 Audit & Log
+*Sistem audit dan pelacakan aktivitas untuk keamanan*
+├── Log Aktivitas Pengguna (Catatan aktivitas sistem untuk audit)
+├── Riwayat Login User (Tracking akses masuk pengguna)
+├── Log Perubahan Data (Catatan perubahan data penting)
+└── Export Data Audit (Ekspor data audit untuk keperluan external)
 
 ├── 🔔 Notifikasi
 │   ├── Dokumen Belum Lengkap / Belum Diverifikasi
 │   ├── Reminder Pengisian LKS
-│   ├── Info PID Telah Diunggah
+│   ├── Info Dokumen FSDP Telah Diunggah
 │   └── Peringatan Melewati Masa Studi
 
 └── ⚙️ Pengaturan

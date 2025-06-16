@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\Auth\AuthController;
 use Illuminate\Support\Facades\Route;
 
 // Authentication Routes
@@ -28,24 +27,24 @@ Route::middleware('auth')->group(function () {
     Route::view('verification', 'pages.administrations.verification')->name('verification');
 
     // Data Pribadi Routes
-    Route::view('profile','profile.index')->name('lecturer.profile');
+    Route::view('profile','profile.index')->name('profile.index');
     Route::view('profile/education', 'profile.education')->name('profile.education');
     Route::view('profile/contact', 'profile.contact')->name('profile.contact');
 });
 
 // Dokumen Saya Routes
 Route::prefix('documents')->name('documents.')->middleware('auth')->group(function () {
-    Route::view('study-requirements', 'documents.study-requirements')->name('study-requirements');
-    Route::view('semester-reports', 'documents.semester-reports')->name('semester-reports');
+    Route::view('study-requirements', 'pages.documents.study-requirements')->name('study-requirements');
+    Route::view('semester-reports', 'pages.documents.semester-reports')->name('semester-reports');
     Route::view('final-reports', 'pages.documents.final-reports')->name('final-reports');
-    Route::view('additional', 'documents.additional')->name('additional');
-    Route::view('service-bond', 'documents.service-bond')->name('service-bond');
+    Route::view('fsdp-documents', 'pages.documents.fsdp-documents')->name('fsdp-documents');
 });
 
 // Administrasi Dokumen Routes
-Route::prefix('admin/documents')->name('admin.documents.')->middleware('auth')->group(function () {
-    Route::view('lecturers', 'admin.documents.lecturers')->name('lecturers');
-    Route::view('upload', 'admin.documents.upload')->name('upload');
+Route::prefix('administrations')->name('administrations.')->middleware('auth')->group(function () {
+    Route::view('lecturers', 'pages.administrations.lecturers')->name('lecturers');
+    Route::view('upload', 'pages.administrations.upload')->name('upload');
+    Route::view('verification', 'pages.administrations.verification')->name('verification');
 });
 
 // Monitoring & Laporan Routes

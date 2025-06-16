@@ -30,7 +30,7 @@ class DocumentFactory extends Factory
         ];
 
         // Add specific fields based on document type
-        if ($documentType->name === 'semester_report') {
+        if (in_array($documentType->name, DocumentTypeConstants::getSemesterDocumentNames())) {
             $data['semester'] = $this->faker->numberBetween(1, 8);
             $data['year'] = $this->faker->year();
         } elseif (in_array($documentType->name, ['pid'])) {
@@ -69,7 +69,7 @@ class DocumentFactory extends Factory
             ];
 
             // Add type-specific attributes based on document type name
-            if ($documentType->name === 'semester_report') {
+            if (in_array($documentType->name, DocumentTypeConstants::getSemesterDocumentNames())) {
                 $stateData['semester'] = $attributes['semester'] ?? $this->faker->numberBetween(1, 8);
                 $stateData['year'] = $attributes['year'] ?? $this->faker->year();
             } elseif ($documentType->name === 'pid') {

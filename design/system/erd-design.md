@@ -59,7 +59,7 @@
 - user_id (FK)
 - employee_number
 - position
-- role (lecturer, fsdp_staff, head_of_affairs, vice_dean)
+- role (lecturer, hr_finance_staff, head_of_hr_finance, fri_vice_dean)
 - created_at
 - updated_at
 
@@ -121,7 +121,7 @@
 ## Main Relationships
 
 - **users** has one **employee** (if the user is an employee)
-- **employees** has a role (lecturer, fsdp_staff, head_of_affairs, vice_dean)
+- **employees** has a role (lecturer, hr_finance_staff, head_of_hr_finance, fri_vice_dean)
 - **employees** (lecturer role) has many **study_programs** via **employee_study_programs** (many-to-many)
 - **employees** (non-lecturer roles) may have one **study_program** (study_program_id)
 - **employee_study_programs** is a pivot table for many-to-many between **employees** (lecturer role) and **study_programs**
@@ -150,7 +150,7 @@ users (1) --- (0..1) employees (N) ---< employee_study_programs >--- (N) study_p
 ## Notes
 
 - The `users` table only stores authentication and shared user info. Organizational/HR info and role are in the `employees` table.
-- The `role` field in employees distinguishes between lecturer, fsdp_staff, head_of_affairs, and vice_dean.
+- The `role` field in employees distinguishes between lecturer, hr_finance_staff, head_of_hr_finance, and fri_vice_dean.
 - Study program relationships for lecturers are managed via the `employee_study_programs` pivot table.
 - Study program relationships for other employees are direct (FK in employees).
 - The documents table can be used for various document types, with specific types managed by `document_types` table.

@@ -1,7 +1,7 @@
 @props([
     'availableDocumentTypes' => [],
     'completionStatus' => null,
-    'title' => 'Status Kelengkapan Dokumen',
+    'title' => 'Status Persyaratan Dokumen',
     'supportsSemester' => false,
     'activeStudyInfo' => null
 ])
@@ -30,7 +30,7 @@
         @endif
     </div>
 
-    {{-- Status Kelengkapan Dokumen --}}
+    {{-- Status Persyaratan Dokumen --}}
     @if($completionStatus)
         @if($supportsSemester && $activeStudyInfo)
             {{-- Simplified semester-based completion tracking with selection --}}
@@ -206,7 +206,7 @@
     @else
         <div class="text-center py-8 text-gray-500">
             <x-heroicon-o-document-text class="w-12 h-12 mx-auto mb-4 text-gray-300" />
-            <p class="text-sm">Status kelengkapan dokumen belum tersedia</p>
+            <p class="text-sm">Status persyaratan dokumen belum tersedia</p>
         </div>
     @endif
 </div>

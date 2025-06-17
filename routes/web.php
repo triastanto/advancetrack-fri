@@ -37,7 +37,7 @@ Route::prefix('documents')->name('documents.')->middleware('auth')->group(functi
     Route::view('study-requirements', 'pages.documents.study-requirements')->name('study-requirements');
     Route::view('semester-reports', 'pages.documents.semester-reports')->name('semester-reports');
     Route::view('final-reports', 'pages.documents.final-reports')->name('final-reports');
-    Route::view('fsdp-documents', 'pages.documents.fsdp-documents')->name('fsdp-documents');
+    Route::view('approval-documents', 'pages.documents.approval-documents')->name('approval-documents');
 });
 
 // Administrasi Dokumen Routes

@@ -9,7 +9,7 @@
     <x-documents.completion-status-card
         :available-document-types="$availableDocumentTypes"
         :completion-status="$completionStatus"
-        title="Status Kelengkapan Dokumen Laporan Akhir"
+        title="Status Kelengkapan"
         :supports-semester="false" />
 
     {{-- Upload Section --}}
@@ -24,7 +24,7 @@
     <x-documents.documents-table-enhanced
         :documents="$documents"
         :can-manage-workflow="$canManageWorkflow"
-        title="Dokumen Laporan Akhir & Kelulusan"
+        title="Dokumen"
         empty-message="Tidak ada dokumen laporan akhir dan kelulusan yang telah diunggah." />
 
     {{-- Enhanced Upload Document Modal --}}

@@ -25,7 +25,7 @@
         :documents="$documents"
         :can-manage-workflow="$canManageWorkflow"
         title="Dokumen"
-        empty-message="Tidak ada dokumen persyaratan studi lanjut yang telah diunggah." />
+        empty-message="Tidak ada dokumen Persetujuan Studi Lanjut yang telah diunggah." />
 
     {{-- Enhanced Upload Document Modal --}}
     <x-documents.document-upload-modal-enhanced

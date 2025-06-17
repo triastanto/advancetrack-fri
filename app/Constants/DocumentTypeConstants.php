@@ -5,7 +5,7 @@ namespace App\Constants;
 class DocumentTypeConstants
 {
     public const DOCUMENT_TYPES = [
-        // 1. Dokumen Kelengkapan Studi Lanjut (Dosen)
+        // 1. Dokumen Persyaratan Studi Lanjut (Dosen)
         [
             'name' => 'letter_of_acceptance',
             'display_name' => 'Letter of Acceptance',
@@ -56,32 +56,65 @@ class DocumentTypeConstants
             'display_name' => 'Surat Pernyataan Melaporkan Kelulusan',
             'description' => 'Surat pernyataan kesediaan melaporkan kelulusan setelah menyelesaikan studi',
         ],
+        [
+            'name' => 'lldikti_assignment_statement',
+            'display_name' => 'Pernyataan Penugasan LLDIKTI',
+            'description' => 'Surat pernyataan penugasan dari LLDIKTI',
+        ],
+        [
+            'name' => 'willing_to_be_relieved_letter',
+            'display_name' => 'Surat Bersedia Dibebastugaskan',
+            'description' => 'Surat pernyataan kesediaan untuk dibebastugaskan selama studi',
+        ],
+        [
+            'name' => 'management_permit_letter',
+            'display_name' => 'Surat Izin Pimpinan',
+            'description' => 'Surat izin resmi dari pimpinan institusi',
+        ],
+        [
+            'name' => 'work_period_certificate',
+            'display_name' => 'Surat Keterangan Masa Kerja',
+            'description' => 'Surat keterangan masa kerja sebagai dosen',
+        ],
+        [
+            'name' => 'academic_recommendation_letter',
+            'display_name' => 'Surat Rekomendasi Akademisi',
+            'description' => 'Surat rekomendasi dari akademisi atau dosen senior',
+        ],
+        [
+            'name' => 'management_recommendation_letter',
+            'display_name' => 'Surat Rekomendasi Pimpinan',
+            'description' => 'Surat rekomendasi dari pimpinan institusi',
+        ],
 
-        // 2. Dokumen Kesesuaian Studi Lanjut, Berita Acara, dan NDE (Staf FSDP)
+        // 2. Dokumen Persetujuan Studi Lanjut (Kepala SDM & Keuangan, Ketua Program Studi, Ketua Kelompok Keilmuan)
         [
             'name' => 'study_compatibility',
             'display_name' => 'Dokumen Kesesuaian Studi Lanjut',
             'description' => 'Dokumen untuk memastikan kesesuaian program yang diambil',
         ],
         [
-            'name' => 'minutes',
-            'display_name' => 'Berita Acara Studi Lanjut',
-            'description' => 'Notulen resmi untuk proses studi lanjut',
+            'name' => 'application_minutes',
+            'display_name' => 'Berita Acara Pengajuan Studi Lanjut',
+            'description' => 'Notulen resmi untuk proses pengajuan studi lanjut',
+        ],
+        [
+            'name' => 'approval_minutes',
+            'display_name' => 'Berita Acara Persetujuan Studi Lanjut',
+            'description' => 'Notulen resmi untuk proses persetujuan studi lanjut',
         ],
         [
             'name' => 'nde',
             'display_name' => 'NDE Studi Lanjut',
             'description' => 'Surat permintaan studi lanjut secara formal',
         ],
-
-        // 3. Dokumen Perjanjian Ikatan Dinas (PID)
         [
             'name' => 'pid',
             'display_name' => 'Perjanjian Ikatan Dinas (PID)',
             'description' => 'Dokumen resmi yang telah ditandatangani oleh semua pemangku kepentingan',
         ],
 
-        // 4. Dokumen Laporan Per Semester (LKS)
+        // 3. Dokumen Laporan Per Semester (Dosen)
         [
             'name' => 'lecturer_cover_letter',
             'display_name' => 'Surat Pengantar dari Dosen',
@@ -99,8 +132,8 @@ class DocumentTypeConstants
         ],
         [
             'name' => 'igracias_publication_proof',
-            'display_name' => 'Bukti Unggah Publikasi di Igracias',
-            'description' => 'Bukti screenshot atau dokumen unggah publikasi ilmiah di sistem Igracias',
+            'display_name' => 'Bukti Unggah Publikasi di iGracias',
+            'description' => 'Bukti screenshot atau dokumen unggah publikasi ilmiah di sistem iGracias',
         ],
         [
             'name' => 'tuition_payment_proof',
@@ -113,7 +146,7 @@ class DocumentTypeConstants
             'description' => 'Surat keterangan kemajuan studi dari institusi atau pembimbing',
         ],
 
-        // 5. Dokumen Laporan Akhir dan Kelulusan
+        // 4. Dokumen Laporan Akhir dan Kelulusan (Dosen)
         [
             'name' => 'diploma',
             'display_name' => 'Ijazah',
@@ -135,7 +168,7 @@ class DocumentTypeConstants
             'description' => 'Surat pernyataan resmi bahwa mahasiswa telah menyelesaikan seluruh program studi',
         ],
 
-        // Bonus: Dokumen Tambahan (Opsional)
+        // 5. Dokumen Tambahan (Opsional)
         [
             'name' => 'additional',
             'display_name' => 'Dokumen Tambahan',
@@ -150,9 +183,10 @@ class DocumentTypeConstants
     {
         $categories = [
             'study_requirements' => self::getStudyRequirementNames(),
-            'fsdp_documents' => ['study_compatibility', 'minutes', 'nde', 'pid'],
+            'approval_documents' => self::getApprovalDocumentNames(),
             'semester_documents' => self::getSemesterDocumentNames(),
             'final_documents' => self::getFinalDocumentNames(),
+            'additional_documents' => ['additional'],
         ];
 
         if (!isset($categories[$category])) {
@@ -201,7 +235,27 @@ class DocumentTypeConstants
             's2_transcript',
             'inpassing_decree',
             'jad_decree',
-            'graduation_report_statement'
+            'graduation_report_statement',
+            'lldikti_assignment_statement',
+            'willing_to_be_relieved_letter',
+            'management_permit_letter',
+            'work_period_certificate',
+            'academic_recommendation_letter',
+            'management_recommendation_letter'
+        ];
+    }
+
+    /**
+     * Get approval document type names for reusability
+     */
+    public static function getApprovalDocumentNames(): array
+    {
+        return [
+            'study_compatibility',
+            'application_minutes',
+            'approval_minutes',
+            'nde',
+            'pid'
         ];
     }
 

@@ -99,7 +99,7 @@
                     </div>
                     <a href="{{ route('documents.study-requirements') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm {{ request()->routeIs('documents.study-requirements') ? 'text-[var(--color-primary)] bg-[var(--color-primary-bg)] font-semibold' : 'text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)]' }}">
                         <x-heroicon-o-document-text class="w-5 h-5" />
-                        Kelengkapan Studi Lanjut
+                        Persyaratan Studi Lanjut
                     </a>
                     <a href="{{ route('documents.semester-reports') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm {{ request()->routeIs('documents.semester-reports') ? 'text-[var(--color-primary)] bg-[var(--color-primary-bg)] font-semibold' : 'text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)]' }}">
                         <x-heroicon-o-clipboard-document-list class="w-5 h-5" />
@@ -109,9 +109,9 @@
                         <x-heroicon-o-check-circle class="w-5 h-5" />
                         Laporan Akhir & Kelulusan
                     </a>
-                    <a href="{{ route('documents.fsdp-documents') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm {{ request()->routeIs('documents.fsdp-documents') ? 'text-[var(--color-primary)] bg-[var(--color-primary-bg)] font-semibold' : 'text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)]' }}">
+                    <a href="{{ route('documents.approval-documents') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm {{ request()->routeIs('documents.approval-documents') ? 'text-[var(--color-primary)] bg-[var(--color-primary-bg)] font-semibold' : 'text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)]' }}">
                         <x-heroicon-o-calendar-days class="w-5 h-5" />
-                        Dokumen FSDP
+                        Persetujuan Studi Lanjut
                     </a>
                 </li>
                 <!-- Administrasi Dokumen Group -->
@@ -125,7 +125,7 @@
                     </a>
                     <a href="{{ route('administrations.upload') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm {{ request()->routeIs('admin.documents.upload') ? 'text-[var(--color-primary)] bg-[var(--color-primary-bg)] font-semibold' : 'text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)]' }}">
                         <x-heroicon-o-cloud-arrow-up class="w-5 h-5" />
-                        Unggah Dokumen FSDP
+                        Unggah Persetujuan Studi Lanjut
                     </a>
                     <a href="{{ route('administrations.verification') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm {{ request()->routeIs('verification') ? 'text-[var(--color-primary)] bg-[var(--color-primary-bg)] font-semibold' : 'text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)]' }}">
                         <x-heroicon-o-check-circle class="w-5 h-5" />

@@ -11,7 +11,7 @@ use Livewire\WithPagination;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Pagination\LengthAwarePaginator;
 
-class FsdpDocuments extends WorkflowComponent
+class ApprovalDocuments extends WorkflowComponent
 {
     use WithPagination;
 
@@ -30,15 +30,15 @@ class FsdpDocuments extends WorkflowComponent
         'transitionComment.max' => 'Komentar maksimal 1000 karakter.',
     ];
 
-    // Helper method to get FSDP document types
-    protected function getFsdpDocumentTypes()
+    // Helper method to get Approval document types
+    protected function getapprovalDocumentTypes()
     {
-        $fsdpDocumentNames = array_column(
-            DocumentTypeConstants::getByCategory('fsdp_documents'),
+        $approvalDocumentNames = array_column(
+            DocumentTypeConstants::getByCategory('approval_documents'),
             'name'
         );
 
-        return DocumentType::whereIn('name', $fsdpDocumentNames)
+        return DocumentType::whereIn('name', $approvalDocumentNames)
             ->orderBy('display_name')
             ->get();
     }
@@ -46,7 +46,7 @@ class FsdpDocuments extends WorkflowComponent
     public function mount(...$parameters)
     {
         parent::mount(...$parameters);
-        $this->availableDocumentTypes = $this->getFsdpDocumentTypes();
+        $this->availableDocumentTypes = $this->getapprovalDocumentTypes();
     }
 
     // Modal Methods
@@ -128,7 +128,7 @@ class FsdpDocuments extends WorkflowComponent
     // Override trait methods for custom behavior
     protected function getSuccessMessage(): string
     {
-        return 'Status dokumen FSDP berhasil diperbarui.';
+        return 'Status Persetujuan Studi Lanjut berhasil diperbarui.';
     }
 
     protected function getSuccessFlashKey(): string
@@ -140,17 +140,17 @@ class FsdpDocuments extends WorkflowComponent
     {
         try {
             $employee = $this->getEmployee();
-            $documentTypes = $this->getFsdpDocumentTypes();
+            $documentTypes = $this->getapprovalDocumentTypes();
             $documentTypeIds = $documentTypes->pluck('id')->toArray();
 
-            $fsdpDocuments = Document::where('employee_id', $employee->id)
+            $ApprovalDocuments = Document::where('employee_id', $employee->id)
                 ->whereIn('document_type_id', $documentTypeIds)
                 ->with(['documentType', 'workflowHistory.user'])
                 ->orderBy('created_at', 'desc')
                 ->paginate(10);
 
-            return view('livewire.documents.fsdp-documents', [
-                'documents' => $fsdpDocuments,
+            return view('livewire.documents.approval-documents', [
+                'documents' => $ApprovalDocuments,
                 'activeStudyInfo' => $this->getActiveStudyInfo(),
                 'canManageWorkflow' => $this->canUserManageWorkflow()
             ]);
@@ -166,7 +166,7 @@ class FsdpDocuments extends WorkflowComponent
                 ['path' => request()->url(), 'pageName' => 'page']
             );
 
-            return view('livewire.documents.fsdp-documents', [
+            return view('livewire.documents.approval-documents', [
                 'documents' => $emptyPaginator,
                 'activeStudyInfo' => null,
                 'canManageWorkflow' => false

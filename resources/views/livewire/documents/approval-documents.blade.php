@@ -5,12 +5,12 @@
     {{-- Active Advanced Study Information --}}
     <x-documents.study-info-card :study-info="$activeStudyInfo" />
 
-    {{-- FSDP Documents Info Card --}}
+    {{-- Approval Documents Info Card --}}
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
         <div class="flex items-center justify-between mb-4">
             <h3 class="text-lg font-semibold text-gray-900 flex items-center">
                 <x-heroicon-o-document-text class="w-5 h-5 mr-2 text-blue-600" />
-                Informasi Dokumen FSDP
+                Tentang
             </h3>
         </div>
         
@@ -18,10 +18,10 @@
             <div class="flex">
                 <x-heroicon-s-information-circle class="w-5 h-5 text-blue-600 mt-0.5 mr-3" />
                 <div>
-                    <h4 class="text-sm font-medium text-blue-900">Dokumen FSDP (Faculty Staff Development Program)</h4>
+                    <h4 class="text-sm font-medium text-blue-900">Persetujuan Studi Lanjut</h4>
                     <p class="text-sm text-blue-700 mt-1">
-                        Dokumen-dokumen ini dikelola oleh staf FSDP dan tidak dapat diunggah sendiri oleh dosen. 
-                        Silakan hubungi staf FSDP untuk pengurusan dokumen berikut:
+                        Dokumen-dokumen ini dikelola oleh Staf SDM & Keuangan dan tidak dapat diunggah sendiri oleh dosen. 
+                        Silakan hubungi Staf SDM & Keuangan untuk pengurusan dokumen berikut:
                     </p>
                     <div class="mt-3 space-y-2">
                         @foreach ($availableDocumentTypes as $docType)
@@ -40,8 +40,8 @@
     <x-documents.documents-table-enhanced
         :documents="$documents"
         :can-manage-workflow="$canManageWorkflow"
-        title="Dokumen FSDP"
-        empty-message="Belum ada dokumen FSDP yang tersedia. Silakan hubungi staf FSDP untuk informasi lebih lanjut." />
+        title="Dokumen"
+        empty-message="Belum ada dokumen Persetujuan Studi Lanjut yang tersedia. Silakan hubungi Staf SDM & Keuangan untuk informasi lebih lanjut." />
 
     {{-- View Document Modal --}}
     <x-documents.document-view-modal

@@ -13,7 +13,7 @@ class EmployeeFactory extends Factory
 
     public function definition(): array
     {
-        $role = $this->faker->randomElement(['lecturer', 'fsdp_staff', 'head_of_affairs', 'vice_dean']);
+        $role = $this->faker->randomElement(['lecturer', 'hr_finance_staff', 'head_of_hr_finance', 'fri_vice_dean']);
 
         return [
             'user_id' => User::factory(),
@@ -39,17 +39,17 @@ class EmployeeFactory extends Factory
     private function generatePosition(string $role): string
     {
         return match($role) {
-            'vice_dean' => $this->faker->randomElement([
+            'fri_vice_dean' => $this->faker->randomElement([
                 'Wakil Dekan Bidang Akademik',
                 'Wakil Dekan Bidang Kemahasiswaan',
                 'Wakil Dekan Bidang Keuangan'
             ]),
-            'head_of_affairs' => $this->faker->randomElement([
+            'head_of_hr_finance' => $this->faker->randomElement([
                 'Kepala Urusan Akademik',
                 'Kepala Urusan Kemahasiswaan',
                 'Kepala Urusan Keuangan'
             ]),
-            'fsdp_staff' => $this->faker->randomElement([
+            'hr_finance_staff' => $this->faker->randomElement([
                 'Staf Administrasi FSDP',
                 'Staf Akademik',
                 'Administrator Sistem',
@@ -93,15 +93,15 @@ class EmployeeFactory extends Factory
      */
     public function staff(): static
     {
-        return $this->role('fsdp_staff');
+        return $this->role('hr_finance_staff');
     }
 
     /**
-     * Create head of affairs employee
+     * Create head of hr finances employee
      */
-    public function headOfAffairs(): static
+    public function headOfHrFinances(): static
     {
-        return $this->role('head_of_affairs');
+        return $this->role('head_of_hr_finance');
     }
 
     /**
@@ -109,6 +109,6 @@ class EmployeeFactory extends Factory
      */
     public function viceDean(): static
     {
-        return $this->role('vice_dean');
+        return $this->role('fri_vice_dean');
     }
 }

@@ -125,7 +125,7 @@ trait HasWorkflowManagement
     public function canUserManageWorkflow($document = null): bool
     {
         // Define roles that can manage workflows
-        $managerRoles = ['head_of_affairs', 'vice_dean', 'fsdp_staff'];
+        $managerRoles = ['head_of_hr_finance', 'fri_vice_dean', 'hr_finance_staff'];
 
         return $this->hasAnyRole($managerRoles);
     }

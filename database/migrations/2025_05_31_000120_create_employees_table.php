@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->string('employee_number');
             $table->string('position');
-            $table->enum('role', ['lecturer', 'fsdp_staff', 'head_of_affairs', 'vice_dean']);
+            $table->enum('role', ['lecturer', 'hr_finance_staff', 'head_of_hr_finance', 'fri_vice_dean']);
             $table->timestamps();
         });
     }

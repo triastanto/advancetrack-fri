@@ -29,7 +29,7 @@ class UserSeeder extends Seeder
             'user_id' => $wakilDekanUser->id,
             'employee_number' => '202500001',
             'position' => 'Wakil Dekan Bidang Akademik',
-            'role' => 'vice_dean',
+            'role' => 'fri_vice_dean',
         ]);
 
         // 2. Kepala Urusan - Mengelola PID (Perjanjian Ikatan Dinas)
@@ -44,7 +44,7 @@ class UserSeeder extends Seeder
             'user_id' => $kepalaUrusanUser->id,
             'employee_number' => '202500002',
             'position' => 'Kepala Urusan Akademik',
-            'role' => 'head_of_affairs',
+            'role' => 'head_of_hr_finance',
         ]);
 
         // 3. Staf FSDP - Verifikasi dokumen dan administrasi
@@ -59,7 +59,7 @@ class UserSeeder extends Seeder
             'user_id' => $stafFSDPUser->id,
             'employee_number' => '202500003',
             'position' => 'Staf Administrasi FSDP',
-            'role' => 'fsdp_staff',
+            'role' => 'hr_finance_staff',
         ]);
 
         // 4. Dosen sampel - Upload dan kelola dokumen studi lanjut
@@ -132,7 +132,7 @@ class UserSeeder extends Seeder
             'user_id' => $adminUser->id,
             'employee_number' => '202500006',
             'position' => 'Administrator Sistem',
-            'role' => 'fsdp_staff',
+            'role' => 'hr_finance_staff',
         ]);
 
         // Buat pengguna tambahan untuk testing dengan employee records

@@ -12,7 +12,7 @@
 │   └── Informasi Kontak
 
 ├── 📁 Dokumen Saya (Dosen)
-│   ├── 📂 Kelengkapan Studi Lanjut (Study Requirements)
+│   ├── 📂 Persyaratan Studi Lanjut (Study Requirements)
 │   │   ├── Letter of Acceptance
 │   │   ├── Surat Pengantar Beasiswa  
 │   │   ├── Surat Izin Rektor
@@ -35,15 +35,15 @@
 │   │   ├── Transkrip Nilai Akhir
 │   │   ├── Surat Keterangan Lulus
 │   │   └── Surat Pernyataan Telah Menyelesaikan Studi
-│   └── 📂 Dokumen FSDP (View Only - Managed by FSDP Staff)
+│   └── 📂 Persetujuan Studi Lanjut (View Only - Managed by Staf SDM & Keuangan)
 │       ├── Dokumen Kesesuaian Studi Lanjut
 │       ├── Berita Acara Studi Lanjut
 │       ├── NDE Studi Lanjut
 │       └── Perjanjian Ikatan Dinas (PID)
 
-├── 🗂️ Administrasi Dokumen (Staf FSDP / Kepala Urusan)
+├── 🗂️ Administrasi Dokumen (Staf SDM & Keuangan / Kepala Urusan SDM & Keuangan)
 │   ├── 🔍 Cari & Pilih Dosen
-│   ├── 📥 Unggah Dokumen FSDP:
+│   ├── 📥 Unggah Persetujuan Studi Lanjut:
 │   │   ├── Dokumen Kesesuaian Studi Lanjut
 │   │   ├── Berita Acara Studi Lanjut
 │   │   ├── NDE Studi Lanjut
@@ -68,7 +68,7 @@
 └── Laporan Kelulusan Dosen (Rekap dosen yang telah lulus)
 
 ### 📄 Status Dokumen
-*Monitoring kelengkapan dan verifikasi dokumen*
+*Monitoring persyaratan dan verifikasi dokumen*
 ├── Status Verifikasi Dokumen (Overview status verifikasi semua dokumen)
 ├── Dokumen Belum Lengkap (Daftar dosen dengan dokumen yang kurang)
 ├── Dokumen Pending Verifikasi (Dokumen yang menunggu approval)
@@ -84,7 +84,7 @@
 ├── 🔔 Notifikasi
 │   ├── Dokumen Belum Lengkap / Belum Diverifikasi
 │   ├── Reminder Pengisian LKS
-│   ├── Info Dokumen FSDP Telah Diunggah
+│   ├── Info Persetujuan Studi Lanjut Telah Diunggah
 │   └── Peringatan Melewati Masa Studi
 
 └── ⚙️ Pengaturan

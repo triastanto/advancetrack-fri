@@ -2,7 +2,7 @@
 
 ## 1. Pendahuluan
 
-Dokumen ini menjelaskan arsitektur sistem perangkat lunak untuk pengelolaan studi lanjut dosen di lingkungan FSDP. Arsitektur ini dirancang untuk memenuhi kebutuhan fungsional dan non-fungsional yang telah didefinisikan dalam dokumen SRS.
+Dokumen ini menjelaskan arsitektur sistem perangkat lunak untuk pengelolaan studi lanjut dosen S3. Arsitektur ini dirancang untuk memenuhi kebutuhan fungsional dan non-fungsional yang telah didefinisikan dalam dokumen SRS.
 
 ---
 
@@ -56,7 +56,7 @@ Sistem menggunakan arsitektur **client-server** berbasis web, dengan pembagian u
 ## 4. Integrasi dan Keamanan
 
 - **Autentikasi**: Setiap pengguna wajib login menggunakan akun terdaftar.
-- **Otorisasi**: Hak akses diatur berdasarkan peran (dosen, staf FSDP, kepala urusan, wakil dekan).
+- **Otorisasi**: Hak akses diatur berdasarkan peran (Dosen Studi Lanjut, Staf SDM & Keuangan, Kepala Urusan SDM & Keuangan, Wakil Dekan II FRI, Ketua Program Studi, Ketua Kelompok Keahlian).
 - **Keamanan Data**: Dokumen dan data sensitif dienkripsi dan hanya dapat diakses oleh pihak berwenang.
 - **Audit Log**: Setiap perubahan data dan dokumen tercatat untuk keperluan audit.
 

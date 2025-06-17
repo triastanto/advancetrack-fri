@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Documents;
+namespace App\Livewire\Administrations;
 
 use App\Models\Document;
 use App\Models\DocumentType;
@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Pagination\LengthAwarePaginator;
 
-class StudyRequirements extends WorkflowComponent
+class Upload extends WorkflowComponent
 {
     use WithFileUploads, WithPagination;
 
@@ -43,20 +43,20 @@ class StudyRequirements extends WorkflowComponent
         'documentFile.max' => 'Ukuran file maksimal 10MB.',
         'fileName.required' => 'Nama dokumen wajib diisi.',
         'fileName.max' => 'Nama dokumen maksimal 255 karakter.',
-        'selectedDocumentTypeId.required' => 'Jenis dokumen persyaratan studi lanjut wajib dipilih.',
+        'selectedDocumentTypeId.required' => 'Jenis Persetujuan Studi Lanjut wajib dipilih.',
         'selectedDocumentTypeId.exists' => 'Jenis dokumen yang dipilih tidak valid.',
         'transitionComment.max' => 'Komentar maksimal 1000 karakter.',
     ];
 
-    // Helper method to get study requirements document types
-    protected function getStudyRequirementDocumentTypes()
+    // Helper method to get approval document types
+    protected function getapprovalDocumentTypes()
     {
-        $studyRequirementNames = array_column(
-            DocumentTypeConstants::getByCategory('study_requirements'),
+        $approvalDocumentNames = array_column(
+            DocumentTypeConstants::getByCategory('approval_documents'),
             'name'
         );
 
-        return DocumentType::whereIn('name', $studyRequirementNames)
+        return DocumentType::whereIn('name', $approvalDocumentNames)
             ->orderBy('display_name')
             ->get();
     }
@@ -65,7 +65,7 @@ class StudyRequirements extends WorkflowComponent
     {
         parent::mount(...$parameters);
         $this->selectedDocumentTypeId = '';
-        $this->availableDocumentTypes = $this->getStudyRequirementDocumentTypes();
+        $this->availableDocumentTypes = $this->getapprovalDocumentTypes();
     }
 
     // Modal Methods
@@ -145,7 +145,7 @@ class StudyRequirements extends WorkflowComponent
             // Submit the document (transition from DRAFT to PENDING)
             $context = [
                 'user_id' => Auth::id(),
-                'comment' => 'Dokumen persyaratan studi lanjut dikirim untuk verifikasi',
+                'comment' => 'Dokumen dikirim untuk verifikasi',
                 'timestamp' => now(),
                 'user_name' => Auth::user()->name,
             ];
@@ -153,7 +153,7 @@ class StudyRequirements extends WorkflowComponent
             // Apply SUBMIT transition (transition ID 1)
             $document->applyTransition(1, $context);
 
-            session()->flash('message', 'Dokumen persyaratan studi lanjut berhasil dikirim untuk verifikasi.');
+            session()->flash('message', 'Dokumen berhasil dikirim untuk verifikasi.');
         } catch (\Exception $e) {
             Log::error('Error in submitDocument: ' . $e->getMessage());
             Log::error('Stack trace: ' . $e->getTraceAsString());
@@ -172,7 +172,7 @@ class StudyRequirements extends WorkflowComponent
                 throw new \Exception('No file was uploaded.');
             }
 
-            $filePath = $this->documentFile->store('study-requirements/' . $employee->id, 'public');
+            $filePath = $this->documentFile->store('approval-documents/' . $employee->id, 'public');
             $documentType = DocumentType::findOrFail($this->selectedDocumentTypeId);
 
             Document::create([
@@ -184,7 +184,7 @@ class StudyRequirements extends WorkflowComponent
             ]);
 
             $this->closeUploadModal();
-            session()->flash('message', 'Dokumen persyaratan studi lanjut berhasil diunggah sebagai draft. Klik "Kirim untuk Verifikasi" untuk mengirimkan dokumen.');
+            session()->flash('message', 'Dokumen berhasil diunggah sebagai draft. Klik "Kirim untuk Verifikasi" untuk mengirimkan dokumen.');
 
         } catch (\Illuminate\Validation\ValidationException $e) {
             throw $e;
@@ -214,7 +214,7 @@ class StudyRequirements extends WorkflowComponent
     {
         try {
             $employee = $this->getEmployee();
-            $documentTypes = $this->getStudyRequirementDocumentTypes();
+            $documentTypes = $this->getapprovalDocumentTypes();
             $documentTypeIds = $documentTypes->pluck('id')->toArray();
 
             $uploadedDocuments = Document::where('employee_id', $employee->id)
@@ -320,7 +320,7 @@ class StudyRequirements extends WorkflowComponent
     // Override trait methods for custom behavior
     protected function getSuccessMessage(): string
     {
-        return 'Status dokumen persyaratan studi lanjut berhasil diperbarui.';
+        return 'Status dokumen berhasil diperbarui.';
     }
 
     protected function getSuccessFlashKey(): string
@@ -332,19 +332,19 @@ class StudyRequirements extends WorkflowComponent
     {
         try {
             $employee = $this->getEmployee();
-            $documentTypes = $this->getStudyRequirementDocumentTypes();
+            $documentTypes = $this->getapprovalDocumentTypes();
             $documentTypeIds = $documentTypes->pluck('id')->toArray();
 
-            $studyRequirements = Document::where('employee_id', $employee->id)
+            $ApprovalDocuments = Document::where('employee_id', $employee->id)
                 ->whereIn('document_type_id', $documentTypeIds)
                 ->with(['documentType', 'workflowHistory.user'])
                 ->orderBy('created_at', 'desc')
                 ->paginate(10);
 
-            return view('livewire.documents.study-requirements', [
-                'documents' => $studyRequirements,
-                'activeStudyInfo' => $this->getActiveStudyInfo(),
+            return view('livewire.administrations.upload', [
+                'documents' => $ApprovalDocuments,
                 'completionStatus' => $this->getCompletionStatus(),
+                'activeStudyInfo' => $this->getActiveStudyInfo(),
                 'canManageWorkflow' => $this->canUserManageWorkflow()
             ]);
         } catch (\Exception $e) {
@@ -352,17 +352,17 @@ class StudyRequirements extends WorkflowComponent
 
             // Return empty paginated result to maintain consistency
             $emptyPaginator = new LengthAwarePaginator(
-                [],
+                collect(),
                 0,
                 10,
                 1,
-                ['path' => request()->url(), 'pageName' => 'page']
+                ['path' => request()->url()]
             );
 
-            return view('livewire.documents.study-requirements', [
+            return view('livewire.administrations.upload', [
                 'documents' => $emptyPaginator,
-                'activeStudyInfo' => null,
                 'completionStatus' => ['status' => 'Error', 'details' => []],
+                'activeStudyInfo' => null,
                 'canManageWorkflow' => false
             ]);
         }

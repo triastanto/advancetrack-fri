@@ -9,7 +9,7 @@
     <x-documents.completion-status-card
         :available-document-types="$availableDocumentTypes"
         :completion-status="$completionStatus"
-        title="Status Kelengkapan Laporan Semester"
+        title="Status Kelengkapan"
         :supports-semester="true"
         :active-study-info="$activeStudyInfo" />
 
@@ -18,7 +18,7 @@
         :available-document-types="$availableDocumentTypes"
         :selected-document-type-id="$selectedDocumentTypeId"
         :completion-status="$completionStatus"
-        title="Unggah Laporan Semester"
+        title="Unggah Laporan"
         upload-button-text="Unggah Laporan"
         :supports-semester="true"
         :active-study-info="$activeStudyInfo" />
@@ -28,7 +28,7 @@
         :documents="$documents"
         :can-manage-workflow="$canManageWorkflow"
         mode="semester"
-        title="Laporan Semester Tersimpan"
+        title="Laporan Tersimpan"
         empty-message="Tidak ada laporan semester yang telah diunggah." />
 
     {{-- Enhanced Upload Modal with Semester Selection --}}

@@ -64,7 +64,7 @@ return [
             'to_state' => 3,   // VERIFIED
             'icon' => 'check-circle',
             'color' => 'success',
-            'required_roles' => ['fsdp_staff', 'head_of_affairs', 'vice_dean'], // Staff can verify
+            'required_roles' => ['hr_finance_staff', 'head_of_hr_finance', 'fri_vice_dean'], // Staff can verify
             'requires_comment' => true,
         ],
         3 => [
@@ -74,7 +74,7 @@ return [
             'to_state' => 4,   // REJECTED
             'icon' => 'x-circle',
             'color' => 'danger',
-            'required_roles' => ['fsdp_staff', 'head_of_affairs', 'vice_dean'], // Staff can reject
+            'required_roles' => ['hr_finance_staff', 'head_of_hr_finance', 'fri_vice_dean'], // Staff can reject
             'requires_comment' => true,
         ],
         4 => [
@@ -127,7 +127,7 @@ return [
                     3 => ['document_owner'], // REJECT - notify document owner
                     4 => ['staff'], // RESUBMIT - notify verification staff
                 ],
-                'staff_roles' => ['fsdp_staff', 'head_of_affairs', 'vice_dean'],
+                'staff_roles' => ['hr_finance_staff', 'head_of_hr_finance', 'fri_vice_dean'],
             ],
         ],
     ],

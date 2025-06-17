@@ -43,19 +43,19 @@ class EmployeeSeeder extends Seeder
         $name = strtolower($user->name);
 
         if (str_contains($email, 'wakildekan') || str_contains($name, 'wakil dekan')) {
-            return 'vice_dean';
+            return 'fri_vice_dean';
         }
 
         if (str_contains($email, 'kaur') || str_contains($name, 'kepala urusan')) {
-            return 'head_of_affairs';
+            return 'head_of_hr_finance';
         }
 
         if (str_contains($email, 'staf') || str_contains($name, 'staf')) {
-            return 'fsdp_staff';
+            return 'hr_finance_staff';
         }
 
         if (str_contains($email, 'admin') || str_contains($name, 'administrator')) {
-            return 'fsdp_staff';
+            return 'hr_finance_staff';
         }
 
         // Default to lecturer for dosen or other users
@@ -81,11 +81,11 @@ class EmployeeSeeder extends Seeder
         $name = $user->name;
 
         switch ($role) {
-            case 'vice_dean':
-                return 'Wakil Dekan Bidang Akademik';
-            case 'head_of_affairs':
-                return 'Kepala Urusan Akademik';
-            case 'fsdp_staff':
+            case 'fri_vice_dean':
+                return 'Wakil Dekan II FRI';
+            case 'head_of_hr_finance':
+                return 'Kepala Urusan SDM & Keuangan';
+            case 'hr_finance_staff':
                 if (str_contains(strtolower($name), 'administrator')) {
                     return 'Administrator Sistem';
                 }

@@ -11,7 +11,7 @@ class NotificationConfig
     public const TRANSITION_RESUBMIT = 4;
 
     // Staff roles that can perform verification
-    public const VERIFICATION_STAFF_ROLES = ['fsdp_staff', 'head_of_affairs', 'vice_dean'];
+    public const VERIFICATION_STAFF_ROLES = ['hr_finance_staff', 'head_of_hr_finance', 'fri_vice_dean'];
 
     // Email notification configuration
     public const EMAIL_ENABLED_TRANSITIONS = [

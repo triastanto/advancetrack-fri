@@ -54,6 +54,28 @@ class User extends Authenticatable
             ->implode('');
     }
 
+    /**
+     * Check if user has a specific role through employee relationship
+     */
+    public function hasRole(string $role): bool
+    {
+        return $this->employee?->role === $role;
+    }
+
+    /**
+     * Get user roles (for compatibility with RoleBasedWorkflowGuard)
+     */
+    public function roles()
+    {
+        if (!$this->employee) {
+            return collect([]);
+        }
+
+        return collect([
+            (object) ['name' => $this->employee->role]
+        ]);
+    }
+
     // Relationships
     public function employee()
     {

@@ -4,7 +4,6 @@ namespace App\Services\Workflow;
 
 use App\Services\Workflow\Guards\RoleBasedWorkflowGuard;
 use App\Services\Workflow\Guards\TimeBasedWorkflowGuard;
-use App\Services\Workflow\Guards\EmployeeRoleWorkflowGuard;
 use Illuminate\Contracts\Container\Container;
 
 class WorkflowConfiguration
@@ -82,16 +81,7 @@ class WorkflowConfiguration
     {
         $guardsConfig = $this->config['guards'] ?? [];
 
-        // Load employee role-based guard (preferred for our system)
-        if ($guardsConfig['employee_role']['enabled'] ?? true) {
-            if ($this->container->bound(EmployeeRoleWorkflowGuard::class)) {
-                $this->guards[] = $this->container->make(EmployeeRoleWorkflowGuard::class);
-            } else {
-                throw new \RuntimeException('EmployeeRoleWorkflowGuard is not registered in the service container. Please register it in WorkflowServiceProvider.');
-            }
-        }
-
-        // Load role-based guard (for systems using Spatie roles package)
+        // Load role-based guard (our current implementation)
         if ($guardsConfig['role_based']['enabled'] ?? false) {
             if ($this->container->bound(RoleBasedWorkflowGuard::class)) {
                 $this->guards[] = $this->container->make(RoleBasedWorkflowGuard::class);

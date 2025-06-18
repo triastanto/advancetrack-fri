@@ -59,7 +59,7 @@
 - user_id (FK)
 - employee_number
 - position
-- role (lecturer, hr_finance_staff, head_of_hr_finance, fri_vice_dean)
+- role (lecturer, hr_finance_staff, head_of_hr_finance, fri_vice_dean, head_of_study_program, head_of_research_group)
 - created_at
 - updated_at
 

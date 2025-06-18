@@ -3,7 +3,7 @@
 namespace App\Services\Workflow\Guards;
 
 use App\Contracts\Workflow\WorkflowGuardInterface;
-use App\Services\Workflow\WorkflowDefinition;
+use App\Services\Workflow\WorkflowConfigService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 
@@ -29,7 +29,7 @@ class RoleBasedWorkflowGuard implements WorkflowGuardInterface
             $allowedRoles = $this->rolePermissions[$transition];
         } else {
             // Fall back to config-based role permissions
-            $allowedRoles = WorkflowDefinition::getTransition($transition)['required_roles'] ?? [];
+            $allowedRoles = WorkflowConfigService::getRequiredRoles($transition);
         }
 
         if (empty($allowedRoles)) {
@@ -61,7 +61,7 @@ class RoleBasedWorkflowGuard implements WorkflowGuardInterface
             $allowedRoles = $this->rolePermissions[$transition];
         } else {
             // Fall back to config-based role permissions
-            $allowedRoles = WorkflowDefinition::getTransition($transition)['required_roles'] ?? [];
+            $allowedRoles = WorkflowConfigService::getRequiredRoles($transition);
         }
 
         if (!empty($allowedRoles)) {

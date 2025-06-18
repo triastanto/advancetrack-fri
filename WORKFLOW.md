@@ -142,7 +142,7 @@ return [
             'to_state' => 3,
             'icon' => 'check-circle',
             'color' => 'success',
-            'required_roles' => ['hr_finance_staff', 'head_of_hr_finance', 'fri_vice_dean'],
+            'required_roles' => ['hr_finance_staff', 'head_of_hr_finance', 'fri_vice_dean', 'head_of_study_program', 'head_of_research_group'],
             'requires_comment' => true,
         ],
         // ... more transitions
@@ -188,8 +188,8 @@ Controls transitions based on user roles:
 ```php
 $guard = new RoleBasedWorkflowGuard([
     1 => ['lecturer'],                                    // 1 = SUBMIT
-    2 => ['hr_finance_staff', 'head_of_hr_finance', 'fri_vice_dean'], // 2 = VERIFY
-    3 => ['hr_finance_staff', 'head_of_hr_finance', 'fri_vice_dean'], // 3 = REJECT
+    2 => ['hr_finance_staff', 'head_of_hr_finance', 'fri_vice_dean', 'head_of_study_program', 'head_of_research_group'], // 2 = VERIFY
+    3 => ['hr_finance_staff', 'head_of_hr_finance', 'fri_vice_dean', 'head_of_study_program', 'head_of_research_group'], // 3 = REJECT
     4 => ['lecturer'],                                    // 4 = RESUBMIT
 ]);
 ```

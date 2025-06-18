@@ -14,28 +14,25 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        // Buat pengguna spesifik untuk setiap peran berdasarkan spesifikasi
-
-        // 1. Wakil Dekan 2 - Pengambil keputusan strategis
+        // 1. Wakil Dekan II FRI (one employee)
         $wakilDekanUser = User::create([
-            'name' => 'Prof. Dr. Wakil Dekan Bidang Akademik',
-            'email' => 'wakildekan@fsdp.ac.id',
+            'name' => 'Prof. Dr. Ir. Bambang Setiawan, M.T.',
+            'email' => 'wakildekan2@fri.ac.id',
             'password' => Hash::make('password'),
             'email_verified_at' => now(),
         ]);
 
-        // Create corresponding employee record
         Employee::create([
             'user_id' => $wakilDekanUser->id,
             'employee_number' => '202500001',
-            'position' => 'Wakil Dekan Bidang Akademik',
+            'position' => 'Wakil Dekan II FRI',
             'role' => 'fri_vice_dean',
         ]);
 
-        // 2. Kepala Urusan - Mengelola PID (Perjanjian Ikatan Dinas)
+        // 2. Kepala Urusan SDM & Keuangan (one employee)
         $kepalaUrusanUser = User::create([
-            'name' => 'Drs. Kepala Urusan Akademik',
-            'email' => 'kaur@fsdp.ac.id',
+            'name' => 'Dra. Siti Nurhasanah, M.M.',
+            'email' => 'kaur.sdm@fri.ac.id',
             'password' => Hash::make('password'),
             'email_verified_at' => now(),
         ]);
@@ -43,108 +40,118 @@ class UserSeeder extends Seeder
         Employee::create([
             'user_id' => $kepalaUrusanUser->id,
             'employee_number' => '202500002',
-            'position' => 'Kepala Urusan Akademik',
+            'position' => 'Kepala Urusan SDM & Keuangan',
             'role' => 'head_of_hr_finance',
         ]);
 
-        // 3. Staf FSDP - Verifikasi dokumen dan administrasi
-        $stafFSDPUser = User::create([
-            'name' => 'Staf Administrasi FSDP',
-            'email' => 'staf@fsdp.ac.id',
-            'password' => Hash::make('password'),
-            'email_verified_at' => now(),
-        ]);
+        // 3. Staf SDM & Keuangan (multiple employees)
+        $staffData = [
+            ['name' => 'Ahmad Rifai, S.E.', 'email' => 'ahmad.rifai@fri.ac.id', 'emp_no' => '202500003'],
+            ['name' => 'Dewi Kartika, S.Sos.', 'email' => 'dewi.kartika@fri.ac.id', 'emp_no' => '202500004'],
+            ['name' => 'Budi Santoso, A.Md.', 'email' => 'budi.santoso@fri.ac.id', 'emp_no' => '202500005'],
+        ];
 
-        Employee::create([
-            'user_id' => $stafFSDPUser->id,
-            'employee_number' => '202500003',
-            'position' => 'Staf Administrasi FSDP',
-            'role' => 'hr_finance_staff',
-        ]);
-
-        // 4. Dosen sampel - Upload dan kelola dokumen studi lanjut
-        $dosen1User = User::create([
-            'name' => 'Dr. Ahmad Dosen Matematika',
-            'email' => 'dosen1@fsdp.ac.id',
-            'password' => Hash::make('password'),
-            'email_verified_at' => now(),
-        ]);
-
-        Employee::create([
-            'user_id' => $dosen1User->id,
-            'employee_number' => '202500004',
-            'position' => 'Dosen Matematika',
-            'role' => 'lecturer',
-        ]);
-
-        $dosen2User = User::create([
-            'name' => 'Prof. Dr. Siti Dosen Fisika',
-            'email' => 'dosen2@fsdp.ac.id',
-            'password' => Hash::make('password'),
-            'email_verified_at' => now(),
-        ]);
-
-        Employee::create([
-            'user_id' => $dosen2User->id,
-            'employee_number' => '202500005',
-            'position' => 'Profesor Fisika',
-            'role' => 'lecturer',
-        ]);
-
-        // Additional specialized lecturers
-        $dosen3User = User::create([
-            'name' => 'Dr. Budi Dosen Kimia',
-            'email' => 'dosen3@fsdp.ac.id',
-            'password' => Hash::make('password'),
-            'email_verified_at' => now(),
-        ]);
-
-        Employee::create([
-            'user_id' => $dosen3User->id,
-            'employee_number' => '202500007',
-            'position' => 'Dosen Kimia',
-            'role' => 'lecturer',
-        ]);
-
-        $dosen4User = User::create([
-            'name' => 'Dr. Ani Dosen Informatika',
-            'email' => 'dosen4@fsdp.ac.id',
-            'password' => Hash::make('password'),
-            'email_verified_at' => now(),
-        ]);
-
-        Employee::create([
-            'user_id' => $dosen4User->id,
-            'employee_number' => '202500008',
-            'position' => 'Dosen Teknik Informatika',
-            'role' => 'lecturer',
-        ]);
-
-        // 5. Administrator sistem
-        $adminUser = User::create([
-            'name' => 'Administrator Sistem',
-            'email' => 'admin@fsdp.ac.id',
-            'password' => Hash::make('password'),
-            'email_verified_at' => now(),
-        ]);
-
-        Employee::create([
-            'user_id' => $adminUser->id,
-            'employee_number' => '202500006',
-            'position' => 'Administrator Sistem',
-            'role' => 'hr_finance_staff',
-        ]);
-
-        // Buat pengguna tambahan untuk testing dengan employee records
-        $additionalUsers = User::factory(5)->create();
-        
-        foreach ($additionalUsers as $index => $user) {
+        foreach ($staffData as $staff) {
+            $user = User::create([
+                'name' => $staff['name'],
+                'email' => $staff['email'],
+                'password' => Hash::make('password'),
+                'email_verified_at' => now(),
+            ]);
+            
             Employee::create([
                 'user_id' => $user->id,
-                'employee_number' => '20250' . str_pad(9 + $index, 4, '0', STR_PAD_LEFT),
-                'position' => 'Dosen',
+                'employee_number' => $staff['emp_no'],
+                'position' => 'Staf SDM & Keuangan',
+                'role' => 'hr_finance_staff',
+            ]);
+        }
+
+        // 4. Ketua Program Studi (three employees)
+        $kaprodiData = [
+            ['name' => 'Dr. Ir. Agus Widodo, M.T.', 'email' => 'kaprodi.ti@fri.ac.id', 'program' => 'S1 Teknik Industri', 'emp_no' => '202500006'],
+            ['name' => 'Dr. Rina Fitriana, S.T., M.T.', 'email' => 'kaprodi.tl@fri.ac.id', 'program' => 'S1 Teknik Logistik', 'emp_no' => '202500007'],
+            ['name' => 'Dr. Hendra Kurniawan, S.Kom., M.T.', 'email' => 'kaprodi.si@fri.ac.id', 'program' => 'S1 Sistem Informasi', 'emp_no' => '202500008'],
+        ];
+
+        foreach ($kaprodiData as $kaprodi) {
+            $user = User::create([
+                'name' => $kaprodi['name'],
+                'email' => $kaprodi['email'],
+                'password' => Hash::make('password'),
+                'email_verified_at' => now(),
+            ]);
+            
+            Employee::create([
+                'user_id' => $user->id,
+                'employee_number' => $kaprodi['emp_no'],
+                'position' => 'Ketua Program Studi ' . $kaprodi['program'],
+                'role' => 'head_of_study_program',
+            ]);
+        }
+
+        // 5. Ketua Kelompok Keilmuan (three employees) - corrected role name
+        $kkelData = [
+            ['name' => 'Prof. Dr. Ir. Sutrisno, M.Eng.', 'email' => 'kkel.mpe@fri.ac.id', 'group' => 'Manufacturing and Process Engineering', 'emp_no' => '202500009'],
+            ['name' => 'Dr. Ir. Maya Sari, M.M.', 'email' => 'kkel.eims@fri.ac.id', 'group' => 'Enterprise and Industrial Management System', 'emp_no' => '202500010'],
+            ['name' => 'Dr. Andi Prasetyo, S.T., M.T.', 'email' => 'kkel.dest@fri.ac.id', 'group' => 'Digital Enterprise System and Technology', 'emp_no' => '202500011'],
+        ];
+
+        foreach ($kkelData as $kkel) {
+            $user = User::create([
+                'name' => $kkel['name'],
+                'email' => $kkel['email'],
+                'password' => Hash::make('password'),
+                'email_verified_at' => now(),
+            ]);
+            
+            Employee::create([
+                'user_id' => $user->id,
+                'employee_number' => $kkel['emp_no'],
+                'position' => 'Ketua Kelompok Keilmuan ' . $kkel['group'],
+                'role' => 'head_of_research_group',
+            ]);
+        }
+
+        // 6. Dosen (multiple employees)
+        $dosenData = [
+            ['name' => 'Dr. Ir. Bambang Supriadi, M.T.', 'email' => 'bambang.supriadi@fri.ac.id', 'emp_no' => '202500012', 'dept' => 'Teknik Industri'],
+            ['name' => 'Dr. Siti Rahayu, S.T., M.T.', 'email' => 'siti.rahayu@fri.ac.id', 'emp_no' => '202500013', 'dept' => 'Teknik Logistik'],
+            ['name' => 'Ir. Dedi Setiawan, M.T.', 'email' => 'dedi.setiawan@fri.ac.id', 'emp_no' => '202500014', 'dept' => 'Teknik Industri'],
+            ['name' => 'Dr. Lina Kusumawati, S.Kom., M.T.', 'email' => 'lina.kusumawati@fri.ac.id', 'emp_no' => '202500015', 'dept' => 'Sistem Informasi'],
+            ['name' => 'Dr. Rahmat Budiman, S.T., M.T.', 'email' => 'rahmat.budiman@fri.ac.id', 'emp_no' => '202500016', 'dept' => 'Teknik Logistik'],
+            ['name' => 'Dra. Ani Wijayanti, M.Si.', 'email' => 'ani.wijayanti@fri.ac.id', 'emp_no' => '202500017', 'dept' => 'Matematika'],
+            ['name' => 'Dr. Benny Kurniawan, S.T., M.T.', 'email' => 'benny.kurniawan@fri.ac.id', 'emp_no' => '202500018', 'dept' => 'Teknik Industri'],
+            ['name' => 'Dr. Citra Maharani, S.Kom., M.T.', 'email' => 'citra.maharani@fri.ac.id', 'emp_no' => '202500019', 'dept' => 'Sistem Informasi'],
+            ['name' => 'Prof. Dr. Ahmad Fauzi, M.Eng.', 'email' => 'ahmad.fauzi@fri.ac.id', 'emp_no' => '202500020', 'dept' => 'Teknik Industri'],
+            ['name' => 'Dr. Rina Sari, S.T., M.T.', 'email' => 'rina.sari@fri.ac.id', 'emp_no' => '202500021', 'dept' => 'Teknik Logistik'],
+            ['name' => 'Dr. Indra Gunawan, S.Kom., M.T.', 'email' => 'indra.gunawan@fri.ac.id', 'emp_no' => '202500022', 'dept' => 'Sistem Informasi'],
+            ['name' => 'Ir. Wulan Sari, M.T.', 'email' => 'wulan.sari@fri.ac.id', 'emp_no' => '202500023', 'dept' => 'Teknik Industri'],
+            ['name' => 'Dr. Rudi Hermawan, S.T., M.T.', 'email' => 'rudi.hermawan@fri.ac.id', 'emp_no' => '202500024', 'dept' => 'Teknik Logistik'],
+            ['name' => 'Dr. Maya Indrawati, S.Kom., M.T.', 'email' => 'maya.indrawati@fri.ac.id', 'emp_no' => '202500025', 'dept' => 'Sistem Informasi'],
+            ['name' => 'Dr. Hadi Santoso, S.T., M.T.', 'email' => 'hadi.santoso@fri.ac.id', 'emp_no' => '202500026', 'dept' => 'Teknik Industri'],
+            ['name' => 'Dra. Evi Susanti, M.Si.', 'email' => 'evi.susanti@fri.ac.id', 'emp_no' => '202500027', 'dept' => 'Matematika'],
+            ['name' => 'Dr. Yudi Prasetyo, S.T., M.T.', 'email' => 'yudi.prasetyo@fri.ac.id', 'emp_no' => '202500028', 'dept' => 'Teknik Logistik'],
+            ['name' => 'Dr. Diah Anggraini, S.Kom., M.T.', 'email' => 'diah.anggraini@fri.ac.id', 'emp_no' => '202500029', 'dept' => 'Sistem Informasi'],
+        ];
+
+        foreach ($dosenData as $dosen) {
+            $user = User::create([
+                'name' => $dosen['name'],
+                'email' => $dosen['email'],
+                'password' => Hash::make('password'),
+                'email_verified_at' => now(),
+            ]);
+            
+            Employee::create([
+                'user_id' => $user->id,
+                'employee_number' => $dosen['emp_no'],
+                'position' => 'Dosen ' . $dosen['dept'],
                 'role' => 'lecturer',
             ]);
         }
+
+        // Remove the factory-generated users since we now have specific lecturers
+        // $additionalUsers = User::factory(10)->create();
     }
 }

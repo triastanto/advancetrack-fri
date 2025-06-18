@@ -8,7 +8,6 @@ use App\Listeners\LogTransitionAttempt;
 use App\Listeners\NotifyStakeholders;
 use App\Listeners\UpdateRelatedModels;
 use App\Services\Workflow\WorkflowManager;
-use App\Services\Workflow\Guards\EmployeeRoleWorkflowGuard;
 use App\Services\Workflow\Guards\RoleBasedWorkflowGuard;
 use App\Services\Workflow\Guards\TimeBasedWorkflowGuard;
 use Illuminate\Support\Facades\Event;
@@ -52,11 +51,6 @@ class WorkflowServiceProvider extends ServiceProvider
      */
     protected function registerWorkflowGuards(): void
     {
-        // Register EmployeeRoleWorkflowGuard
-        $this->app->singleton(EmployeeRoleWorkflowGuard::class, function ($app) {
-            return new EmployeeRoleWorkflowGuard();
-        });
-
         // Register RoleBasedWorkflowGuard  
         $this->app->singleton(RoleBasedWorkflowGuard::class, function ($app) {
             return new RoleBasedWorkflowGuard();
@@ -68,7 +62,6 @@ class WorkflowServiceProvider extends ServiceProvider
         });
 
         // Register guard aliases for easier configuration
-        $this->app->alias(EmployeeRoleWorkflowGuard::class, 'workflow.guards.employee_role');
         $this->app->alias(RoleBasedWorkflowGuard::class, 'workflow.guards.role_based');
         $this->app->alias(TimeBasedWorkflowGuard::class, 'workflow.guards.time_based');
     }

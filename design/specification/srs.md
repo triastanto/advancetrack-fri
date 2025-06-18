@@ -9,7 +9,7 @@ Sistem ini dikembangkan untuk mendukung proses administrasi dan monitoring studi
 Dokumen ini bertujuan untuk mendefinisikan kebutuhan perangkat lunak berdasarkan user stories yang telah disusun, sehingga pengembangan sistem dapat berjalan sesuai harapan seluruh pemangku kepentingan.
 
 ### 1.3 Lingkup
-Sistem akan digunakan oleh Dosen, Staf SDM & Keuangan, Kepala Urusan SDM & Keuangan, dan Wakil Dekan II FRI 2 untuk mengelola data dan dokumen studi lanjut, serta mendukung proses administrasi terkait.
+Sistem akan digunakan oleh Dosen Studi Lanjut, Staf SDM & Keuangan, Kepala Urusan SDM & Keuangan, Wakil Dekan II FRI, Ketua Program Studi, Ketua Kelompok Keilmuan untuk mengelola data dan dokumen studi lanjut, serta mendukung proses administrasi terkait.
 
 ---
 

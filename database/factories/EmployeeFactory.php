@@ -13,7 +13,7 @@ class EmployeeFactory extends Factory
 
     public function definition(): array
     {
-        $role = $this->faker->randomElement(['lecturer', 'hr_finance_staff', 'head_of_hr_finance', 'fri_vice_dean']);
+        $role = $this->faker->randomElement(['lecturer', 'hr_finance_staff', 'head_of_hr_finance', 'fri_vice_dean', 'head_of_study_program', 'head_of_research_group']);
 
         return [
             'user_id' => User::factory(),

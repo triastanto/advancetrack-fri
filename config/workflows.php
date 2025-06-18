@@ -64,7 +64,7 @@ return [
             'to_state' => 3,   // VERIFIED
             'icon' => 'check-circle',
             'color' => 'success',
-            'required_roles' => ['hr_finance_staff', 'head_of_hr_finance', 'fri_vice_dean'], // Staff can verify
+            'required_roles' => ['hr_finance_staff', 'head_of_hr_finance', 'fri_vice_dean', 'head_of_study_program', 'head_of_research_group'], // Staff can verify
             'requires_comment' => true,
         ],
         3 => [
@@ -74,7 +74,7 @@ return [
             'to_state' => 4,   // REJECTED
             'icon' => 'x-circle',
             'color' => 'danger',
-            'required_roles' => ['hr_finance_staff', 'head_of_hr_finance', 'fri_vice_dean'], // Staff can reject
+            'required_roles' => ['hr_finance_staff', 'head_of_hr_finance', 'fri_vice_dean', 'head_of_study_program', 'head_of_research_group'], // Staff can reject
             'requires_comment' => true,
         ],
         4 => [
@@ -106,8 +106,8 @@ return [
                 'auto_notify' => true,
             ],
             'guards' => [
-                'employee_role' => ['enabled' => true], // Use employee-based roles (recommended)
-                'role_based' => ['enabled' => false],
+                'role_based' => ['enabled' => true], // Use RoleBasedWorkflowGuard (recommended)
+                'employee_role' => ['enabled' => false], // Legacy employee-based roles
                 'time_based' => [
                     'enabled' => false,
                     'business_hours_only' => [2, 3], // VERIFY, REJECT
@@ -127,7 +127,7 @@ return [
                     3 => ['document_owner'], // REJECT - notify document owner
                     4 => ['staff'], // RESUBMIT - notify verification staff
                 ],
-                'staff_roles' => ['hr_finance_staff', 'head_of_hr_finance', 'fri_vice_dean'],
+                'staff_roles' => ['hr_finance_staff', 'head_of_hr_finance', 'fri_vice_dean', 'head_of_study_program', 'head_of_research_group'],
             ],
         ],
     ],

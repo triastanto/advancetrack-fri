@@ -5,7 +5,7 @@
 ])
 
 <x-ui.modal 
-    show="modalOpen" 
+    show="showModal" 
     max-width="lg" 
     z-index="50" 
     close-method="$wire.closeModal()">
@@ -32,7 +32,7 @@
                     Tanggal Upload: <span class="font-semibold">{{ $document->created_at ? $document->created_at->format('d M Y') : '-' }}</span>
                 </div>
                 <div class="text-sm text-gray-600 mb-2">
-                    Status: <x-workflow.workflow-status :document="$document" :canManageWorkflow="true" />
+                    Status: <x-workflow.workflow-status :document="$document" />
                 </div>
                 
                 <div class="mt-4">
@@ -46,21 +46,25 @@
                     <h4 class="text-sm font-semibold mb-2">Riwayat Workflow</h4>
                     <x-workflow.workflow-history :document="$document" />
                 </div>
+
+                <div class="mt-4">
+                    <label class="block text-sm font-semibold mb-1">Catatan Verifikasi</label>
+                    <textarea wire:model.defer="verificationNote" rows="3" class="w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-[#009444]"></textarea>
+                    @error('verificationNote') 
+                        <div class="text-red-500 text-xs mt-1">{{ $message }}</div> 
+                    @enderror
+                </div>
             </div>
             
-            <div class="mb-4">
-                <label class="block text-sm font-semibold mb-1">Catatan Verifikasi</label>
-                <textarea wire:model.defer="verificationNote" rows="3" class="w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-[#009444]"></textarea>
-                @error('verificationNote') 
-                    <div class="text-red-500 text-xs mt-1">{{ $message }}</div> 
-                @enderror
-            </div>
-            
-            <div class="flex gap-3 justify-end">
-                <button wire:click="rejectDocument" class="bg-red-100 text-red-700 px-4 py-2 rounded-lg font-semibold hover:bg-red-200 transition">
+            <div class="flex gap-3 justify-end p-6">
+                <button 
+                    wire:click="rejectDocument" 
+                    class="bg-red-100 text-red-700 px-4 py-2 rounded-lg font-semibold hover:bg-red-200 transition">
                     Tolak
                 </button>
-                <button wire:click="verifyDocument" class="bg-[#009444] text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition">
+                <button 
+                    wire:click="verifyDocument" 
+                    class="bg-[#009444] text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition">
                     Verifikasi
                 </button>
             </div>

@@ -4,6 +4,7 @@ namespace App\Livewire\Administrations;
 
 use App\Models\Document;
 use App\Models\DocumentType;
+use App\Models\Employee;
 use App\Constants\DocumentTypeConstants;
 use App\Livewire\Base\WorkflowComponent;
 use Carbon\Carbon;
@@ -28,6 +29,16 @@ class Upload extends WorkflowComponent
     public $selectedTransition;
     public $transitionComment = '';
     public $showWorkflowHistory = false;
+    
+    // Employee selection properties
+    public $selectedEmployeeId;
+    public $selectedEmployee;
+    public $isNonLecturerRole = false;
+
+    protected $listeners = [
+        'employeeSelected' => 'handleEmployeeSelected',
+        'employeeCleared' => 'handleEmployeeCleared'
+    ];
 
     protected $rules = [
         'documentFile' => 'required|file|mimes:pdf|max:10240', // 10MB limit, PDF only
@@ -61,17 +72,97 @@ class Upload extends WorkflowComponent
             ->get();
     }
 
-    public function mount(...$parameters)
+    /**
+     * Check if current user has non-lecturer role
+     */
+    protected function checkIsNonLecturerRole(): bool
     {
-        parent::mount(...$parameters);
-        $this->selectedDocumentTypeId = '';
-        $this->availableDocumentTypes = $this->getapprovalDocumentTypes();
+        $user = Auth::user();
+        if (!$user || !$user->employee) {
+            return false;
+        }
+
+        $nonLecturerRoles = [
+            'hr_finance_staff',
+            'head_of_hr_finance', 
+            'fri_vice_dean',
+            'head_of_study_program',
+            'head_of_research_group'
+        ];
+
+        return in_array($user->employee->role, $nonLecturerRoles);
+    }
+
+    /**
+     * Get employee for document operations
+     * For lecturers: returns their own employee record
+     * For non-lecturers: returns selected employee
+     */
+    protected function getEmployeeForDocuments()
+    {
+        if ($this->isNonLecturerRole) {
+            if (!$this->selectedEmployeeId) {
+                throw new \Exception('Silakan pilih dosen terlebih dahulu.');
+            }
+            
+            $employee = Employee::with(['user', 'studyPrograms'])->find($this->selectedEmployeeId);
+            if (!$employee) {
+                throw new \Exception('Data dosen tidak ditemukan.');
+            }
+            
+            return $employee;
+        }
+        
+        // For lecturers, use the standard getEmployee method
+        return $this->getEmployee();
+    }
+
+    /**
+     * Handle employee selection from employee finder
+     */
+    public function handleEmployeeSelected($data)
+    {
+        $this->selectedEmployeeId = $data['employeeId'];
+        $this->selectedEmployee = Employee::with(['user', 'studyPrograms'])->find($data['employeeId']);
+        
+        // Force refresh of the component data
+        $this->refreshData();
+    }
+
+    /**
+     * Handle employee selection clearing
+     */
+    public function handleEmployeeCleared()
+    {
+        $this->selectedEmployeeId = null;
+        $this->selectedEmployee = null;
+        
+        // Force refresh of the component data
+        $this->refreshData();
+    }
+
+    /**
+     * Refresh component data after employee selection or document operations
+     */
+    public function refreshData()
+    {
+        // Reset pagination to first page
+        $this->resetPage();
+        
+        // Clear any cached data
+        $this->dispatch('$refresh');
     }
 
     // Modal Methods
     public function openUploadModal()
     {
         if (!$this->selectedDocumentTypeId) {
+            return;
+        }
+
+        // Check if employee is selected for non-lecturer roles
+        if ($this->isNonLecturerRole && !$this->selectedEmployeeId) {
+            session()->flash('error', 'Silakan pilih dosen terlebih dahulu.');
             return;
         }
 
@@ -130,7 +221,7 @@ class Upload extends WorkflowComponent
             }
 
             // Check if user owns this document
-            $employee = $this->getEmployee();
+            $employee = $this->getEmployeeForDocuments();
             if ($document->employee_id !== $employee->id) {
                 session()->flash('error', 'Anda tidak memiliki akses untuk mengirim dokumen ini.');
                 return;
@@ -153,6 +244,7 @@ class Upload extends WorkflowComponent
             // Apply SUBMIT transition (transition ID 1)
             $document->applyTransition(1, $context);
 
+            $this->refreshData(); // Refresh the data to show updated status
             session()->flash('message', 'Dokumen berhasil dikirim untuk verifikasi.');
         } catch (\Exception $e) {
             Log::error('Error in submitDocument: ' . $e->getMessage());
@@ -166,7 +258,7 @@ class Upload extends WorkflowComponent
     {
         try {
             $this->validate();
-            $employee = $this->getEmployee();
+            $employee = $this->getEmployeeForDocuments();
 
             if (!$this->documentFile) {
                 throw new \Exception('No file was uploaded.');
@@ -184,6 +276,7 @@ class Upload extends WorkflowComponent
             ]);
 
             $this->closeUploadModal();
+            $this->refreshData(); // Refresh the data to show new document
             session()->flash('message', 'Dokumen berhasil diunggah sebagai draft. Klik "Kirim untuk Verifikasi" untuk mengirimkan dokumen.');
 
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -203,6 +296,7 @@ class Upload extends WorkflowComponent
             }
 
             $document->delete();
+            $this->refreshData(); // Refresh the data to remove deleted document
             session()->flash('message', 'Dokumen berhasil dihapus.');
         } catch (\Exception $e) {
             session()->flash('error', 'Terjadi kesalahan saat menghapus dokumen: ' . $e->getMessage());
@@ -213,7 +307,7 @@ class Upload extends WorkflowComponent
     public function getCompletionStatus()
     {
         try {
-            $employee = $this->getEmployee();
+            $employee = $this->getEmployeeForDocuments();
             $documentTypes = $this->getapprovalDocumentTypes();
             $documentTypeIds = $documentTypes->pluck('id')->toArray();
 
@@ -263,7 +357,7 @@ class Upload extends WorkflowComponent
     public function getActiveStudyInfo()
     {
         try {
-            $employee = $this->getEmployee();
+            $employee = $this->getEmployeeForDocuments();
 
             $activeStudy = $employee->studyCalendars()
                 ->where('study_status', 'active')
@@ -328,47 +422,37 @@ class Upload extends WorkflowComponent
         return 'message';
     }
 
-    public function render()
+    public function mount(...$parameters)
     {
+        parent::mount(...$parameters);
+        $this->selectedDocumentTypeId = '';
+        
+        // Ensure availableDocumentTypes is always initialized
         try {
-            $employee = $this->getEmployee();
-            $documentTypes = $this->getapprovalDocumentTypes();
-            $documentTypeIds = $documentTypes->pluck('id')->toArray();
-
-            $ApprovalDocuments = Document::where('employee_id', $employee->id)
-                ->whereIn('document_type_id', $documentTypeIds)
-                ->with(['documentType', 'workflowHistory.user'])
-                ->orderBy('created_at', 'desc')
-                ->paginate(10);
-
-            return view('livewire.administrations.upload', [
-                'documents' => $ApprovalDocuments,
-                'completionStatus' => $this->getCompletionStatus(),
-                'activeStudyInfo' => $this->getActiveStudyInfo(),
-                'canManageWorkflow' => $this->canUserManageWorkflow()
-            ]);
+            $this->availableDocumentTypes = $this->getapprovalDocumentTypes();
         } catch (\Exception $e) {
-            session()->flash('error', 'Terjadi kesalahan: ' . $e->getMessage());
-
-            // Return empty paginated result to maintain consistency
-            $emptyPaginator = new LengthAwarePaginator(
-                collect(),
-                0,
-                10,
-                1,
-                ['path' => request()->url()]
-            );
-
-            return view('livewire.administrations.upload', [
-                'documents' => $emptyPaginator,
-                'completionStatus' => ['status' => 'Error', 'details' => []],
-                'activeStudyInfo' => null,
-                'canManageWorkflow' => false
-            ]);
+            $this->availableDocumentTypes = collect();
+        }
+        
+        // Check if current user is non-lecturer role
+        $this->isNonLecturerRole = $this->checkIsNonLecturerRole();
+        
+        // If user is lecturer, auto-select their employee record
+        if (!$this->isNonLecturerRole) {
+            try {
+                $employee = $this->getEmployee();
+                $this->selectedEmployeeId = $employee->id;
+                $this->selectedEmployee = $employee;
+            } catch (\Exception $e) {
+                // Handle case where lecturer doesn't have employee record
+                Log::warning('Lecturer without employee record: ' . Auth::id());
+            }
         }
     }
 
-    // Implementation of abstract methods from WorkflowComponent
+    /**
+     * Implementation of abstract methods from WorkflowComponent
+     */
     protected function getWorkflowModelClass(): string
     {
         return Document::class;
@@ -387,5 +471,74 @@ class Upload extends WorkflowComponent
     protected function getWorkflowTransitionPropertyName(): string  
     {
         return 'selectedTransition';
+    }
+
+    public function render()
+    {
+        try {
+            // Ensure availableDocumentTypes is always available
+            if (!$this->availableDocumentTypes) {
+                $this->availableDocumentTypes = $this->getapprovalDocumentTypes();
+            }
+
+            // Return empty state if non-lecturer hasn't selected an employee
+            if ($this->isNonLecturerRole && !$this->selectedEmployeeId) {
+                // Return empty paginated result
+                $emptyPaginator = new LengthAwarePaginator(
+                    collect(),
+                    0,
+                    10,
+                    1,
+                    ['path' => request()->url()]
+                );
+
+                return view('livewire.administrations.upload', [
+                    'documents' => $emptyPaginator,
+                    'completionStatus' => ['status' => 'Pilih Dosen', 'details' => []],
+                    'activeStudyInfo' => null,
+                    'canManageWorkflow' => false
+                ]);
+            }
+
+            $employee = $this->getEmployeeForDocuments();
+            $documentTypes = $this->getapprovalDocumentTypes();
+            $documentTypeIds = $documentTypes->pluck('id')->toArray();
+
+            $ApprovalDocuments = Document::where('employee_id', $employee->id)
+                ->whereIn('document_type_id', $documentTypeIds)
+                ->with(['documentType', 'workflowHistory.user'])
+                ->orderBy('created_at', 'desc')
+                ->paginate(10);
+
+            return view('livewire.administrations.upload', [
+                'documents' => $ApprovalDocuments,
+                'completionStatus' => $this->getCompletionStatus(),
+                'activeStudyInfo' => $this->getActiveStudyInfo(),
+                'canManageWorkflow' => $this->canUserManageWorkflow()
+            ]);
+        } catch (\Exception $e) {
+            session()->flash('error', 'Terjadi kesalahan: ' . $e->getMessage());
+
+            // Ensure availableDocumentTypes is available even in error case
+            if (!$this->availableDocumentTypes) {
+                $this->availableDocumentTypes = collect();
+            }
+
+            // Return empty paginated result to maintain consistency
+            $emptyPaginator = new LengthAwarePaginator(
+                collect(),
+                0,
+                10,
+                1,
+                ['path' => request()->url()]
+            );
+
+            return view('livewire.administrations.upload', [
+                'documents' => $emptyPaginator,
+                'completionStatus' => ['status' => 'Error', 'details' => []],
+                'activeStudyInfo' => null,
+                'canManageWorkflow' => false
+            ]);
+        }
     }
 }

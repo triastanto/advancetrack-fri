@@ -16,9 +16,11 @@ class InvalidTransitionException extends Exception
         public ?string $reason = null
     ) {
         $modelClass = get_class($model);
-        $fromLabel = WorkflowDefinition::getStateLabel($from);
-        $toLabel = WorkflowDefinition::getStateLabel($to);
-        $transitionLabel = WorkflowDefinition::getTransitionLabel($transition);
+        $workflowName = $model->getWorkflowName();
+        
+        $fromLabel = WorkflowDefinition::getStateLabel($from, $workflowName);
+        $toLabel = WorkflowDefinition::getStateLabel($to, $workflowName);
+        $transitionLabel = WorkflowDefinition::getTransitionLabel($transition, $workflowName);
         
         $message = "Invalid transition from {$fromLabel} to {$toLabel} via {$transitionLabel} for {$modelClass}";
 

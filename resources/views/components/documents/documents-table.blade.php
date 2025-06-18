@@ -55,7 +55,7 @@
                 <td class="px-6 py-4 whitespace-nowrap text-center">
                     <div class="flex items-center justify-center space-x-2">
                         <!-- Primary Action Button (contextual based on workflow state) -->
-                        @if($document->state_id == 1)
+                        @if($document->isInDraftState())
                             <!-- Submit Button for Draft Documents -->
                             <button
                                 wire:click="submitDocument({{ $document->id }})"
@@ -75,7 +75,7 @@
                         @endif
 
                         <!-- Workflow Transition Dropdown (exclude submit transitions for draft documents) -->
-                        @if($document->hasAvailableTransitions() && $document->state_id != 1)
+                        @if($document->hasAvailableTransitions() && !$document->isInDraftState())
                             @php $transitions = $document->getFormattedTransitions(); @endphp
                             @if(count($transitions) > 1)
                                 <!-- Dropdown for multiple transitions -->
@@ -136,7 +136,7 @@
                         @endif
 
                         <!-- Destructive Actions (Delete for Draft only) -->
-                        @if($document->state_id == 1)
+                        @if($document->isInDraftState())
                             <button
                                 wire:click="deleteDocument({{ $document->id }})"
                                 wire:confirm="Apakah Anda yakin ingin menghapus dokumen ini?"
@@ -165,7 +165,7 @@
                 <td class="px-6 py-4 whitespace-nowrap">
                     <div class="flex items-center space-x-2">
                         <!-- Primary Action: Context-aware based on document state -->
-                        @if($document->state_id == 1)
+                        @if($document->isInDraftState())
                             <!-- Submit for Draft Documents -->
                             <button
                                 wire:click="submitDocument({{ $document->id }})"
@@ -185,7 +185,7 @@
                         </button>
 
                         <!-- Workflow Actions (exclude submit transitions for draft documents to avoid duplication) -->
-                        @if($document->hasAvailableTransitions() && $document->state_id != 1)
+                        @if($document->hasAvailableTransitions() && !$document->isInDraftState())
                             @php $transitions = $document->getFormattedTransitions(); @endphp
                             
                             @if(count($transitions) == 1)
@@ -264,7 +264,7 @@
                         @endif
 
                         <!-- Delete Action for Draft Documents -->
-                        @if($document->state_id == 1)
+                        @if($document->isInDraftState())
                             <button
                                 wire:click="deleteDocument({{ $document->id }})"
                                 wire:confirm="Apakah Anda yakin ingin menghapus dokumen ini?"

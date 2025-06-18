@@ -12,7 +12,7 @@ class WorkflowTransitionsCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'workflow:transitions';
+    protected $signature = 'workflow:transitions {workflow? : The workflow name to list transitions for}';
 
     /**
      * The console command description.
@@ -26,12 +26,26 @@ class WorkflowTransitionsCommand extends Command
      */
     public function handle(): int
     {
-        $this->info('Available Workflow Transitions:');
+        $workflowName = $this->argument('workflow');
+        
+        if (!$workflowName) {
+            $this->error('Please specify a workflow name.');
+            $this->info('Available workflows: ' . implode(', ', WorkflowDefinition::getWorkflowNames()));
+            return self::FAILURE;
+        }
+
+        if (!WorkflowDefinition::workflowExists($workflowName)) {
+            $this->error("Workflow '{$workflowName}' does not exist.");
+            $this->info('Available workflows: ' . implode(', ', WorkflowDefinition::getWorkflowNames()));
+            return self::FAILURE;
+        }
+
+        $this->info("Transitions for workflow: {$workflowName}");
 
         $transitions = [];
-        foreach (WorkflowDefinition::getAllTransitions() as $id => $transition) {
-            $fromState = WorkflowDefinition::getStateLabel($transition['from_state']);
-            $toState = WorkflowDefinition::getStateLabel($transition['to_state']);
+        foreach (WorkflowDefinition::getAllTransitions($workflowName) as $id => $transition) {
+            $fromState = WorkflowDefinition::getStateLabel($transition['from_state'], $workflowName);
+            $toState = WorkflowDefinition::getStateLabel($transition['to_state'], $workflowName);
             
             $transitions[] = [
                 $id,

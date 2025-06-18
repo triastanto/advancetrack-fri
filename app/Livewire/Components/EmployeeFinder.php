@@ -15,6 +15,7 @@ class EmployeeFinder extends Component
     public $selectedEmployee = null;
     public $showEmployeeModal = false;
     public $perPage = 10;
+    public $page = 1;
 
     protected $queryString = [
         'search' => ['except' => ''],

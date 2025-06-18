@@ -7,34 +7,65 @@ This state machine applies to:
 
 ## States
 
-| State    | Description                                      |
-|----------|--------------------------------------------------|
-| draft    | (optional) Document not yet submitted/uploaded   |
-| pending  | Awaiting verification by staff                   |
-| verified | Approved/verified by staff (final state)         |
-| rejected | Not approved, needs revision                     |
+| State ID | State Name | Type      | Description                                      | Color     | Icon         | Terminal |
+|----------|------------|-----------|--------------------------------------------------|-----------|--------------|----------|
+| 1        | DRAFT      | draft     | Document not yet submitted/uploaded              | secondary | edit         | No       |
+| 2        | PENDING    | pending   | Awaiting verification by staff                   | warning   | clock        | No       |
+| 3        | VERIFIED   | verified  | Approved/verified by staff (final state)        | success   | check-circle | Yes      |
+| 4        | REJECTED   | rejected  | Not approved, needs revision                     | danger    | x-circle     | No       |
 
 ## Transitions
 
-| From     | To        | Trigger/Action                |
-|----------|-----------|------------------------------|
-| draft    | pending   | User submits/uploads         |
-| pending  | verified  | Staff verifies/approves      |
-| pending  | rejected  | Staff rejects (with note)    |
-| rejected | pending   | User revises and resubmits   |
-| verified |           | (Final state, no transition) |
+| Transition ID | Name      | Label                   | From State | To State | Required Roles                                                                                      | Requires Comment |
+|---------------|-----------|-------------------------|------------|----------|-----------------------------------------------------------------------------------------------------|------------------|
+| 1             | SUBMIT    | Submit for Verification | DRAFT (1)  | PENDING (2) | lecturer                                                                                            | No               |
+| 2             | VERIFY    | Verify Document         | PENDING (2)| VERIFIED (3)| hr_finance_staff, head_of_hr_finance, fri_vice_dean, head_of_study_program, head_of_research_group | Yes              |
+| 3             | REJECT    | Reject Document         | PENDING (2)| REJECTED (4)| hr_finance_staff, head_of_hr_finance, fri_vice_dean, head_of_study_program, head_of_research_group | Yes              |
+| 4             | RESUBMIT  | Revise and Resubmit     | REJECTED (4)| PENDING (2)| lecturer                                                                                            | No               |
 
-## Diagram (Text)
+## State Flow Diagram
 
 ```
-[draft] --submit/upload--> [pending]
-[pending] --approve--> [verified]
-[pending] --reject--> [rejected]
-[rejected] --revise/resubmit--> [pending]
-[verified] (final)
+[DRAFT] --SUBMIT--> [PENDING]
+           |             |
+           |             +--VERIFY--> [VERIFIED] (terminal)
+           |             |
+           |             +--REJECT--> [REJECTED]
+           |                              |
+           +--RESUBMIT---------------------+
 ```
+
+## Notification Rules
+
+| Transition | Notified Parties |
+|------------|------------------|
+| SUBMIT     | Verification staff (hr_finance_staff, head_of_hr_finance, fri_vice_dean, head_of_study_program, head_of_research_group) |
+| VERIFY     | Document owner |
+| REJECT     | Document owner |
+| RESUBMIT   | Verification staff |
+
+## Email Templates
+
+| Transition | Template |
+|------------|----------|
+| SUBMIT     | emails.document-submitted |
+| VERIFY     | emails.document-verified |
+| REJECT     | emails.document-rejected |
+| RESUBMIT   | emails.document-resubmitted |
+
+## Configuration Details
+
+- **Initial State**: DRAFT (ID: 1)
+- **Workflow Name**: `document_verification`
+- **Settings**: History tracking enabled, auto-save enabled, strict mode enabled, auto-notify enabled
+- **Notification Channels**: Mail, Database
+- **Guards**: Role-based permissions enabled
 
 ## Notes
-- "draft" is optional and may be skipped if documents are always submitted directly.
-- "verified" is a terminal state; no further transitions allowed.
-- Each transition may include metadata (e.g., verification note, timestamp).
+
+- **DRAFT** is the initial state where documents are created
+- **VERIFIED** is a terminal state; no further transitions allowed
+- **REJECT** and **VERIFY** transitions require comments from staff
+- Only lecturers can submit/resubmit documents
+- Only authorized staff can verify or reject documents
+- Each transition triggers automatic notifications to relevant parties

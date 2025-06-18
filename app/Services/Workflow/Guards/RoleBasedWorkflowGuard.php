@@ -3,7 +3,7 @@
 namespace App\Services\Workflow\Guards;
 
 use App\Contracts\Workflow\WorkflowGuardInterface;
-use App\Services\Workflow\WorkflowConfigService;
+use App\Services\Workflow\WorkflowDefinition;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 
@@ -24,12 +24,16 @@ class RoleBasedWorkflowGuard implements WorkflowGuardInterface
             return false;
         }
 
+        // Get workflow name from model
+        $workflowName = $model->getWorkflowName();
+
         // Check if specific role permissions are set for this instance
         if (!empty($this->rolePermissions) && isset($this->rolePermissions[$transition])) {
             $allowedRoles = $this->rolePermissions[$transition];
         } else {
-            // Fall back to config-based role permissions
-            $allowedRoles = WorkflowConfigService::getRequiredRoles($transition);
+            // Fall back to config-based role permissions using WorkflowDefinition
+            $transitionConfig = WorkflowDefinition::getTransition($workflowName, $transition);
+            $allowedRoles = $transitionConfig['required_roles'] ?? [];
         }
 
         if (empty($allowedRoles)) {
@@ -56,12 +60,16 @@ class RoleBasedWorkflowGuard implements WorkflowGuardInterface
 
     public function getBlockingReason(Model $model, int $from, int $to, int $transition): ?string
     {
+        // Get workflow name from model
+        $workflowName = $model->getWorkflowName();
+
         // Check if specific role permissions are set for this instance
         if (!empty($this->rolePermissions) && isset($this->rolePermissions[$transition])) {
             $allowedRoles = $this->rolePermissions[$transition];
         } else {
-            // Fall back to config-based role permissions
-            $allowedRoles = WorkflowConfigService::getRequiredRoles($transition);
+            // Fall back to config-based role permissions using WorkflowDefinition
+            $transitionConfig = WorkflowDefinition::getTransition($workflowName, $transition);
+            $allowedRoles = $transitionConfig['required_roles'] ?? [];
         }
 
         if (!empty($allowedRoles)) {

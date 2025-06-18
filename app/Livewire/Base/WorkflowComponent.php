@@ -109,4 +109,92 @@ abstract class WorkflowComponent extends Component
 
         return $model;
     }
+
+    /**
+     * Get the workflow name for this component
+     */
+    protected function getWorkflowName(): string
+    {
+        return $this->model->getWorkflowName();
+    }
+
+    /**
+     * Get available transitions for the current model state
+     */
+    protected function getAvailableTransitions(): array
+    {
+        return $this->model->getAvailableTransitions();
+    }
+
+    /**
+     * Check if a transition is available
+     */
+    protected function canTransition(int $transitionId): bool
+    {
+        return $this->model->canTransition($transitionId);
+    }
+
+    /**
+     * Get the current state information
+     */
+    protected function getCurrentStateInfo(): array
+    {
+        return $this->model->getWorkflowStateInfo();
+    }
+
+    /**
+     * Get the current state label
+     */
+    protected function getCurrentStateLabel(): string
+    {
+        return $this->model->getWorkflowStateInfo()['label'];
+    }
+
+    /**
+     * Get the current state color
+     */
+    protected function getCurrentStateColor(): string
+    {
+        return $this->model->getWorkflowStateInfo()['color'];
+    }
+
+    /**
+     * Get the current state icon
+     */
+    protected function getCurrentStateIcon(): string
+    {
+        return $this->model->getWorkflowStateInfo()['icon'];
+    }
+
+    /**
+     * Check if the model is in a draft state
+     */
+    protected function isDraftState(): bool
+    {
+        return $this->model->isInDraftState();
+    }
+
+    /**
+     * Check if the model is in a pending state
+     */
+    protected function isPendingState(): bool
+    {
+        return $this->model->isInPendingState();
+    }
+
+    /**
+     * Check if the model is in a verified/approved state
+     */
+    protected function isVerifiedState(): bool
+    {
+        return $this->model->isInVerifiedState();
+    }
+
+    /**
+     * Check if the model is in a rejected state
+     */
+    protected function isRejectedState(): bool
+    {
+        return $this->model->isInRejectedState();
+    }
 }

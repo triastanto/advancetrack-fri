@@ -14,10 +14,11 @@ class UpdateRelatedModels
     public function handle(WorkflowTransitionApplied $event): void
     {
         Log::info('Updating related models after workflow transition', [
+            'workflow' => $event->workflowName,
             'model' => get_class($event->model),
             'id' => $event->model->id,
-            'from' => WorkflowDefinition::getStateLabel($event->fromState),
-            'to' => WorkflowDefinition::getStateLabel($event->toState),
+            'from' => WorkflowDefinition::getStateLabel($event->fromState, $event->workflowName),
+            'to' => WorkflowDefinition::getStateLabel($event->toState, $event->workflowName),
         ]);
 
         // Example implementation - customize based on your needs

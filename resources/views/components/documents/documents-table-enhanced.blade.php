@@ -134,7 +134,7 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <div class="flex items-center space-x-2">
                                         {{-- Primary Action: Context-aware based on document state --}}
-                                        @if($document->state_id == 1)
+                                        @if($document->isInDraftState())
                                             {{-- Submit for Draft Documents --}}
                                             <button
                                                 wire:click="submitDocument({{ $document->id }})"
@@ -154,7 +154,7 @@
                                         </button>
 
                                         {{-- Workflow Actions for Admin/Verifier --}}
-                                        @if($canManageWorkflow && method_exists($document, 'hasAvailableTransitions') && $document->hasAvailableTransitions() && $document->state_id != 1)
+                                        @if($document->hasAvailableTransitions() && !$document->isInDraftState())
                                             @php $transitions = $document->getFormattedTransitions(); @endphp
                                             
                                             @if(count($transitions) == 1)
@@ -233,7 +233,7 @@
                                         @endif
 
                                         {{-- Delete Action for Draft Documents --}}
-                                        @if($document->state_id == 1)
+                                        @if($document->isInDraftState())
                                             <button
                                                 wire:click="deleteDocument({{ $document->id }})"
                                                 wire:confirm="Apakah Anda yakin ingin menghapus dokumen ini?"

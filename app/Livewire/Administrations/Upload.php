@@ -214,26 +214,22 @@ class Upload extends WorkflowComponent
         try {
             $document = Document::findOrFail($documentId);
             
-            // Check if document is in draft state
-            if ($document->state_id !== 1) {
+            if (!$document->isInDraftState()) {
                 session()->flash('error', 'Dokumen tidak dalam status draft.');
                 return;
             }
 
-            // Check if user owns this document
-            $employee = $this->getEmployeeForDocuments();
+            $employee = $this->getEmployee();
             if ($document->employee_id !== $employee->id) {
                 session()->flash('error', 'Anda tidak memiliki akses untuk mengirim dokumen ini.');
                 return;
             }
 
-            // Check if user can perform this transition
             if (method_exists($document, 'canTransition') && !$document->canTransition(1)) {
                 session()->flash('error', 'Anda tidak memiliki akses untuk mengirim dokumen ini.');
                 return;
             }
 
-            // Submit the document (transition from DRAFT to PENDING)
             $context = [
                 'user_id' => Auth::id(),
                 'comment' => 'Dokumen dikirim untuk verifikasi',
@@ -241,14 +237,10 @@ class Upload extends WorkflowComponent
                 'user_name' => Auth::user()->name,
             ];
 
-            // Apply SUBMIT transition (transition ID 1)
             $document->applyTransition(1, $context);
-
-            $this->refreshData(); // Refresh the data to show updated status
             session()->flash('message', 'Dokumen berhasil dikirim untuk verifikasi.');
         } catch (\Exception $e) {
             Log::error('Error in submitDocument: ' . $e->getMessage());
-            Log::error('Stack trace: ' . $e->getTraceAsString());
             session()->flash('error', 'Terjadi kesalahan saat mengirim dokumen: ' . $e->getMessage());
         }
     }
@@ -539,6 +531,39 @@ class Upload extends WorkflowComponent
                 'activeStudyInfo' => null,
                 'canManageWorkflow' => false
             ]);
+        }
+    }
+
+    public function downloadDocument($documentId)
+    {
+        try {
+            $document = Document::findOrFail($documentId);
+            
+            if (!$document->isInVerifiedState()) {
+                session()->flash('error', 'Dokumen belum diverifikasi.');
+                return;
+            }
+
+            $employee = $this->getEmployee();
+            if ($document->employee_id !== $employee->id) {
+                session()->flash('error', 'Anda tidak memiliki akses untuk mengunduh dokumen ini.');
+                return;
+            }
+
+            if (!Storage::disk('public')->exists($document->file_path)) {
+                session()->flash('error', 'File dokumen tidak ditemukan.');
+                return;
+            }
+
+            $filePath = Storage::disk('public')->path($document->file_path);
+            if (!file_exists($filePath)) {
+                session()->flash('error', 'File dokumen tidak ditemukan.');
+                return;
+            }
+            return response()->download($filePath, $document->file_name);
+        } catch (\Exception $e) {
+            Log::error('Error in downloadDocument: ' . $e->getMessage());
+            session()->flash('error', 'Terjadi kesalahan saat mengunduh dokumen: ' . $e->getMessage());
         }
     }
 }

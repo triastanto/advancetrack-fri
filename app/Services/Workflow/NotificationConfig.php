@@ -4,92 +4,117 @@ namespace App\Services\Workflow;
 
 class NotificationConfig
 {
-    // Workflow transition constants
-    public const TRANSITION_SUBMIT = 1;
-    public const TRANSITION_VERIFY = 2;
-    public const TRANSITION_REJECT = 3;
-    public const TRANSITION_RESUBMIT = 4;
-
-    // Staff roles that can perform verification
-    public const VERIFICATION_STAFF_ROLES = ['hr_finance_staff', 'head_of_hr_finance', 'fri_vice_dean', 'head_of_study_program', 'head_of_research_group'];
-
-    // Email notification configuration
-    public const EMAIL_ENABLED_TRANSITIONS = [
-        self::TRANSITION_SUBMIT,
-        self::TRANSITION_VERIFY,
-        self::TRANSITION_REJECT,
-        self::TRANSITION_RESUBMIT,
-    ];
-
-    // In-app notification configuration
-    public const NOTIFY_DOCUMENT_OWNER_TRANSITIONS = [
-        self::TRANSITION_VERIFY,
-        self::TRANSITION_REJECT,
-    ];
-
-    public const NOTIFY_VERIFICATION_STAFF_TRANSITIONS = [
-        self::TRANSITION_SUBMIT,
-        self::TRANSITION_RESUBMIT,
-    ];
-
     /**
-     * Get staff roles from configuration with fallback
+     * Get notification configuration for a specific workflow
      */
-    public static function getStaffRoles(): array
+    public static function getWorkflowNotificationConfig(string $workflowName): array
     {
-        return config(
-            'workflows.workflows.document_verification.notifications.staff_roles',
-            self::VERIFICATION_STAFF_ROLES
-        );
+        return config("workflows.workflows.{$workflowName}.notifications", []);
     }
 
     /**
-     * Check if email should be sent for transition
+     * Get staff roles from configuration for a specific workflow
      */
-    public static function shouldSendEmail(int $transition): bool
+    public static function getStaffRoles(string $workflowName): array
     {
-        return in_array($transition, self::EMAIL_ENABLED_TRANSITIONS);
+        $config = self::getWorkflowNotificationConfig($workflowName);
+        return $config['staff_roles'] ?? $config['reviewer_roles'] ?? [];
     }
 
     /**
-     * Check if document owner should be notified for transition
+     * Check if email should be sent for transition in a specific workflow
      */
-    public static function shouldNotifyDocumentOwner(int $transition): bool
+    public static function shouldSendEmail(int $transition, string $workflowName): bool
     {
-        return in_array($transition, self::NOTIFY_DOCUMENT_OWNER_TRANSITIONS);
+        $config = self::getWorkflowNotificationConfig($workflowName);
+        $channels = $config['channels'] ?? [];
+        return in_array('mail', $channels);
     }
 
     /**
-     * Check if verification staff should be notified for transition
+     * Check if a specific event should trigger notifications
      */
-    public static function shouldNotifyVerificationStaff(int $transition): bool
+    public static function shouldNotifyForEvent(int $transition, string $eventType, string $workflowName): bool
     {
-        return in_array($transition, self::NOTIFY_VERIFICATION_STAFF_TRANSITIONS);
+        $events = self::getNotificationEvents($workflowName);
+        return in_array($eventType, $events[$transition] ?? []);
     }
 
     /**
-     * Get transition name for logging
+     * Get notification channels for a workflow
      */
-    public static function getTransitionName(int $transition): string
+    public static function getNotificationChannels(string $workflowName): array
     {
-        return match ($transition) {
-            self::TRANSITION_SUBMIT => 'SUBMIT',
-            self::TRANSITION_VERIFY => 'VERIFY',
-            self::TRANSITION_REJECT => 'REJECT',
-            self::TRANSITION_RESUBMIT => 'RESUBMIT',
-            default => 'UNKNOWN',
-        };
+        $config = self::getWorkflowNotificationConfig($workflowName);
+        return $config['channels'] ?? ['database'];
     }
 
     /**
-     * Get email queue name for transition (for future queue implementation)
+     * Get notification events configuration for a workflow
      */
-    public static function getEmailQueue(int $transition): string
+    public static function getNotificationEvents(string $workflowName): array
     {
-        return match ($transition) {
-            self::TRANSITION_SUBMIT, self::TRANSITION_RESUBMIT => 'notifications-staff',
-            self::TRANSITION_VERIFY, self::TRANSITION_REJECT => 'notifications-users',
-            default => 'notifications-default',
-        };
+        $config = self::getWorkflowNotificationConfig($workflowName);
+        return $config['events'] ?? [];
+    }
+
+    /**
+     * Get all notification recipients for a transition
+     */
+    public static function getNotificationRecipients(int $transition, string $workflowName): array
+    {
+        $events = self::getNotificationEvents($workflowName);
+        return $events[$transition] ?? [];
+    }
+
+    /**
+     * Check if model owner should be notified for transition
+     */
+    public static function shouldNotifyModelOwner(int $transition, string $workflowName): bool
+    {
+        return self::shouldNotifyForEvent($transition, 'document_owner', $workflowName) ||
+               self::shouldNotifyForEvent($transition, 'model_owner', $workflowName);
+    }
+
+    /**
+     * Check if staff/reviewers should be notified for transition
+     */
+    public static function shouldNotifyStaff(int $transition, string $workflowName): bool
+    {
+        return self::shouldNotifyForEvent($transition, 'staff', $workflowName) ||
+               self::shouldNotifyForEvent($transition, 'reviewers', $workflowName);
+    }
+
+    /**
+     * Get workflow-specific notification settings
+     */
+    public static function getWorkflowSettings(string $workflowName): array
+    {
+        $config = self::getWorkflowNotificationConfig($workflowName);
+        return [
+            'channels' => $config['channels'] ?? ['database'],
+            'auto_notify' => $config['auto_notify'] ?? true,
+            'email_templates' => $config['email_templates'] ?? [],
+            'notification_types' => $config['notification_types'] ?? ['in_app', 'email'],
+        ];
+    }
+
+    /**
+     * Check if workflow has auto-notification enabled
+     */
+    public static function isAutoNotifyEnabled(string $workflowName): bool
+    {
+        $config = self::getWorkflowNotificationConfig($workflowName);
+        return $config['auto_notify'] ?? true;
+    }
+
+    /**
+     * Get email template for a specific transition
+     */
+    public static function getEmailTemplate(int $transition, string $workflowName): ?string
+    {
+        $config = self::getWorkflowNotificationConfig($workflowName);
+        $templates = $config['email_templates'] ?? [];
+        return $templates[$transition] ?? null;
     }
 }

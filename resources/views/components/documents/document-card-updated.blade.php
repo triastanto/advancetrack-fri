@@ -6,7 +6,7 @@
         <h3 class="text-lg font-semibold text-gray-900">{{ $document->documentType->display_name }}</h3>
         
         {{-- Use workflow state instead of verification_status --}}
-        <x-workflow.workflow-status :state="$document->state_id" />
+        <x-workflow.workflow-status :document="$document" />
     </div>
 
     <div class="space-y-2 text-sm text-gray-600">

@@ -22,11 +22,46 @@ class NotifyStakeholders
      */
     public function handle(WorkflowTransitionApplied $event): void
     {
-        $this->logTransitionEvent($event);
+        $workflowName = $event->workflowName;
+        
+        if (!$workflowName) {
+            Log::error('Workflow name is required for notifications', [
+                'model' => get_class($event->model),
+                'model_id' => $event->model->id,
+            ]);
+            return;
+        }
 
-        // Handle Document-specific notifications
-        if ($event->model instanceof Document) {
-            $this->handleDocumentNotifications($event);
+        // Check if auto-notification is enabled for this workflow
+        if (!NotificationConfig::isAutoNotifyEnabled($workflowName)) {
+            Log::info('Auto-notification disabled for workflow', [
+                'workflow' => $workflowName,
+                'model' => get_class($event->model),
+                'model_id' => $event->model->id,
+            ]);
+            return;
+        }
+
+        $this->logTransitionEvent($event);
+        $this->handleWorkflowNotifications($event, $workflowName);
+    }
+
+    /**
+     * Handle workflow-specific notifications
+     */
+    private function handleWorkflowNotifications(WorkflowTransitionApplied $event, string $workflowName): void
+    {
+        $notificationData = $this->buildNotificationData($event, $workflowName);
+        $settings = NotificationConfig::getWorkflowSettings($workflowName);
+
+        // Send in-app notifications
+        if (in_array('in_app', $settings['notification_types'])) {
+            $this->sendInAppNotifications($event->model, $event->transition, $notificationData, $workflowName);
+        }
+
+        // Send email notifications
+        if (in_array('email', $settings['notification_types'])) {
+            $this->sendEmailNotifications($event->model, $event->transition, $notificationData, $workflowName);
         }
     }
 
@@ -35,160 +70,246 @@ class NotifyStakeholders
      */
     private function logTransitionEvent(WorkflowTransitionApplied $event): void
     {
-        Log::info('Notifying stakeholders after workflow transition', [
+        Log::info('Processing workflow notifications', [
+            'workflow' => $event->workflowName,
             'model' => get_class($event->model),
             'id' => $event->model->id,
-            'from' => WorkflowDefinition::getStateLabel($event->fromState),
-            'to' => WorkflowDefinition::getStateLabel($event->toState),
-            'transition' => WorkflowDefinition::getTransitionLabel($event->transition),
+            'from' => WorkflowDefinition::getStateLabel($event->fromState, $event->workflowName),
+            'to' => WorkflowDefinition::getStateLabel($event->toState, $event->workflowName),
+            'transition' => WorkflowDefinition::getTransitionLabel($event->transition, $event->workflowName),
             'user' => $event->context['user_name'] ?? 'System',
         ]);
     }
 
     /**
-     * Handle document-specific notifications
-     */
-    private function handleDocumentNotifications(WorkflowTransitionApplied $event): void
-    {
-        $document = $event->model;
-        $notificationData = $this->buildNotificationData($event);
-
-        // Send in-app notifications
-        $this->sendInAppNotifications($document, $event->transition, $notificationData);
-
-        // Send email notifications for critical transitions
-        $this->sendEmailNotifications($document, $event->transition, $notificationData);
-    }
-
-    /**
      * Build notification data array from event
      */
-    private function buildNotificationData(WorkflowTransitionApplied $event): array
+    private function buildNotificationData(WorkflowTransitionApplied $event, string $workflowName): array
     {
-        return [
-            'document_id' => $event->model->id,
-            'document_name' => $event->model->file_name,
-            'document_type' => $event->model->documentType->display_name ?? 'Unknown',
-            'from_state' => WorkflowDefinition::getStateLabel($event->fromState),
-            'to_state' => WorkflowDefinition::getStateLabel($event->toState),
-            'transition' => WorkflowDefinition::getTransitionLabel($event->transition),
+        $baseData = [
+            'workflow_name' => $workflowName,
+            'model_id' => $event->model->id,
+            'model_type' => get_class($event->model),
+            'from_state' => WorkflowDefinition::getStateLabel($event->fromState, $workflowName),
+            'to_state' => WorkflowDefinition::getStateLabel($event->toState, $workflowName),
+            'transition' => WorkflowDefinition::getTransitionLabel($event->transition, $workflowName),
             'comment' => $event->context['comment'] ?? null,
             'user_name' => $event->context['user_name'] ?? 'System',
             'user_id' => $event->context['user_id'] ?? null,
             'timestamp' => $event->context['timestamp'] ?? now(),
         ];
+
+        // Add model-specific data
+        if ($event->model instanceof Document) {
+            $baseData['document_id'] = $event->model->id;
+            $baseData['document_name'] = $event->model->file_name;
+            $baseData['document_type'] = $event->model->documentType->display_name ?? 'Unknown';
+        }
+
+        return $baseData;
     }
 
     /**
      * Send in-app notifications to relevant users
      */
-    private function sendInAppNotifications(Document $document, int $transition, array $notificationData): void
+    private function sendInAppNotifications($model, int $transition, array $notificationData, string $workflowName): void
     {
-        // Notify document owner
-        if ($this->shouldNotifyDocumentOwner($transition)) {
-            $this->notifyDocumentOwner($document, $notificationData);
+        // Notify model owner
+        if (NotificationConfig::shouldNotifyModelOwner($transition, $workflowName)) {
+            $this->notifyModelOwner($model, $notificationData);
         }
 
-        // Notify verification staff
-        if ($this->shouldNotifyVerificationStaff($transition)) {
-            $this->notifyVerificationStaff($notificationData);
+        // Notify staff/reviewers
+        if (NotificationConfig::shouldNotifyStaff($transition, $workflowName)) {
+            $this->notifyStaff($notificationData, $workflowName);
         }
     }
 
     /**
      * Send email notifications for critical transitions
      */
-    private function sendEmailNotifications(Document $document, int $transition, array $notificationData): void
+    private function sendEmailNotifications($model, int $transition, array $notificationData, string $workflowName): void
     {
-        if (!NotificationConfig::shouldSendEmail($transition)) {
+        if (!NotificationConfig::shouldSendEmail($transition, $workflowName)) {
             return;
         }
 
         try {
-            match ($transition) {
-                NotificationConfig::TRANSITION_SUBMIT => $this->sendDocumentSubmittedEmail($document, $notificationData),
-                NotificationConfig::TRANSITION_VERIFY => $this->sendDocumentVerifiedEmail($document, $notificationData),
-                NotificationConfig::TRANSITION_REJECT => $this->sendDocumentRejectedEmail($document, $notificationData),
-                NotificationConfig::TRANSITION_RESUBMIT => $this->sendDocumentResubmittedEmail($document, $notificationData),
-                default => $this->logUnhandledTransition($transition, $notificationData),
-            };
+            // Handle document-specific emails
+            if ($model instanceof Document) {
+                $this->handleDocumentEmails($model, $transition, $notificationData);
+            } else {
+                // Handle generic workflow emails
+                $this->handleGenericWorkflowEmails($model, $transition, $notificationData, $workflowName);
+            }
         } catch (\Exception $e) {
-            $this->logEmailFailure($document->id, $transition, $e);
+            $this->logEmailFailure($model->id, $transition, $e);
         }
     }
 
     /**
-     * Determine if email should be sent for this transition
+     * Handle document-specific email notifications
      */
-    private function shouldSendEmail(int $transition): bool
+    private function handleDocumentEmails(Document $document, int $transition, array $notificationData): void
     {
-        return NotificationConfig::shouldSendEmail($transition);
+        // Map transitions to email classes (this could be made configurable)
+        $emailMap = [
+            1 => DocumentSubmittedMail::class,    // SUBMIT
+            2 => DocumentVerifiedMail::class,     // VERIFY
+            3 => DocumentRejectedMail::class,     // REJECT
+            4 => DocumentResubmittedMail::class,  // RESUBMIT
+        ];
+
+        $emailClass = $emailMap[$transition] ?? null;
+        
+        if ($emailClass && class_exists($emailClass)) {
+            $this->sendEmail($document, $emailClass, $notificationData);
+        } else {
+            $this->logUnhandledTransition($transition, $notificationData);
+        }
     }
 
     /**
-     * Determine if document owner should be notified
+     * Handle generic workflow email notifications
      */
-    private function shouldNotifyDocumentOwner(int $transition): bool
+    private function handleGenericWorkflowEmails($model, int $transition, array $notificationData, string $workflowName): void
     {
-        return NotificationConfig::shouldNotifyDocumentOwner($transition);
+        $emailTemplate = NotificationConfig::getEmailTemplate($transition, $workflowName);
+        
+        if ($emailTemplate) {
+            // Send using custom email template
+            $this->sendCustomEmail($model, $emailTemplate, $notificationData);
+        } else {
+            // Log generic notification
+            Log::info('Generic workflow email notification', [
+                'workflow' => $workflowName,
+                'transition' => $transition,
+                'model' => get_class($model),
+                'model_id' => $model->id,
+            ]);
+        }
     }
 
     /**
-     * Determine if verification staff should be notified
+     * Send email using specified mail class
      */
-    private function shouldNotifyVerificationStaff(int $transition): bool
+    private function sendEmail($model, string $mailClass, array $notificationData): void
     {
-        return NotificationConfig::shouldNotifyVerificationStaff($transition);
+        $recipients = $this->getEmailRecipients($model, $notificationData);
+        
+        foreach ($recipients as $recipient) {
+            Mail::to($recipient)->send(new $mailClass($model, $notificationData));
+        }
     }
 
     /**
-     * Notify document owner
+     * Send custom email using template
      */
-    private function notifyDocumentOwner(Document $document, array $notificationData): void
+    private function sendCustomEmail($model, string $template, array $notificationData): void
     {
-        if ($document->employee && $document->employee->user) {
+        $recipients = $this->getEmailRecipients($model, $notificationData);
+        
+        foreach ($recipients as $recipient) {
+            Mail::send($template, $notificationData, function ($message) use ($recipient, $notificationData) {
+                $message->to($recipient)
+                        ->subject("Workflow Update: {$notificationData['transition']}");
+            });
+        }
+    }
+
+    /**
+     * Get email recipients for the model
+     */
+    private function getEmailRecipients($model, array $notificationData): array
+    {
+        $recipients = [];
+
+        // Add model owner
+        $owner = $this->getModelOwner($model);
+        if ($owner && $owner->email) {
+            $recipients[] = $owner->email;
+        }
+
+        // Add staff emails
+        $staffUsers = $this->getStaffUsers($notificationData['workflow_name']);
+        foreach ($staffUsers as $staffUser) {
+            if ($staffUser->email) {
+                $recipients[] = $staffUser->email;
+            }
+        }
+
+        return array_unique($recipients);
+    }
+
+    /**
+     * Notify model owner
+     */
+    private function notifyModelOwner($model, array $notificationData): void
+    {
+        $owner = $this->getModelOwner($model);
+        
+        if ($owner) {
             $this->sendNotificationToUser(
-                $document->employee->user,
-                'document_workflow_updated',
+                $owner,
+                'workflow_updated',
                 $notificationData
             );
         }
     }
 
     /**
-     * Notify verification staff
+     * Get model owner (supports different model types)
      */
-    private function notifyVerificationStaff(array $notificationData): void
+    private function getModelOwner($model): ?User
     {
-        $staffUsers = $this->getVerificationStaff();
+        // Handle Document model
+        if ($model instanceof Document && $model->employee && $model->employee->user) {
+            return $model->employee->user;
+        }
+
+        // Handle other models with user relationship
+        if (method_exists($model, 'user') && $model->user) {
+            return $model->user;
+        }
+
+        // Handle models with owner relationship
+        if (method_exists($model, 'owner') && $model->owner) {
+            return $model->owner;
+        }
+
+        return null;
+    }
+
+    /**
+     * Notify staff/reviewers
+     */
+    private function notifyStaff(array $notificationData, string $workflowName): void
+    {
+        $staffUsers = $this->getStaffUsers($workflowName);
         
         foreach ($staffUsers as $staffUser) {
             $this->sendNotificationToUser(
                 $staffUser,
-                'document_workflow_action_required',
+                'workflow_action_required',
                 $notificationData
             );
         }
     }
 
     /**
-     * Get verification staff users
+     * Get staff users for a specific workflow
      */
-    private function getVerificationStaff(): Collection
+    private function getStaffUsers(string $workflowName): Collection
     {
-        $staffRoles = $this->getStaffRolesFromConfig();
+        $staffRoles = NotificationConfig::getStaffRoles($workflowName);
         
+        if (empty($staffRoles)) {
+            return collect();
+        }
+
         return User::whereHas('employee', function ($query) use ($staffRoles) {
             $query->whereIn('role', $staffRoles);
         })->get();
-    }
-
-    /**
-     * Get staff roles from configuration
-     */
-    private function getStaffRolesFromConfig(): array
-    {
-        return NotificationConfig::getStaffRoles();
     }
 
     /**
@@ -199,13 +320,14 @@ class NotifyStakeholders
         try {
             // Here you would implement your notification system
             // For example, using Laravel's notification system:
-            // $user->notify(new DocumentWorkflowNotification($type, $data));
+            // $user->notify(new WorkflowNotification($type, $data));
 
             Log::info('In-app notification sent', [
                 'user_id' => $user->id,
                 'user_name' => $user->name,
                 'type' => $type,
-                'document_id' => $data['document_id'] ?? null,
+                'workflow' => $data['workflow_name'] ?? 'unknown',
+                'model_id' => $data['model_id'] ?? null,
             ]);
         } catch (\Exception $e) {
             Log::error('Failed to send in-app notification', [
@@ -224,177 +346,21 @@ class NotifyStakeholders
         Log::info('Unhandled email notification transition', [
             'transition_id' => $transition,
             'transition_name' => $notificationData['transition'],
-            'document_id' => $notificationData['document_id'],
+            'workflow' => $notificationData['workflow_name'] ?? 'unknown',
+            'model_id' => $notificationData['model_id'],
         ]);
     }
 
     /**
      * Log email sending failure
      */
-    private function logEmailFailure(int $documentId, int $transition, \Exception $e): void
+    private function logEmailFailure(int $modelId, int $transition, \Exception $e): void
     {
         Log::error('Failed to send email notification', [
-            'document_id' => $documentId,
+            'model_id' => $modelId,
             'transition' => $transition,
             'error' => $e->getMessage(),
             'trace' => $e->getTraceAsString(),
         ]);
-    }
-
-    /**
-     * Send email notification when document is submitted
-     */
-    private function sendDocumentSubmittedEmail(Document $document, array $notificationData): void
-    {
-        $staffUsers = $this->getVerificationStaff();
-        
-        if ($staffUsers->isEmpty()) {
-            Log::warning('No verification staff found for document submission notification', [
-                'document_id' => $document->id,
-            ]);
-            return;
-        }
-
-        foreach ($staffUsers as $staffUser) {
-            if (!$staffUser->email) {
-                Log::warning('Staff user has no email address', [
-                    'user_id' => $staffUser->id,
-                    'document_id' => $document->id,
-                ]);
-                continue;
-            }
-
-            try {
-                Mail::to($staffUser->email)->send(new DocumentSubmittedMail($document, $notificationData));
-                
-                Log::info('Document submission email sent', [
-                    'document_id' => $document->id,
-                    'recipient' => $staffUser->email,
-                    'recipient_name' => $staffUser->name,
-                    'recipient_role' => $staffUser->employee->role ?? 'unknown',
-                ]);
-            } catch (\Exception $e) {
-                Log::error('Failed to send document submission email to individual recipient', [
-                    'document_id' => $document->id,
-                    'recipient' => $staffUser->email,
-                    'error' => $e->getMessage(),
-                ]);
-            }
-        }
-    }
-
-    /**
-     * Send email notification when document is verified/approved
-     */
-    private function sendDocumentVerifiedEmail(Document $document, array $notificationData): void
-    {
-        $recipient = $this->getDocumentOwnerEmail($document);
-        
-        if (!$recipient) {
-            Log::warning('Cannot send document verification email - no valid recipient', [
-                'document_id' => $document->id,
-                'employee_exists' => $document->employee ? 'yes' : 'no',
-                'user_exists' => $document->employee && $document->employee->user ? 'yes' : 'no',
-                'email_exists' => $document->employee && $document->employee->user && $document->employee->user->email ? 'yes' : 'no',
-            ]);
-            return;
-        }
-
-        Mail::to($recipient['email'])->send(new DocumentVerifiedMail($document, $notificationData));
-        
-        Log::info('Document verification email sent', [
-            'document_id' => $document->id,
-            'recipient' => $recipient['email'],
-            'recipient_name' => $recipient['name'],
-            'verifying_staff' => $notificationData['user_name'] ?? 'Unknown',
-        ]);
-    }
-
-    /**
-     * Send email notification when document is rejected
-     */
-    private function sendDocumentRejectedEmail(Document $document, array $notificationData): void
-    {
-        $recipient = $this->getDocumentOwnerEmail($document);
-        
-        if (!$recipient) {
-            Log::warning('Cannot send document rejection email - no valid recipient', [
-                'document_id' => $document->id,
-                'employee_exists' => $document->employee ? 'yes' : 'no',
-                'user_exists' => $document->employee && $document->employee->user ? 'yes' : 'no',
-                'email_exists' => $document->employee && $document->employee->user && $document->employee->user->email ? 'yes' : 'no',
-            ]);
-            return;
-        }
-
-        Mail::to($recipient['email'])->send(new DocumentRejectedMail($document, $notificationData));
-        
-        Log::info('Document rejection email sent', [
-            'document_id' => $document->id,
-            'recipient' => $recipient['email'],
-            'recipient_name' => $recipient['name'],
-            'rejecting_staff' => $notificationData['user_name'] ?? 'Unknown',
-            'rejection_reason' => $notificationData['comment'] ?? 'No reason provided',
-        ]);
-    }
-
-    /**
-     * Send email notification when document is resubmitted
-     */
-    private function sendDocumentResubmittedEmail(Document $document, array $notificationData): void
-    {
-        $staffUsers = $this->getVerificationStaff();
-        
-        if ($staffUsers->isEmpty()) {
-            Log::warning('No verification staff found for document resubmission notification', [
-                'document_id' => $document->id,
-            ]);
-            return;
-        }
-
-        foreach ($staffUsers as $staffUser) {
-            if (!$staffUser->email) {
-                Log::warning('Staff user has no email address', [
-                    'user_id' => $staffUser->id,
-                    'document_id' => $document->id,
-                ]);
-                continue;
-            }
-
-            try {
-                Mail::to($staffUser->email)->send(new DocumentResubmittedMail($document, $notificationData));
-                
-                Log::info('Document resubmission email sent', [
-                    'document_id' => $document->id,
-                    'recipient' => $staffUser->email,
-                    'recipient_name' => $staffUser->name,
-                    'recipient_role' => $staffUser->employee->role ?? 'unknown',
-                    'resubmitting_employee' => $document->employee->user->name ?? 'Unknown',
-                ]);
-            } catch (\Exception $e) {
-                Log::error('Failed to send document resubmission email to individual recipient', [
-                    'document_id' => $document->id,
-                    'recipient' => $staffUser->email,
-                    'error' => $e->getMessage(),
-                ]);
-            }
-        }
-    }
-
-    /**
-     * Get document owner email information
-     */
-    private function getDocumentOwnerEmail(Document $document): ?array
-    {
-        if (!$document->employee || 
-            !$document->employee->user || 
-            !$document->employee->user->email) {
-            return null;
-        }
-
-        return [
-            'email' => $document->employee->user->email,
-            'name' => $document->employee->user->name,
-        ];
     }
 }

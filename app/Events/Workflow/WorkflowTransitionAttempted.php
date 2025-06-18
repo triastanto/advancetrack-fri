@@ -15,6 +15,7 @@ class WorkflowTransitionAttempted
         public int $fromState,
         public int $toState,
         public int $transition,
-        public array $context = []
+        public array $context,
+        public string $workflowName
     ) {}
 }

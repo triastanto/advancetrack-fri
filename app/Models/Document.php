@@ -10,12 +10,10 @@ class Document extends Model
 {
     use HasFactory, HasWorkflow;
 
-    protected string $workflowName = 'document_verification';
-
     protected $guarded = [];
 
     protected $casts = [
-        'state_id' => 'integer',
+        'workflow_state' => 'integer',
     ];
 
     public function employee()
@@ -33,7 +31,7 @@ class Document extends Model
      */
     public function getVerificationStatusAttribute(): string
     {
-        return match($this->state_id) {
+        return match($this->getCurrentState()) {
             1 => 'draft',      // DRAFT
             2 => 'pending',    // PENDING
             3 => 'verified',   // VERIFIED
@@ -79,12 +77,55 @@ class Document extends Model
      */
     public function getFormattedStatusAttribute(): string
     {
-        return match($this->state_id) {
+        return match($this->getCurrentState()) {
             1 => 'Draft',
             2 => 'Menunggu Verifikasi',
             3 => 'Terverifikasi',
             4 => 'Ditolak',
             default => 'Draft'
         };
+    }
+
+    /**
+     * Get the workflow name for this model
+     */
+    public function getWorkflowName(): string
+    {
+        return 'document_verification';
+    }
+
+    /**
+     * Get user roles for workflow permissions
+     */
+    public function getUserRoles(): array
+    {
+        if (!\Illuminate\Support\Facades\Auth::check()) {
+            return [];
+        }
+
+        $user = \Illuminate\Support\Facades\Auth::user();
+        $roles = [];
+
+        // Check user roles based on the authentication system
+        if ($user->hasRole('lecturer')) {
+            $roles[] = 'lecturer';
+        }
+        if ($user->hasRole('hr_finance_staff')) {
+            $roles[] = 'hr_finance_staff';
+        }
+        if ($user->hasRole('head_of_hr_finance')) {
+            $roles[] = 'head_of_hr_finance';
+        }
+        if ($user->hasRole('fri_vice_dean')) {
+            $roles[] = 'fri_vice_dean';
+        }
+        if ($user->hasRole('head_of_study_program')) {
+            $roles[] = 'head_of_study_program';
+        }
+        if ($user->hasRole('head_of_research_group')) {
+            $roles[] = 'head_of_research_group';
+        }
+
+        return $roles;
     }
 }

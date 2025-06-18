@@ -51,7 +51,7 @@ class WorkflowShowCommand extends Command
 
         $this->info('Configuration:');
         $this->table(['Setting', 'Value'], [
-            ['Initial State', $config->getInitialState()->name],
+            ['Initial State', $config->getInitialState()],
             ['Track History', $config->shouldTrackHistory() ? 'Yes' : 'No'],
             ['Auto Save', $config->shouldAutoSave() ? 'Yes' : 'No'],
             ['Strict Mode', $config->isStrictMode() ? 'Yes' : 'No'],

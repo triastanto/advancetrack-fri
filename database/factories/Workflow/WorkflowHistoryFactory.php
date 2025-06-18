@@ -17,10 +17,11 @@ class WorkflowHistoryFactory extends Factory
      */
     public function definition(): array
     {
+        // Default to document workflow, but should use forWorkflow() method to specify
         return [
             'workflowable_type' => 'App\\Models\\Document',
             'workflowable_id' => 1,
-            'workflow_name' => 'document_verification',
+            'workflow_name' => 'document_verification', // Default - use forWorkflow() to specify
             'from_state' => 1, // DRAFT
             'to_state' => 2,   // PENDING
             'transition' => 1, // SUBMIT

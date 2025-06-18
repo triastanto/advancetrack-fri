@@ -136,7 +136,7 @@ class SemesterReports extends WorkflowComponent
         try {
             $document = Document::findOrFail($documentId);
             
-            if ($document->state_id !== 1) {
+            if (!$document->isInDraftState()) {
                 session()->flash('error', 'Dokumen tidak dalam status draft.');
                 return;
             }

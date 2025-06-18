@@ -39,7 +39,7 @@ class WorkflowConfiguration
 
     public function getInitialState(): int
     {
-        return $this->config['initial_state'] ?? WorkflowDefinition::getInitialState();
+        return $this->config['initial_state'] ?? WorkflowDefinition::getInitialState($this->name);
     }
 
     public function shouldTrackHistory(): bool
@@ -107,7 +107,6 @@ class WorkflowConfiguration
                     foreach ($minTimes as $config => $minutes) {
                         // Handle different configuration formats:
                         // Format 1: "transition_from_to" => minutes
-                        // Format 2: stateId => minutes (legacy, needs transition info)
                         if (is_string($config) && str_contains($config, '_')) {
                             $parts = explode('_', $config);
                             if (count($parts) === 3) {
@@ -115,8 +114,6 @@ class WorkflowConfiguration
                                 $guard->setMinTimeInState((int)$transitionId, (int)$fromState, (int)$toState, $minutes);
                             }
                         }
-                        // For legacy format, we'll skip this configuration as it's incomplete
-                        // TODO: Update workflow config to use proper format
                     }
                 }
 
@@ -132,37 +129,6 @@ class WorkflowConfiguration
                 throw new \RuntimeException('TimeBasedWorkflowGuard is not registered in the service container. Please register it in WorkflowServiceProvider.');
             }
         }
-    }
-
-    // Legacy methods for backward compatibility
-    public function addGuard($guard): self
-    {
-        $this->guards[] = $guard;
-        return $this;
-    }
-
-    public function enableHistoryTracking(): self
-    {
-        $this->config['settings']['track_history'] = true;
-        return $this;
-    }
-
-    public function setAutoSave(bool $autoSave): self
-    {
-        $this->config['settings']['auto_save'] = $autoSave;
-        return $this;
-    }
-
-    public function setStrictMode(bool $strict): self
-    {
-        $this->config['settings']['strict_mode'] = $strict;
-        return $this;
-    }
-
-    public function setSetting(string $key, mixed $value): self
-    {
-        $this->config['settings'][$key] = $value;
-        return $this;
     }
 
     /**

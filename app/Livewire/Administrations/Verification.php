@@ -9,6 +9,7 @@ use App\Models\DocumentType;
 use App\Models\Employee;
 use App\Models\StudyProgram;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class Verification extends WorkflowComponent
 {
@@ -53,11 +54,17 @@ class Verification extends WorkflowComponent
         $documentTypes = DocumentType::orderBy('display_name')->get();
         $studyPrograms = StudyProgram::all();
 
+        // Debug information
+        $currentUser = Auth::user();
+        $userRoles = $currentUser ? $currentUser->employee?->role : 'No role';
+        $canManageWorkflow = $this->canUserManageWorkflow();
+
         return view('livewire.administrations.verification', [
             'documents' => $documents,
             'documentTypes' => $documentTypes,
             'studyPrograms' => $studyPrograms,
-            'canManageWorkflow' => $this->canUserManageWorkflow(),
+            'canManageWorkflow' => $canManageWorkflow,
+            'userRoles' => $userRoles,
         ]);
     }
 
@@ -75,11 +82,34 @@ class Verification extends WorkflowComponent
         // Check if user is authenticated and has employee data
         $user = Auth::user();
         if (!$user || !$user->employee) {
-            session()->flash('error', 'Akses tidak diizinkan.');
+            $errorMsg = 'Akses tidak diizinkan. User tidak memiliki data employee.';
+            Log::warning('Verification attempt failed: No employee data', [
+                'user_id' => $user?->id,
+                'user_name' => $user?->name,
+                'document_id' => $this->selectedDocument->id,
+            ]);
+            session()->flash('error', $errorMsg);
             return;
         }
 
         try {
+            // Check if user can perform the transition
+            if (!$this->selectedDocument->canTransition(2)) {
+                $blockingReason = $this->selectedDocument->getTransitionBlockingReason(2);
+                $errorMsg = 'Tidak dapat melakukan verifikasi: ' . $blockingReason;
+                
+                Log::warning('Verification attempt blocked', [
+                    'user_id' => $user->id,
+                    'user_name' => $user->name,
+                    'user_role' => $user->employee->role,
+                    'document_id' => $this->selectedDocument->id,
+                    'blocking_reason' => $blockingReason,
+                ]);
+                
+                session()->flash('error', $errorMsg);
+                return;
+            }
+
             // Use workflow transition instead of direct status update
             $context = [
                 'user_id' => Auth::id(),
@@ -94,7 +124,18 @@ class Verification extends WorkflowComponent
             $this->showModal = false;
             session()->flash('success', 'Dokumen berhasil diverifikasi.');
         } catch (\Exception $e) {
-            session()->flash('error', 'Terjadi kesalahan: ' . $e->getMessage());
+            $errorMsg = 'Terjadi kesalahan: ' . $e->getMessage();
+            
+            Log::error('Verification attempt failed with exception', [
+                'user_id' => $user->id,
+                'user_name' => $user->name,
+                'user_role' => $user->employee->role,
+                'document_id' => $this->selectedDocument->id,
+                'exception' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            
+            session()->flash('error', $errorMsg);
         }
     }
 
@@ -106,7 +147,37 @@ class Verification extends WorkflowComponent
             'verificationNote' => 'required|string|min:5',
         ]);
 
+        // Check if user is authenticated and has employee data
+        $user = Auth::user();
+        if (!$user || !$user->employee) {
+            $errorMsg = 'Akses tidak diizinkan. User tidak memiliki data employee.';
+            Log::warning('Rejection attempt failed: No employee data', [
+                'user_id' => $user?->id,
+                'user_name' => $user?->name,
+                'document_id' => $this->selectedDocument->id,
+            ]);
+            session()->flash('error', $errorMsg);
+            return;
+        }
+
         try {
+            // Check if user can perform the transition
+            if (!$this->selectedDocument->canTransition(3)) {
+                $blockingReason = $this->selectedDocument->getTransitionBlockingReason(3);
+                $errorMsg = 'Tidak dapat melakukan penolakan: ' . $blockingReason;
+                
+                Log::warning('Rejection attempt blocked', [
+                    'user_id' => $user->id,
+                    'user_name' => $user->name,
+                    'user_role' => $user->employee->role,
+                    'document_id' => $this->selectedDocument->id,
+                    'blocking_reason' => $blockingReason,
+                ]);
+                
+                session()->flash('error', $errorMsg);
+                return;
+            }
+
             // Use workflow transition instead of direct status update
             $context = [
                 'user_id' => Auth::id(),
@@ -121,7 +192,18 @@ class Verification extends WorkflowComponent
             $this->showModal = false;
             session()->flash('error', 'Dokumen ditolak.');
         } catch (\Exception $e) {
-            session()->flash('error', 'Terjadi kesalahan: ' . $e->getMessage());
+            $errorMsg = 'Terjadi kesalahan: ' . $e->getMessage();
+            
+            Log::error('Rejection attempt failed with exception', [
+                'user_id' => $user->id,
+                'user_name' => $user->name,
+                'user_role' => $user->employee->role,
+                'document_id' => $this->selectedDocument->id,
+                'exception' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            
+            session()->flash('error', $errorMsg);
         }
     }
 

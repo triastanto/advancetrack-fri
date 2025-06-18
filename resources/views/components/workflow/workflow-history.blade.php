@@ -14,9 +14,10 @@
                         <div class="relative flex space-x-3">
                             <div>
                                 @php
+                                    $workflowName = $document->getWorkflowName();
                                     $stateInfo = [
-                                        'color' => config("workflows.states.{$history->to_state}.color", 'gray'),
-                                        'icon' => config("workflows.states.{$history->to_state}.icon", 'question-circle')
+                                        'color' => \App\Services\Workflow\WorkflowDefinition::getStateColor($history->to_state, $workflowName),
+                                        'icon' => \App\Services\Workflow\WorkflowDefinition::getStateIcon($history->to_state, $workflowName)
                                     ];
                                     $iconClass = match($stateInfo['color']) {
                                         'warning' => 'text-yellow-400',
@@ -46,13 +47,13 @@
                                 <div>
                                     <p class="text-sm text-gray-500">
                                         @if($history->from_state)
-                                            Berubah dari <span class="font-medium text-gray-900">{{ config("workflows.states.{$history->from_state}.label") }}</span>
-                                            ke <span class="font-medium text-gray-900">{{ config("workflows.states.{$history->to_state}.label") }}</span>
+                                            Berubah dari <span class="font-medium text-gray-900">{{ \App\Services\Workflow\WorkflowDefinition::getStateLabel($history->from_state, $workflowName) }}</span>
+                                            ke <span class="font-medium text-gray-900">{{ \App\Services\Workflow\WorkflowDefinition::getStateLabel($history->to_state, $workflowName) }}</span>
                                         @else
-                                            Diinisialisasi ke <span class="font-medium text-gray-900">{{ config("workflows.states.{$history->to_state}.label") }}</span>
+                                            Diinisialisasi ke <span class="font-medium text-gray-900">{{ \App\Services\Workflow\WorkflowDefinition::getStateLabel($history->to_state, $workflowName) }}</span>
                                         @endif
                                         @if($history->transition)
-                                            melalui <span class="font-medium text-gray-900">{{ config("workflows.transitions.{$history->transition}.label") }}</span>
+                                            melalui <span class="font-medium text-gray-900">{{ \App\Services\Workflow\WorkflowDefinition::getTransitionLabel($history->transition, $workflowName) }}</span>
                                         @endif
                                     </p>
                                     @if($history->user)

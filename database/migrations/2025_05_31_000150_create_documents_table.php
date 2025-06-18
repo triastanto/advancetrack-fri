@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('document_type_id')->constrained('document_types')->onDelete('restrict');
             $table->string('file_name');
             $table->string('file_path');
-            $table->unsignedBigInteger('state_id')->default(1); // Default to DRAFT state for workflow
+            $table->unsignedBigInteger('workflow_state')->default(1); // Default to DRAFT state for workflow
             $table->integer('semester')->nullable(); // Semester number (1, 2, 3, etc.)
             $table->year('year')->nullable();
             $table->date('upload_date')->nullable();

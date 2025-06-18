@@ -5,11 +5,22 @@ namespace App\Traits;
 use App\Models\Workflow\WorkflowHistory;
 use App\Services\Workflow\WorkflowEngine;
 use App\Services\Workflow\WorkflowManager;
+use App\Services\Workflow\WorkflowDefinition;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 trait HasWorkflow
 {
-    protected string $workflowName = 'document_verification';
+    /**
+     * Boot the HasWorkflow trait
+     */
+    public static function bootHasWorkflow()
+    {
+        static::creating(function ($model) {
+            if (!$model->workflow_state) {
+                $model->workflow_state = $model->getInitialState();
+            }
+        });
+    }
 
     public function workflowHistory(): MorphMany
     {
@@ -23,7 +34,11 @@ trait HasWorkflow
 
     public function getWorkflowName(): string
     {
-        return $this->workflowName ?? 'document_verification';
+        // Models using this trait must override this method
+        // to specify their workflow name
+        throw new \RuntimeException(
+            'Model ' . get_class($this) . ' must override getWorkflowName() method to specify its workflow name.'
+        );
     }
 
     public function initializeWorkflow(): void
@@ -43,7 +58,7 @@ trait HasWorkflow
 
     public function getCurrentState(): int
     {
-        return $this->state_id ?? $this->getWorkflowEngine()->getConfiguration()->getInitialState();
+        return $this->workflow_state ?? $this->getWorkflowEngine()->getConfiguration()->getInitialState();
     }
 
     public function isInState(int $stateId): bool
@@ -77,12 +92,14 @@ trait HasWorkflow
     public function getWorkflowStateInfo(): array
     {
         $stateId = $this->getCurrentState();
+        $workflowName = $this->getWorkflowName();
+        
         return [
             'id' => $stateId,
-            'name' => config("workflows.states.{$stateId}.name", 'UNKNOWN'),
-            'label' => config("workflows.states.{$stateId}.label", 'Unknown'),
-            'color' => config("workflows.states.{$stateId}.color", 'secondary'),
-            'icon' => config("workflows.states.{$stateId}.icon", 'question-circle'),
+            'name' => WorkflowDefinition::getState($stateId, $workflowName)['name'] ?? 'UNKNOWN',
+            'label' => WorkflowDefinition::getStateLabel($stateId, $workflowName),
+            'color' => WorkflowDefinition::getStateColor($stateId, $workflowName),
+            'icon' => WorkflowDefinition::getStateIcon($stateId, $workflowName),
         ];
     }
 
@@ -101,6 +118,7 @@ trait HasWorkflow
     {
         $transitions = $this->getAvailableTransitions();
         $formatted = [];
+        $workflowName = $this->getWorkflowName();
 
         foreach ($transitions as $id => $transition) {
             $formatted[] = [
@@ -122,7 +140,7 @@ trait HasWorkflow
     public function isInTerminalState(): bool
     {
         $stateId = $this->getCurrentState();
-        return config("workflows.states.{$stateId}.is_terminal", false);
+        return WorkflowDefinition::isTerminalState($stateId, $this->getWorkflowName());
     }
 
     /**
@@ -130,7 +148,8 @@ trait HasWorkflow
      */
     public function getTransitionBlockingReason(int $transitionId): ?string
     {
-        $transition = config("workflows.transitions.{$transitionId}");
+        $workflowName = $this->getWorkflowName();
+        $transition = WorkflowDefinition::getTransition($transitionId, $workflowName);
         
         if (!$transition) {
             return 'Transisi tidak valid.';
@@ -151,7 +170,7 @@ trait HasWorkflow
      */
     public function getTransitionInfo(int $transitionId): ?array
     {
-        return config("workflows.transitions.{$transitionId}");
+        return WorkflowDefinition::getTransition($transitionId, $this->getWorkflowName());
     }
 
     /**
@@ -159,7 +178,7 @@ trait HasWorkflow
      */
     public function transitionRequiresComment(int $transitionId): bool
     {
-        return config("workflows.transitions.{$transitionId}.requires_comment", false);
+        return WorkflowDefinition::transitionRequiresComment($transitionId, $this->getWorkflowName());
     }
 
     /**
@@ -184,6 +203,67 @@ trait HasWorkflow
         }
 
         return $formatted;
+    }
+
+    /**
+     * Check if the model is in draft state (workflow-agnostic)
+     */
+    public function isInDraftState(): bool
+    {
+        $workflowName = $this->getWorkflowName();
+        return WorkflowDefinition::isDraftState($this->getCurrentState(), $workflowName);
+    }
+
+    /**
+     * Check if the model is in pending state (workflow-agnostic)
+     */
+    public function isInPendingState(): bool
+    {
+        $workflowName = $this->getWorkflowName();
+        return WorkflowDefinition::isPendingState($this->getCurrentState(), $workflowName);
+    }
+
+    /**
+     * Check if the model is in verified/approved state (workflow-agnostic)
+     */
+    public function isInVerifiedState(): bool
+    {
+        $workflowName = $this->getWorkflowName();
+        return WorkflowDefinition::isVerifiedState($this->getCurrentState(), $workflowName);
+    }
+
+    /**
+     * Check if the model is in rejected state (workflow-agnostic)
+     */
+    public function isInRejectedState(): bool
+    {
+        $workflowName = $this->getWorkflowName();
+        return WorkflowDefinition::isRejectedState($this->getCurrentState(), $workflowName);
+    }
+
+    /**
+     * Check if the model can be submitted (workflow-agnostic)
+     */
+    public function canBeSubmitted(): bool
+    {
+        return $this->isInDraftState() && $this->hasAvailableTransitions();
+    }
+
+    /**
+     * Check if the model can be deleted (workflow-agnostic)
+     */
+    public function canBeDeleted(): bool
+    {
+        return $this->isInDraftState();
+    }
+
+    /**
+     * Get workflow state type (draft, pending, verified, rejected, etc.)
+     */
+    public function getWorkflowStateType(): string
+    {
+        $workflowName = $this->getWorkflowName();
+        return WorkflowDefinition::getStateType($this->getCurrentState(), $workflowName);
     }
 
     public function getInitialState(): int

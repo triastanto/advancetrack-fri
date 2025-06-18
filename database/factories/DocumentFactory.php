@@ -25,7 +25,7 @@ class DocumentFactory extends Factory
             'document_type_id' => $documentType->id,
             'file_name' => $this->faker->lexify('document_????.pdf'),
             'file_path' => 'uploads/' . $this->faker->uuid . '.pdf',
-            'state_id' => $this->faker->randomElement($workflowStates), // Use workflow states instead
+            'workflow_state' => $this->faker->randomElement($workflowStates), // Use workflow states instead
             'created_at' => $this->faker->dateTimeThisYear(),
         ];
 

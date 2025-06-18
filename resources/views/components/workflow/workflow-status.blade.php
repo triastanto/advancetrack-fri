@@ -1,80 +1,76 @@
-@props(['document', 'canManageWorkflow' => false, 'showButtonsInline' => true])
+@props(['model', 'document'])
 
-<div class="flex items-center space-x-2">
-    {{-- Workflow State Badge --}}
-    @php
-        $stateInfo = $document->getWorkflowStateInfo();
-        $badgeClass = match($stateInfo['color']) {
-            'warning' => 'bg-yellow-100 text-yellow-800',
-            'success' => 'bg-green-100 text-green-800',
-            'info' => 'bg-blue-100 text-blue-800',
-            'secondary' => 'bg-gray-100 text-gray-800',
-            'danger' => 'bg-red-100 text-red-800',
-            default => 'bg-gray-100 text-gray-800'
-        };
-    @endphp
+@php
+    // Support both 'model' and 'document' props for backward compatibility
+    $workflowModel = $model ?? $document;
+    
+    if (!$workflowModel) {
+        throw new Exception('Either "model" or "document" prop must be provided to workflow-status component');
+    }
+    
+    $stateInfo = $workflowModel->getWorkflowStateInfo();
+    $workflowName = $workflowModel->getWorkflowName();
+    $workflowConfig = config("workflows.workflows.{$workflowName}");
+    $workflowLabel = $workflowConfig['name'] ?? ucfirst(str_replace('_', ' ', $workflowName));
+    
+    // Map semantic color names to Tailwind CSS color names
+    $colorMap = [
+        'secondary' => 'gray',
+        'warning' => 'yellow',
+        'success' => 'green',
+        'danger' => 'red',
+        'info' => 'blue',
+        'primary' => 'blue',
+    ];
+    
+    $iconColor = $colorMap[$stateInfo['color']] ?? $stateInfo['color'];
+@endphp
 
-    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $badgeClass }}">
-        @switch($stateInfo['icon'])
-            @case('clock')
-                <x-heroicon-s-clock class="w-3 h-3 mr-1" />
-                @break
-            @case('check-circle')
+<div class="workflow-status">
+    <div class="flex items-center space-x-2">
+        <div class="text-sm text-gray-600">{{ $workflowLabel }}:</div>
+        <div class="flex items-center space-x-1">
+            @switch($stateInfo['icon'])
+                @case('clock')
+                    <x-heroicon-o-clock class="w-4 h-4 text-{{ $iconColor }}-500" />
+                    @break
+                @case('check-circle')
+                    <x-heroicon-o-check-circle class="w-4 h-4 text-{{ $iconColor }}-500" />
+                    @break
+                @case('x-circle')
+                    <x-heroicon-o-x-circle class="w-4 h-4 text-{{ $iconColor }}-500" />
+                    @break
+                @case('document')
+                @case('document-text')
+                    <x-heroicon-o-document-text class="w-4 h-4 text-{{ $iconColor }}-500" />
+                    @break
+                @case('edit')
+                @case('pencil')
+                    <x-heroicon-o-pencil class="w-4 h-4 text-{{ $iconColor }}-500" />
+                    @break
+                @case('upload')
+                @case('cloud-arrow-up')
+                    <x-heroicon-o-cloud-arrow-up class="w-4 h-4 text-{{ $iconColor }}-500" />
+                    @break
+                @case('refresh-cw')
+                @case('arrow-path')
+                    <x-heroicon-o-arrow-path class="w-4 h-4 text-{{ $iconColor }}-500" />
+                    @break
+                @default
+                    <x-heroicon-o-question-mark-circle class="w-4 h-4 text-{{ $iconColor }}-500" />
+            @endswitch
+            <span class="text-sm font-medium text-{{ $iconColor }}-700">
+                {{ $stateInfo['label'] }}
+            </span>
+        </div>
+    </div>
+    
+    @if($workflowModel->isInTerminalState())
+        <div class="mt-1">
+            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                 <x-heroicon-s-check-circle class="w-3 h-3 mr-1" />
-                @break
-            @case('truck')
-                <x-heroicon-s-truck class="w-3 h-3 mr-1" />
-                @break
-            @case('arrow-left-circle')
-                <x-heroicon-s-arrow-left-circle class="w-3 h-3 mr-1" />
-                @break
-            @case('x-circle')
-                <x-heroicon-s-x-circle class="w-3 h-3 mr-1" />
-                @break
-            @default
-                <x-heroicon-s-question-mark-circle class="w-3 h-3 mr-1" />
-        @endswitch
-        {{ $stateInfo['label'] }}
-    </span>
-
-    {{-- Transition Buttons (only show if showButtonsInline is true) --}}
-    @if($showButtonsInline && $canManageWorkflow && $document->hasAvailableTransitions())
-        @foreach($document->getFormattedTransitions() as $transition)
-            @php
-                $buttonClass = match($transition['color']) {
-                    'primary' => 'bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] focus:ring-[var(--color-primary)]',
-                    'green' => 'bg-green-600 hover:bg-green-700 focus:ring-green-500',
-                    'red' => 'bg-red-600 hover:bg-red-700 focus:ring-red-500',
-                    'yellow' => 'bg-yellow-600 hover:bg-yellow-700 focus:ring-yellow-500',
-                    'blue' => 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500',
-                    default => 'bg-gray-600 hover:bg-gray-700 focus:ring-gray-500'
-                };
-            @endphp
-            <button
-                wire:click="openWorkflowModal({{ $document->id }}, {{ $transition['id'] }})"
-                class="inline-flex items-center px-2 py-1 border border-transparent text-xs font-medium rounded text-white {{ $buttonClass }} focus:outline-none focus:ring-2 focus:ring-offset-2"
-                title="{{ $transition['label'] }}">
-                @switch($transition['icon'])
-                    @case('check-circle')
-                        <x-heroicon-o-check-circle class="w-3 h-3 mr-1" />
-                        @break
-                    @case('x-circle')
-                        <x-heroicon-o-x-circle class="w-3 h-3 mr-1" />
-                        @break
-                    @case('truck')
-                        <x-heroicon-o-truck class="w-3 h-3 mr-1" />
-                        @break
-                    @case('arrow-left-circle')
-                        <x-heroicon-o-arrow-left-circle class="w-3 h-3 mr-1" />
-                        @break
-                    @case('refresh-cw')
-                        <x-heroicon-o-arrow-path class="w-3 h-3 mr-1" />
-                        @break
-                    @default
-                        <x-heroicon-o-arrow-right class="w-3 h-3 mr-1" />
-                @endswitch
-                {{ $transition['label'] }}
-            </button>
-        @endforeach
+                Completed
+            </span>
+        </div>
     @endif
 </div>

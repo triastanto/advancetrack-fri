@@ -2,7 +2,6 @@
 
 namespace App\Traits;
 
-use App\Models\Document;
 use App\Contracts\LivewireWorkflowComponent;
 use App\Services\TraitValidator;
 use Illuminate\Support\Facades\Auth;
@@ -35,7 +34,9 @@ trait HasWorkflowManagement
      */
     public function openWorkflowModal($documentId, $transitionId)
     {
-        $document = Document::with(['employee.user', 'employee.studyPrograms', 'documentType'])->findOrFail($documentId);
+        // Use the abstract method to get the model class
+        $modelClass = $this->getWorkflowModelClass();
+        $document = $modelClass::with(['employee.user', 'employee.studyPrograms', 'documentType'])->findOrFail($documentId);
         
         $this->setWorkflowDocument($document);
         $this->setWorkflowTransitionId($transitionId);
@@ -140,15 +141,30 @@ trait HasWorkflowManagement
     }
 
     /**
-     * Get workflow state CSS class
+     * Get workflow state CSS class - now workflow-agnostic
      */
-    public function getWorkflowStateClass($stateId): string
+    public function getWorkflowStateClass($stateId, $workflowName = null): string
     {
-        return match($stateId) {
-            1 => 'bg-gray-100 text-gray-800',    // DRAFT
-            2 => 'bg-yellow-100 text-yellow-800', // PENDING
-            3 => 'bg-green-100 text-green-800',   // VERIFIED
-            4 => 'bg-red-100 text-red-800',       // REJECTED
+        if ($workflowName) {
+            $stateColor = \App\Services\Workflow\WorkflowDefinition::getStateColor($stateId, $workflowName);
+            return match($stateColor) {
+                'warning' => 'bg-yellow-100 text-yellow-800',
+                'success' => 'bg-green-100 text-green-800',
+                'info' => 'bg-blue-100 text-blue-800',
+                'danger' => 'bg-red-100 text-red-800',
+                default => 'bg-gray-100 text-gray-800'
+            };
+        }
+
+        // Use workflow name from model
+        $workflowName = $this->getWorkflowModelClass()::getWorkflowName();
+        
+        $stateColor = \App\Services\Workflow\WorkflowDefinition::getStateColor($stateId, $workflowName);
+        return match($stateColor) {
+            'warning' => 'bg-yellow-100 text-yellow-800',
+            'success' => 'bg-green-100 text-green-800',
+            'info' => 'bg-blue-100 text-blue-800',
+            'danger' => 'bg-red-100 text-red-800',
             default => 'bg-gray-100 text-gray-800'
         };
     }
@@ -156,7 +172,7 @@ trait HasWorkflowManagement
     // Protected methods that can be overridden by implementing classes
 
     /**
-     * Get transitions for document - can be overridden by implementing classes
+     * Get transitions for document - now uses workflow-specific configuration
      */
     protected function getTransitionsForDocument($document): array
     {
@@ -164,8 +180,9 @@ trait HasWorkflowManagement
             return $document->getAvailableTransitions();
         }
 
-        // Fallback to config
-        return config('workflows.transitions', []);
+        // Use workflow-specific config
+        $workflowName = $document->getWorkflowName();
+        return \App\Services\Workflow\WorkflowDefinition::getAllTransitions($workflowName);
     }
 
     /**

@@ -18,6 +18,7 @@ return new class extends Migration
             $table->date('estimated_study_end');
             $table->date('graduation_date')->nullable();
             $table->enum('study_status', ['active', 'finished', 'leave', 'drop_out'])->default('active');
+            $table->unsignedBigInteger('workflow_state')->default(1);
             $table->timestamps();
         });
     }

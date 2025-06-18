@@ -24,9 +24,16 @@ class UserSeeder extends Seeder
 
         Employee::create([
             'user_id' => $wakilDekanUser->id,
-            'employee_number' => '202500001',
+            'nidn' => '0202500001',
             'position' => 'Wakil Dekan II FRI',
             'role' => 'fri_vice_dean',
+            'birth_place' => 'Jakarta',
+            'birth_date' => '1970-05-15',
+            'gender' => 'male',
+            'functional_position' => 'Lektor Kepala',
+            'origin_address' => 'Jl. Merdeka No. 123, Jakarta',
+            'contact_phone' => '081234567890',
+            'contact_email' => 'wakildekan2@fri.ac.id',
         ]);
 
         // 2. Kepala Urusan SDM & Keuangan (one employee)
@@ -39,9 +46,16 @@ class UserSeeder extends Seeder
 
         Employee::create([
             'user_id' => $kepalaUrusanUser->id,
-            'employee_number' => '202500002',
+            'nidn' => '0202500002',
             'position' => 'Kepala Urusan SDM & Keuangan',
             'role' => 'head_of_hr_finance',
+            'birth_place' => 'Surabaya',
+            'birth_date' => '1975-03-20',
+            'gender' => 'female',
+            'functional_position' => 'Tenaga Kependidikan',
+            'origin_address' => 'Jl. Sudirman No. 456, Surabaya',
+            'contact_phone' => '081234567891',
+            'contact_email' => 'kaur.sdm@fri.ac.id',
         ]);
 
         // 3. Staf SDM & Keuangan (multiple employees)
@@ -61,9 +75,16 @@ class UserSeeder extends Seeder
             
             Employee::create([
                 'user_id' => $user->id,
-                'employee_number' => $staff['emp_no'],
+                'nidn' => '0' . $staff['emp_no'],
                 'position' => 'Staf SDM & Keuangan',
                 'role' => 'hr_finance_staff',
+                'birth_place' => 'Surabaya',
+                'birth_date' => '1980-01-01',
+                'gender' => str_contains($staff['name'], 'Dewi') ? 'female' : 'male',
+                'functional_position' => 'Tenaga Kependidikan',
+                'origin_address' => 'Jl. Veteran No. 100, Surabaya',
+                'contact_phone' => '0812345678' . substr($staff['emp_no'], -2),
+                'contact_email' => $staff['email'],
             ]);
         }
 
@@ -84,9 +105,16 @@ class UserSeeder extends Seeder
             
             Employee::create([
                 'user_id' => $user->id,
-                'employee_number' => $kaprodi['emp_no'],
+                'nidn' => '0' . $kaprodi['emp_no'],
                 'position' => 'Ketua Program Studi ' . $kaprodi['program'],
                 'role' => 'head_of_study_program',
+                'birth_place' => 'Surabaya',
+                'birth_date' => '1970-06-15',
+                'gender' => str_contains($kaprodi['name'], 'Rina') ? 'female' : 'male',
+                'functional_position' => 'Lektor Kepala',
+                'origin_address' => 'Jl. Raya ITS No. 25, Surabaya',
+                'contact_phone' => '0812345678' . substr($kaprodi['emp_no'], -2),
+                'contact_email' => $kaprodi['email'],
             ]);
         }
 
@@ -107,9 +135,16 @@ class UserSeeder extends Seeder
             
             Employee::create([
                 'user_id' => $user->id,
-                'employee_number' => $kkel['emp_no'],
+                'nidn' => '0' . $kkel['emp_no'],
                 'position' => 'Ketua Kelompok Keilmuan ' . $kkel['group'],
                 'role' => 'head_of_research_group',
+                'birth_place' => 'Surabaya',
+                'birth_date' => '1965-08-10',
+                'gender' => str_contains($kkel['name'], 'Maya') ? 'female' : 'male',
+                'functional_position' => str_contains($kkel['name'], 'Prof.') ? 'Profesor' : 'Lektor Kepala',
+                'origin_address' => 'Jl. Keputran No. 15, Surabaya',
+                'contact_phone' => '0812345678' . substr($kkel['emp_no'], -2),
+                'contact_email' => $kkel['email'],
             ]);
         }
 
@@ -145,13 +180,54 @@ class UserSeeder extends Seeder
             
             Employee::create([
                 'user_id' => $user->id,
-                'employee_number' => $dosen['emp_no'],
+                'nidn' => '0' . $dosen['emp_no'],
                 'position' => 'Dosen ' . $dosen['dept'],
                 'role' => 'lecturer',
+                'birth_place' => 'Surabaya',
+                'birth_date' => '1975-01-01',
+                'gender' => $this->determineGender($dosen['name']),
+                'functional_position' => $this->determineFunctionalPosition($dosen['name']),
+                'origin_address' => 'Jl. ITS Raya No. 50, Surabaya',
+                'contact_phone' => '0812345678' . substr($dosen['emp_no'], -2),
+                'contact_email' => $dosen['email'],
             ]);
         }
 
         // Remove the factory-generated users since we now have specific lecturers
         // $additionalUsers = User::factory(10)->create();
+    }
+
+    /**
+     * Determine gender based on name patterns
+     */
+    private function determineGender(string $name): string
+    {
+        $name = strtolower($name);
+        
+        // Check for female name patterns
+        $femalePatterns = ['siti', 'dewi', 'sri', 'rina', 'maya', 'ani', 'indah', 'ratna', 'citra', 'diah', 'evi', 'wulan'];
+        foreach ($femalePatterns as $pattern) {
+            if (str_contains($name, $pattern)) {
+                return 'female';
+            }
+        }
+        
+        return 'male'; // Default for Indonesian academic names
+    }
+
+    /**
+     * Determine functional position based on academic title
+     */
+    private function determineFunctionalPosition(string $name): string
+    {
+        if (str_contains($name, 'Prof.')) {
+            return 'Profesor';
+        } elseif (str_contains($name, 'Dr.')) {
+            return 'Lektor Kepala';
+        } elseif (str_contains($name, 'Ir.') || str_contains($name, 'Dra.')) {
+            return 'Lektor';
+        } else {
+            return 'Asisten Ahli';
+        }
     }
 }

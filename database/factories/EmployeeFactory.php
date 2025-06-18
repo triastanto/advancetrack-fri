@@ -17,20 +17,33 @@ class EmployeeFactory extends Factory
 
         return [
             'user_id' => User::factory(),
-            'employee_number' => $this->generateEmployeeNumber(),
+            'nidn' => $this->generateNIDN(),
             'position' => $this->generatePosition($role),
             'role' => $role,
+            'birth_place' => $this->faker->optional(0.9)->city(),
+            'birth_date' => $this->faker->optional(0.9)->dateTimeBetween('-60 years', '-25 years'),
+            'gender' => $this->faker->randomElement(['male', 'female', 'other']),
+            'functional_position' => $this->faker->optional(0.7)->randomElement([
+                'Asisten Ahli',
+                'Lektor',
+                'Lektor Kepala',
+                'Profesor',
+                'Tenaga Pendidik',
+                'Tenaga Kependidikan'
+            ]),
+            'origin_address' => $this->faker->optional(0.8)->address(),
+            'contact_phone' => $this->faker->optional(0.9)->phoneNumber(),
+            'contact_email' => $this->faker->optional(0.8)->email,
         ];
     }
 
     /**
-     * Generate a realistic employee number
+     * Generate a realistic NIDN (Nomor Induk Dosen Nasional)
      */
-    private function generateEmployeeNumber(): string
+    private function generateNIDN(): string
     {
-        $year = date('Y');
-        $sequence = $this->faker->unique()->numberBetween(1000, 9999);
-        return $year . $sequence;
+        // NIDN format: 0 + 10 digits
+        return '0' . $this->faker->unique()->numerify('##########');
     }
 
     /**

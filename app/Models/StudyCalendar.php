@@ -22,6 +22,14 @@ class StudyCalendar extends Model
     }
 
     /**
+     * Get the study detail for this study calendar.
+     */
+    public function studyDetail()
+    {
+        return $this->hasOne(StudyDetail::class);
+    }
+
+    /**
      * Get the workflow name for this model
      */
     public function getWorkflowName(): string

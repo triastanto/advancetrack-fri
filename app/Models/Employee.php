@@ -11,6 +11,24 @@ class Employee extends Model
 
     protected $guarded = [];
 
+    protected $fillable = [
+        'user_id',
+        'nidn',
+        'position',
+        'role',
+        'birth_place',
+        'birth_date',
+        'gender',
+        'functional_position',
+        'origin_address',
+        'contact_phone',
+        'contact_email',
+    ];
+
+    protected $casts = [
+        'birth_date' => 'date',
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -42,5 +60,59 @@ class Employee extends Model
     public function studyCalendars()
     {
         return $this->hasMany(StudyCalendar::class);
+    }
+
+    /**
+     * Get the supervisor assignments where this employee is the supervisee.
+     */
+    public function supervisorAssignments()
+    {
+        return $this->hasMany(SupervisorAssignment::class, 'employee_id');
+    }
+
+    /**
+     * Get the supervisor assignments where this employee is the supervisor.
+     */
+    public function supervisingAssignments()
+    {
+        return $this->hasMany(SupervisorAssignment::class, 'supervisor_id');
+    }
+
+    /**
+     * Get the current supervisors for this employee.
+     */
+    public function currentSupervisors()
+    {
+        return $this->belongsToMany(Employee::class, 'supervisor_assignments', 'employee_id', 'supervisor_id')
+            ->wherePivot('end_date', null)
+            ->withPivot(['start_date', 'end_date'])
+            ->withTimestamps();
+    }
+
+    /**
+     * Get the employees this employee is currently supervising.
+     */
+    public function currentSupervisees()
+    {
+        return $this->belongsToMany(Employee::class, 'supervisor_assignments', 'supervisor_id', 'employee_id')
+            ->wherePivot('end_date', null)
+            ->withPivot(['start_date', 'end_date'])
+            ->withTimestamps();
+    }
+
+    /**
+     * Get the course responsibilities for this employee.
+     */
+    public function courseResponsibilities()
+    {
+        return $this->hasMany(CourseResponsibility::class);
+    }
+
+    /**
+     * Get the employee number (same as NIDN) for compatibility.
+     */
+    public function getEmployeeNumberAttribute()
+    {
+        return $this->nidn;
     }
 }

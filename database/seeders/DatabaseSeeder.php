@@ -32,5 +32,11 @@ class DatabaseSeeder extends Seeder
         // Create study calendars for any lecturers who might not have them
         // (This acts as a safety net)
         $this->call(StudyCalendarSeeder::class);
+
+        // Seed new tables based on updated ERD
+        $this->call(StudyDetailSeeder::class);
+        $this->call(StudyPromotorSeeder::class);
+        $this->call(SupervisorAssignmentSeeder::class);
+        $this->call(CourseResponsibilitySeeder::class);
     }
 }

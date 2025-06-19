@@ -23,10 +23,13 @@ class Employee extends Model
         'origin_address',
         'contact_phone',
         'contact_email',
+        'research_lab_id',
+        'is_lab_head',
     ];
 
     protected $casts = [
         'birth_date' => 'date',
+        'is_lab_head' => 'boolean',
     ];
 
     public function user()
@@ -106,6 +109,57 @@ class Employee extends Model
     public function courseResponsibilities()
     {
         return $this->hasMany(CourseResponsibility::class);
+    }
+
+    /**
+     * Get the research lab this employee belongs to.
+     */
+    public function researchLab()
+    {
+        return $this->belongsTo(ResearchLab::class);
+    }
+
+    /**
+     * Get the research group this employee belongs to through their lab.
+     */
+    public function researchGroup()
+    {
+        return $this->hasOneThrough(
+            ResearchGroup::class,
+            ResearchLab::class,
+            'id', // Foreign key on research_labs table
+            'id', // Foreign key on research_groups table
+            'research_lab_id', // Local key on employees table
+            'research_group_id' // Local key on research_labs table
+        );
+    }
+
+    /**
+     * Get the research groups this employee heads.
+     */
+    public function headsResearchGroups()
+    {
+        return $this->hasMany(ResearchGroup::class, 'head_employee_id');
+    }
+
+    /**
+     * Check if this employee is a lab head.
+     */
+    public function isLabHead()
+    {
+        return $this->is_lab_head;
+    }
+
+    /**
+     * Get other members of the same research lab.
+     */
+    public function labColleagues()
+    {
+        if (!$this->research_lab_id) {
+            return collect();
+        }
+        
+        return $this->researchLab->employees()->where('id', '!=', $this->id)->get();
     }
 
     /**

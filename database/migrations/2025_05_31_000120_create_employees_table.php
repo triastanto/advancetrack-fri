@@ -31,11 +31,15 @@ return new class extends Migration
             $table->text('origin_address')->nullable();
             $table->string('contact_phone')->nullable();
             $table->string('contact_email')->nullable();
+            $table->foreignId('research_lab_id')->nullable()->constrained('research_labs')->onDelete('set null');
+            $table->boolean('is_lab_head')->default(false);
             $table->timestamps();
             
             // Add indexes for better query performance
             $table->index('role');
             $table->index('nidn');
+            $table->index('research_lab_id');
+            $table->index('is_lab_head');
         });
     }
 

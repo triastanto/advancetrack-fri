@@ -13,30 +13,44 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Seed document types first (required for other seeders)
-        $this->call(DocumentTypeSeeder::class);
-
-        // Seed study programs
-        $this->call(StudyProgramSeeder::class);
-
-        // Seed users with their corresponding employee records
-        $this->call(UserSeeder::class);
+        $environment = app()->environment();
         
-        // If there are users without employee records, create them
-        $this->call(EmployeeSeeder::class);
+        // Always seed master data first
+        $this->seedMasterData();
+        
+        // Add development data only in non-production environments
+        if ($environment !== 'production') {
+            $this->seedDevelopmentData();
+        }
+    }
 
-        // Create many-to-many relationships between employees and study programs
-        // This will also create study calendars for lecturers
-        $this->call(EmployeeStudyProgramSeeder::class);
+    /**
+     * Seed master data required in all environments
+     */
+    private function seedMasterData(): void
+    {
+        $this->command->info('📋 Seeding Master Data...');
+        
+        // Core master data - required for system operation
+        $this->call(DocumentTypeSeeder::class);
+        $this->call(StudyProgramSeeder::class);
+        $this->call(ResearchStructureSeeder::class); // Creates research groups and labs (production-safe)
+        
+        $this->command->info('✅ Master data seeded successfully');
+    }
 
-        // Create study calendars for any lecturers who might not have them
-        // (This acts as a safety net)
-        $this->call(StudyCalendarSeeder::class);
-
-        // Seed new tables based on updated ERD
-        $this->call(StudyDetailSeeder::class);
-        $this->call(StudyPromotorSeeder::class);
-        $this->call(SupervisorAssignmentSeeder::class);
-        $this->call(CourseResponsibilitySeeder::class);
+    /**
+     * Seed development/test data (non-production only)
+     */
+    private function seedDevelopmentData(): void
+    {
+        $this->command->info('👥 Seeding Development Data...');
+        
+        // Create users and employees for research structure (development only)
+        $this->call(PersonnelSeeder::class);
+        
+        // Additional development data can be added here as needed
+        
+        $this->command->info('✅ Development data seeded successfully');
     }
 }

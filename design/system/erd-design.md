@@ -59,6 +59,14 @@
 | finished                  | selesai                       |
 | leave                     | cuti                          |
 | drop_out                  | drop out                      |
+| research_groups           | kelompok keilmuan             |
+| research_group            | kelompok keilmuan             |
+| research_labs             | laboratorium riset            |
+| research_lab              | laboratorium riset            |
+| head_employee_id          | ketua kelompok keilmuan       |
+| is_lab_head               | adalah ketua laboratorium     |
+| lab_head                  | ketua laboratorium riset      |
+| alias_name                | nama alias                    |
 
 
 ## Main Tables & Relationships
@@ -86,6 +94,8 @@
 - origin_address (nullable)
 - contact_phone (nullable)
 - contact_email (nullable)
+- research_lab_id (FK → research_labs.id, nullable)
+- is_lab_head (boolean, default: false)
 - created_at
 - updated_at
 
@@ -191,11 +201,31 @@
 - created_at
 - updated_at
 
+### 13. research_groups
+- id (PK)
+- name
+- description (nullable)
+- head_employee_id (FK → employees.id, nullable) // Ketua Kelompok Keilmuan
+- created_at
+- updated_at
+
+### 14. research_labs
+- id (PK)
+- name
+- alias_name (nullable)
+- description (nullable)
+- research_group_id (FK → research_groups.id)
+- created_at
+- updated_at
+
 ## Relationships
 
 - users (1) --- (0..1) employees (user_id)
 - employees (1) --- (N) employee_study_program (employee_id)
 - study_programs (1) --- (N) employee_study_program (study_program_id)
+- research_groups (1) --- (N) research_labs (research_group_id)
+- research_groups (1) --- (0..1) employees (head_employee_id) // Ketua Kelompok Keilmuan
+- research_labs (1) --- (N) employees (research_lab_id)
 - employees (1) --- (N) documents (employee_id)
 - document_types (1) --- (N) documents (document_type_id)
 - employees (1) --- (N) study_calendars (employee_id)
@@ -216,28 +246,35 @@
                      (1)
                       |
                    employees -----(N)-----> course_responsibilities
-                      |
-                     (N)
-                      |
-          ┌-----------+----------┐
-          |           |          |
-         (N)         (N)        (N)
-          |           |          |
-employee_study_    documents  study_calendars
-   program           |          |
-      |             (N)        (1)
-     (N)             |          |
-      |        workflow_     study_details
-                    |           |
-                   (1)           |
-                  users          |
+                      |            |
+                 ┌----+----┐      (N)
+                (N)       (N)       |
+                 |         |   research_labs
+    employee_study_    documents    |
+       program           |         (1)
+          |             (N)         |
+         (N)             |       research_groups
+          |              |           |
+     study_programs     (1)         (1)
+                        users        |
+                                 employees (head)
+                                     |
+                                    (N)
+                                     |
+                              study_calendars
+                                     |
+                                    (1)
+                                     |
+                               study_details
+                                     |
+                                     |
                                study_promotors
-                                |
-                               (N)
-                                |
-                          supervisor_assignments
-                                |
-                         (self-reference to employees)
+                                     |
+                                    (N)
+                                     |
+                             supervisor_assignments
+                                     |
+                              (self-reference to employees)
 
 Legend:
 - (1) = One-to-one relationship
@@ -247,11 +284,59 @@ Legend:
 
 ## Notes
 
+### Workflow Management
 - The `study_calendars` table manages time-based workflow lifecycle of the study (e.g. DRAFT → APPROVED → ACTIVE → FINISHED).
 - The `study_details` table links to `study_calendars`, allowing multiple study attempts per employee to be uniquely documented.
 - The `active_status` field was removed from `study_details` to avoid duplication with `study_calendars.workflow_state`.
-- Workflow states now solely determine the study lifecycle.
-- Promotors and supervisors are normalized for better traceability.
-- Course responsibilities are separated to support multi-semester teaching tracking.
-- `workflow_histories` uses polymorphic relationships to track state changes for both `documents` and `study_calendars`.
+- Workflow states determine the study lifecycle and serve as the single source of truth for study status.
+- `workflow_histories` uses polymorphic relationships to track state changes for both `documents` and `study_calendars`, enabling complete audit trails.
 
+### Document Management
+- Documents are categorized by `document_types` to standardize document handling across the system.
+- Each document belongs to an employee and has verification status tracking through workflow states.
+- File storage paths are maintained in the `file_path` field for retrieval and management.
+
+### Academic Structure
+- Course responsibilities are separated to support multi-semester teaching tracking and workload distribution.
+- Promotors and supervisors are normalized for better traceability and to handle changing supervision relationships over time.
+- The `supervisor_assignments` table uses start_date and end_date to track supervision periods, allowing for supervisor changes during study periods.
+
+### Research Organization Hierarchy
+- **Research Groups (Kelompok Keilmuan)**: Top-level academic groupings with 3 main groups:
+  1. Manufacturing dan Process Engineering
+  2. Enterprise and Industrial Management System
+  3. Digital Enterprise System and Technology
+- **Research Labs (Laboratorium Riset)**: Individual laboratories within research groups (14 total laboratories)
+- **Group Leadership**: Each research group can have a head employee (Ketua Kelompok Keilmuan) via `head_employee_id`
+- **Lab Leadership**: Each research lab can have lab heads (Ketua Laboratorium) via `is_lab_head` flag on employees
+- **Employee Assignment**: Employees are assigned to research labs, which automatically places them in the corresponding research group
+
+### Research Laboratory Organization
+- Added hierarchical structure: `research_groups` → `research_labs` → `employees`
+- Employees belong to research labs with optional foreign key `research_lab_id` - allows for unassigned employees
+- Boolean `is_lab_head` on employees indicates Ketua Lab (Head of Research Laboratory)
+- Research groups can have designated heads via `head_employee_id` for Ketua Kelompok Keilmuan
+- Each research laboratory is supervised by exactly one Ketua Laboratorium Riset, but employees can exist without lab assignments
+- Multiple employees can be lab heads within the same research group (across different labs)
+
+### Data Integrity Considerations
+- Foreign key constraints with appropriate cascade/set null actions ensure referential integrity
+- Unique constraints on critical fields (email, nidn) prevent duplicate entries
+- Nullable fields are explicitly marked to distinguish between required and optional data
+- Polymorphic relationships in `workflow_histories` allow tracking of different entity types while maintaining consistency
+- Research group heads and lab heads are independent - one employee can be both
+
+### Business Rules Implications
+- An employee can belong to only one research lab at a time (single lab assignment)
+- A research lab can have multiple lab heads and multiple regular members
+- A research group can have one designated head employee
+- An employee can be both a research group head and a lab head simultaneously
+- Study calendars represent the official timeline and status, while study details contain the academic specifics
+- Document workflows and study calendar workflows operate independently but may be related through business processes
+- Employee roles (lecturer, hr_finance_staff, etc.) determine system permissions and available actions
+
+### Scalability and Performance
+- Indexes are strategically placed on frequently queried fields (role, nidn, research_lab_id, research_group_id, workflow states)
+- Polymorphic relationships reduce table proliferation while maintaining flexibility
+- Hierarchical research organization allows for efficient querying and reporting
+- Separation of concerns between workflow management, document storage, and academic data allows for independent scaling

@@ -95,35 +95,35 @@ class DocumentFactory extends Factory
     }
 
     /**
-     * Create a document in DRAFT state (state_id = 1)
+     * Create a document in DRAFT state (workflow_state = 1)
      */
     public function draft(): self
     {
-        return $this->state(['state_id' => 1]);
+        return $this->state(['workflow_state' => 1]);
     }
 
     /**
-     * Create a document in PENDING state (state_id = 2)
+     * Create a document in PENDING state (workflow_state = 2)
      */
     public function pending(): self
     {
-        return $this->state(['state_id' => 2]);
+        return $this->state(['workflow_state' => 2]);
     }
 
     /**
-     * Create a document in VERIFIED state (state_id = 3)
+     * Create a document in VERIFIED state (workflow_state = 3)
      */
     public function verified(): self
     {
-        return $this->state(['state_id' => 3]);
+        return $this->state(['workflow_state' => 3]);
     }
 
     /**
-     * Create a document in REJECTED state (state_id = 4)
+     * Create a document in REJECTED state (workflow_state = 4)
      */
     public function rejected(): self
     {
-        return $this->state(['state_id' => 4]);
+        return $this->state(['workflow_state' => 4]);
     }
 
     /**
@@ -131,6 +131,6 @@ class DocumentFactory extends Factory
      */
     public function inState(int $stateId): self
     {
-        return $this->state(['state_id' => $stateId]);
+        return $this->state(['workflow_state' => $stateId]);
     }
 }

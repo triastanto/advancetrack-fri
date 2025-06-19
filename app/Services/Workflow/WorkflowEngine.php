@@ -24,7 +24,7 @@ class WorkflowEngine
         $currentState = $this->getCurrentState($model);
         $userRoles = $this->getUserRoles();
 
-        $transition = WorkflowDefinition::getTransition($workflowName, $transitionId);
+        $transition = WorkflowDefinition::getTransition($transitionId, $workflowName);
         
         if (!$transition) {
             Log::warning('Workflow transition authorization failed: Invalid transition', [

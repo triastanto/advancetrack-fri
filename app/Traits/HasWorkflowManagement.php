@@ -58,23 +58,21 @@ trait HasWorkflowManagement
     /**
      * Apply workflow transition
      */
-    public function applyWorkflowTransition()
+    public function applyWorkflowTransition($transitionId, $comment = null): bool
     {
         // Ensure the class has required Livewire methods
         $this->ensureLivewireComponent();
 
         $document = $this->getWorkflowDocument();
-        $transitionId = $this->getWorkflowTransitionId();
-        $comment = $this->getWorkflowComment();
 
         if (!$document || !$transitionId) {
             session()->flash('error', 'Data tidak valid.');
-            return;
+            return false;
         }
 
         if (!$this->hasEmployee()) {
             session()->flash('error', 'Akses tidak diizinkan.');
-            return;
+            return false;
         }
 
         $user = Auth::user();
@@ -86,19 +84,19 @@ trait HasWorkflowManagement
 
             if (!$transition) {
                 session()->flash('error', 'Transisi tidak valid.');
-                return;
+                return false;
             }
 
             // Validate comment if required
             if (($transition['requires_comment'] ?? false) && empty($comment)) {
                 $this->addError($this->workflowCommentProperty, 'Komentar wajib diisi untuk transisi ini.');
-                return;
+                return false;
             }
 
             // Check if user can perform this transition (if method exists)
             if (method_exists($document, 'canTransition') && !$document->canTransition($transitionId)) {
                 session()->flash('error', 'Anda tidak memiliki akses untuk melakukan transisi ini.');
-                return;
+                return false;
             }
 
             // Build context
@@ -115,8 +113,11 @@ trait HasWorkflowManagement
             $this->closeWorkflowModal();
             session()->flash($this->getSuccessFlashKey(), $this->getSuccessMessage());
 
+            return true;
+
         } catch (\Exception $e) {
             session()->flash('error', 'Terjadi kesalahan: ' . $e->getMessage());
+            return false;
         }
     }
 

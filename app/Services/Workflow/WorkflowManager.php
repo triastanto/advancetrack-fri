@@ -91,7 +91,7 @@ class WorkflowManager
         $currentState = $model->getWorkflowState();
         $userRoles = $this->getUserRoles();
 
-        $transition = WorkflowDefinition::getTransition($workflowName, $transitionId);
+        $transition = WorkflowDefinition::getTransition($transitionId, $workflowName);
         
         if (!$transition) {
             return false;

@@ -12,8 +12,11 @@
 */
 
 pest()->extend(Tests\TestCase::class)
- // ->use(Illuminate\Foundation\Testing\RefreshDatabase::class)
+    ->use(Illuminate\Foundation\Testing\RefreshDatabase::class)
     ->in('Feature');
+
+pest()->extend(Tests\TestCase::class)
+    ->in('Unit');
 
 /*
 |--------------------------------------------------------------------------
@@ -30,6 +33,22 @@ expect()->extend('toBeOne', function () {
     return $this->toBe(1);
 });
 
+expect()->extend('toBeDraft', function () {
+    return $this->toBe(1);
+});
+
+expect()->extend('toBePending', function () {
+    return $this->toBe(2);
+});
+
+expect()->extend('toBeVerified', function () {
+    return $this->toBe(3);
+});
+
+expect()->extend('toBeRejected', function () {
+    return $this->toBe(4);
+});
+
 /*
 |--------------------------------------------------------------------------
 | Functions
@@ -41,7 +60,5 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
-{
-    // ..
-}
+// Include test helpers
+require_once __DIR__ . '/helpers.php';

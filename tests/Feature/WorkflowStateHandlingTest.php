@@ -1,78 +1,68 @@
 <?php
 
-namespace Tests\Feature;
-
 use App\Models\Document;
 use App\Models\StudyCalendar;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
+use App\Models\User;
+use App\Models\Employee;
+use App\Models\DocumentType;
 
-class WorkflowStateHandlingTest extends TestCase
-{
-    use RefreshDatabase;
+test('document with null workflow state handles correctly', function () {
+    // Create a document without setting workflow_state (should be null)
+    $document = new Document();
+    
+    // Should return initial state (1) when workflow_state is null
+    expect($document->getCurrentState())->toBe(1);
+    expect($document->isInDraftState())->toBeTrue();
+    expect($document->isInPendingState())->toBeFalse();
+    expect($document->isInVerifiedState())->toBeFalse();
+    expect($document->isInRejectedState())->toBeFalse();
+});
 
-    public function test_document_with_null_workflow_state_handles_correctly()
-    {
-        // Create a document without setting workflow_state (should be null)
-        $document = new Document();
-        
-        // Should return initial state (1) when workflow_state is null
-        $this->assertEquals(1, $document->getCurrentState());
-        $this->assertTrue($document->isInDraftState());
-        $this->assertFalse($document->isInPendingState());
-        $this->assertFalse($document->isInVerifiedState());
-        $this->assertFalse($document->isInRejectedState());
-    }
+test('study calendar with null workflow state handles correctly', function () {
+    // Create a study calendar without setting workflow_state (should be null)
+    $studyCalendar = new StudyCalendar();
+    
+    // Should return initial state (1) when workflow_state is null
+    expect($studyCalendar->getCurrentState())->toBe(1);
+    expect($studyCalendar->isInDraftState())->toBeTrue();
+    expect($studyCalendar->isInPendingState())->toBeFalse();
+});
 
-    public function test_study_calendar_with_null_workflow_state_handles_correctly()
-    {
-        // Create a study calendar without setting workflow_state (should be null)
-        $studyCalendar = new StudyCalendar();
-        
-        // Should return initial state (1) when workflow_state is null
-        $this->assertEquals(1, $studyCalendar->getCurrentState());
-        $this->assertTrue($studyCalendar->isInDraftState());
-        $this->assertFalse($studyCalendar->isInPendingState());
-    }
+test('document with explicit workflow state', function () {
+    // Create a document with explicit workflow_state
+    $document = new Document();
+    $document->workflow_state = 2; // PENDING
+    
+    expect($document->getCurrentState())->toBe(2);
+    expect($document->isInDraftState())->toBeFalse();
+    expect($document->isInPendingState())->toBeTrue();
+});
 
-    public function test_document_with_explicit_workflow_state()
-    {
-        // Create a document with explicit workflow_state
-        $document = new Document();
-        $document->workflow_state = 2; // PENDING
-        
-        $this->assertEquals(2, $document->getCurrentState());
-        $this->assertFalse($document->isInDraftState());
-        $this->assertTrue($document->isInPendingState());
-    }
+test('workflow state persistence', function () {
+    // Create required related models
+    $user = User::factory()->create();
+    $employee = Employee::factory()->create(['user_id' => $user->id]);
+    $documentType = DocumentType::factory()->create();
 
-    public function test_workflow_state_persistence()
-    {
-        // Create required related models
-        $user = \App\Models\User::factory()->create();
-        $employee = \App\Models\Employee::factory()->create(['user_id' => $user->id]);
-        $documentType = \App\Models\DocumentType::factory()->create();
+    // Create document without specifying workflow_state
+    $document = Document::create([
+        'employee_id' => $employee->id,
+        'document_type_id' => $documentType->id,
+        'file_name' => 'test-document.pdf',
+        'file_path' => '/uploads/test-document.pdf',
+    ]);
 
-        // Create document without specifying workflow_state
-        $document = Document::create([
-            'employee_id' => $employee->id,
-            'document_type_id' => $documentType->id,
-            'file_name' => 'test-document.pdf',
-            'file_path' => '/uploads/test-document.pdf',
-        ]);
+    // Should default to initial state
+    expect($document->workflow_state)->toBe(1);
+    expect($document->getCurrentState())->toBe(1);
+    expect($document->isInDraftState())->toBeTrue();
 
-        // Should default to initial state
-        $this->assertEquals(1, $document->workflow_state);
-        $this->assertEquals(1, $document->getCurrentState());
-        $this->assertTrue($document->isInDraftState());
+    // Update workflow state
+    $document->workflow_state = 2;
+    $document->save();
 
-        // Update workflow state
-        $document->workflow_state = 2;
-        $document->save();
-
-        // Should reflect the new state
-        $this->assertEquals(2, $document->workflow_state);
-        $this->assertEquals(2, $document->getCurrentState());
-        $this->assertTrue($document->isInPendingState());
-    }
-} 
+    // Should reflect the new state
+    expect($document->workflow_state)->toBe(2);
+    expect($document->getCurrentState())->toBe(2);
+    expect($document->isInPendingState())->toBeTrue();
+}); 

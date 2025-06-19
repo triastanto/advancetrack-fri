@@ -27,7 +27,7 @@ class WorkflowObserver
             Log::info('Workflow initialized for model', [
                 'model' => get_class($model),
                 'id' => $model->id,
-                'initial_state' => $model->state_id,
+                'initial_state' => $model->workflow_state,
             ]);
         }
     }
@@ -37,12 +37,12 @@ class WorkflowObserver
      */
     public function updated(Model $model): void
     {
-        if ($this->hasWorkflow($model) && $model->wasChanged('state_id')) {
+        if ($this->hasWorkflow($model) && $model->wasChanged('workflow_state')) {
             Log::info('Workflow state changed', [
                 'model' => get_class($model),
                 'id' => $model->id,
-                'old_state' => $model->getOriginal('state_id'),
-                'new_state' => $model->state_id,
+                'old_state' => $model->getOriginal('workflow_state'),
+                'new_state' => $model->workflow_state,
             ]);
         }
     }
@@ -76,7 +76,7 @@ class WorkflowObserver
      */
     protected function initializeWorkflow(Model $model): void
     {
-        if (!$model->state_id && method_exists($model, 'initializeWorkflow')) {
+        if (!$model->workflow_state && method_exists($model, 'initializeWorkflow')) {
             $model->initializeWorkflow();
         }
     }

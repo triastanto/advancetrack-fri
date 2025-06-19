@@ -70,14 +70,14 @@
         <!-- Navigation Links -->
         <nav class="flex-1 px-4">
             <ul class="mt-4">
-                <!-- Dashboard Link -->
+                <!-- Dashboard Link - Available to All Roles -->
                 <li>
                     <a href="/dashboard" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm {{ request()->routeIs('dashboard') ? 'text-[var(--color-primary)] bg-[var(--color-primary-bg)]' : 'text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)]' }}">
                         <x-heroicon-o-squares-2x2 class="w-5 h-5" />
                         Dashboard
                     </a>
                 </li>
-                <!-- Notifikasi Link with Badge -->
+                <!-- Notifikasi Link with Badge - Available to All Roles -->
                 <li>
                     <a href="/notifications" class="flex items-center gap-3 px-3 py-2 rounded-lg relative text-sm {{ request()->is('notifications*') ? 'text-[var(--color-primary)] bg-[var(--color-primary-bg)] font-semibold' : 'text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)]' }}">
                         <x-heroicon-o-bell class="w-5 h-5" />
@@ -85,14 +85,17 @@
                         <span class="ml-auto inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-bold bg-[var(--color-primary)] text-white absolute right-3 top-1/2 -translate-y-1/2">8</span>
                     </a>
                 </li>
-                <!-- Data Pribadi Link -->
+                <!-- Lecturer Role Menu Items -->
+                @auth
+                @if(Auth::user()->employee && Auth::user()->employee->role === 'lecturer')
+                <!-- Data Pribadi Link - Lecturer Only -->
                 <li>
                     <a href="{{ route('profile.index') ?? '/profile' }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm {{ request()->is('profile*') ? 'text-[var(--color-primary)] bg-[var(--color-primary-bg)] font-semibold' : 'text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)]' }}">
                         <x-heroicon-o-user class="w-5 h-5" />
                         Data Pribadi
                     </a>
                 </li>
-                <!-- Dokumen Saya Group -->
+                <!-- Dokumen Saya Group - Lecturer Only -->
                 <li>
                     <div class="py-1">
                         <span class="text-xs font-medium text-gray-500 uppercase tracking-wider">Dokumen Saya</span>
@@ -114,7 +117,26 @@
                         Persetujuan Studi Lanjut
                     </a>
                 </li>
-                <!-- Administrasi Dokumen Group -->
+                @endif
+
+                <!-- Fallback for users without employee data or not authenticated -->
+                @if(!Auth::check() || !Auth::user()->employee)
+                <!-- Default menu items for guests or users without employee records -->
+                <li>
+                    <div class="py-1 mt-3">
+                        <span class="text-xs font-medium text-gray-500 uppercase tracking-wider">Menu Umum</span>
+                    </div>
+                    <a href="/help" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)]">
+                        <x-heroicon-o-question-mark-circle class="w-5 h-5" />
+                        Bantuan
+                    </a>
+                </li>
+                @endif
+                @endauth
+                <!-- Non-Lecturer Role Menu Items -->
+                @auth
+                @if(Auth::user()->employee && Auth::user()->employee->role !== 'lecturer')
+                <!-- Administrasi Dokumen Group - Non-Lecturer Only -->
                 <li>
                     <div class="py-1 mt-3">
                         <span class="text-xs font-medium text-gray-500 uppercase tracking-wider">Administrasi Dokumen</span>
@@ -132,7 +154,7 @@
                         Verifikasi Dokumen
                     </a>
                 </li>
-                <!-- Monitoring & Laporan Group -->
+                <!-- Monitoring & Laporan Group - Non-Lecturer Only -->
                 <li>
                     <div class="py-1 mt-3">
                         <span class="text-xs font-medium text-gray-500 uppercase tracking-wider">Monitoring & Laporan</span>
@@ -154,6 +176,8 @@
                         Audit & Log
                     </a>
                 </li>
+                @endif
+                @endauth
             </ul>
         </nav>
     </aside>

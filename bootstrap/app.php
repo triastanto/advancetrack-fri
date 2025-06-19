@@ -11,7 +11,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        //
+        // Register custom middleware aliases
+        $middleware->alias([
+            'role' => \App\Http\Middleware\RoleBasedAccess::class,
+            'lecturer.only' => \App\Http\Middleware\LecturerOnly::class,
+            'non.lecturer.only' => \App\Http\Middleware\NonLecturerOnly::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

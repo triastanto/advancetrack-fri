@@ -23,32 +23,32 @@ Route::get('/', function () {
 // Main Routes
 Route::middleware('auth')->group(function () {
     Route::view('dashboard', 'dashboard')->name('dashboard');
-    Route::view('lecturer', 'lecturer')->name('lecturer');
-    Route::view('verification', 'pages.administrations.verification')->name('verification');
 
-    // Data Pribadi Routes
-    Route::view('profile','profile.index')->name('profile.index');
-    Route::view('profile/education', 'profile.education')->name('profile.education');
-    Route::view('profile/contact', 'profile.contact')->name('profile.contact');
+    // Data Pribadi Routes - Lecturer Only
+    Route::middleware('lecturer.only')->group(function () {
+        Route::view('profile','profile.index')->name('profile.index');
+        Route::view('profile/education', 'profile.education')->name('profile.education');
+        Route::view('profile/contact', 'profile.contact')->name('profile.contact');
+    });
 });
 
-// Dokumen Saya Routes
-Route::prefix('documents')->name('documents.')->middleware('auth')->group(function () {
+// Dokumen Saya Routes - Lecturer Only
+Route::prefix('documents')->name('documents.')->middleware(['auth', 'lecturer.only'])->group(function () {
     Route::view('study-requirements', 'pages.documents.study-requirements')->name('study-requirements');
     Route::view('semester-reports', 'pages.documents.semester-reports')->name('semester-reports');
     Route::view('final-reports', 'pages.documents.final-reports')->name('final-reports');
     Route::view('approval-documents', 'pages.documents.approval-documents')->name('approval-documents');
 });
 
-// Administrasi Dokumen Routes
-Route::prefix('administrations')->name('administrations.')->middleware('auth')->group(function () {
+// Administrasi Dokumen Routes - Non-Lecturer Only
+Route::prefix('administrations')->name('administrations.')->middleware(['auth', 'non.lecturer.only'])->group(function () {
     Route::view('lecturers', 'pages.administrations.lecturers')->name('lecturers');
     Route::view('upload', 'pages.administrations.upload')->name('upload');
     Route::view('verification', 'pages.administrations.verification')->name('verification');
 });
 
-// Monitoring & Laporan Routes
-Route::prefix('reports')->name('reports.')->middleware('auth')->group(function () {
+// Monitoring & Laporan Routes - Non-Lecturer Only
+Route::prefix('reports')->name('reports.')->middleware(['auth', 'non.lecturer.only'])->group(function () {
     Route::view('/', 'reports.index')->name('index');
     Route::view('verification-status', 'reports.verification-status')->name('verification-status');
     Route::view('activity-logs', 'reports.activity-logs')->name('activity-logs');

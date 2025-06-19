@@ -40,19 +40,10 @@
     <x-documents.documents-table-enhanced
         :documents="$documents"
         :can-manage-workflow="$canManageWorkflow"
-        title="Dokumen"
+        title="Dokumen Persetujuan Studi Lanjut"
         empty-message="Belum ada dokumen Persetujuan Studi Lanjut yang tersedia. Silakan hubungi Staf SDM & Keuangan untuk informasi lebih lanjut." />
 
-    {{-- View Document Modal --}}
-    <x-documents.document-view-modal
-        :modal-open="$viewModalOpen"
-        :document="$currentDocument"
-        :show-workflow-history="$showWorkflowHistory" />
-
-    {{-- Workflow Transition Modal --}}
-    <x-workflow.workflow-transition-modal
-        :modal-open="$workflowModalOpen"
-        :document="$currentDocument"
-        :selected-transition="$selectedTransition"
-        :transition-comment="$transitionComment" />
+    {{-- Modular Components (Event-driven) --}}
+    <livewire:components.document.document-view-modal />
+    <livewire:components.workflow.workflow-transition-modal />
 </div>

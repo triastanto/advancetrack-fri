@@ -5,6 +5,7 @@ namespace App\Livewire\Base;
 use App\Traits\HasEmployeeAuthentication;
 use App\Traits\HasWorkflowManagement;
 use Livewire\Component;
+use Illuminate\Support\Facades\Log;
 
 abstract class WorkflowComponent extends Component
 {
@@ -196,5 +197,81 @@ abstract class WorkflowComponent extends Component
     protected function isRejectedState(): bool
     {
         return $this->model->isInRejectedState();
+    }
+
+    /**
+     * Get workflow validation rules
+     */
+    protected function getWorkflowValidationRules(): array
+    {
+        return [
+            'workflow_comment' => 'nullable|string|max:1000',
+            'workflow_transition_id' => 'required|integer|exists:workflow_transitions,id'
+        ];
+    }
+
+    /**
+     * Handle workflow errors
+     */
+    protected function handleWorkflowError(\Exception $e): void
+    {
+        $this->addError('workflow', $e->getMessage());
+        Log::error('Workflow error: ' . $e->getMessage(), [
+            'component' => static::class,
+            'trace' => $e->getTraceAsString()
+        ]);
+    }
+
+    /**
+     * Apply workflow transition with error handling
+     */
+    protected function applyWorkflowTransition($transitionId, $comment = null): bool
+    {
+        try {
+            $this->setWorkflowTransitionId($transitionId);
+            $this->setWorkflowComment($comment);
+            
+            $this->validate($this->getWorkflowValidationRules());
+            
+            $result = $this->applyTransition();
+            
+            if ($result) {
+                $this->dispatch('workflowTransitionApplied', [
+                    'transitionId' => $transitionId,
+                    'comment' => $comment
+                ]);
+            }
+            
+            return $result;
+        } catch (\Exception $e) {
+            $this->handleWorkflowError($e);
+            return false;
+        }
+    }
+
+    /**
+     * Apply transition - override in child classes
+     */
+    protected function applyTransition(): bool
+    {
+        // Override in child classes
+        return true;
+    }
+
+    /**
+     * Get workflow status for display
+     */
+    public function getWorkflowStatus(): array
+    {
+        return [
+            'currentState' => $this->getCurrentStateLabel(),
+            'currentColor' => $this->getCurrentStateColor(),
+            'currentIcon' => $this->getCurrentStateIcon(),
+            'availableTransitions' => $this->getAvailableTransitions(),
+            'isDraft' => $this->isDraftState(),
+            'isPending' => $this->isPendingState(),
+            'isVerified' => $this->isVerifiedState(),
+            'isRejected' => $this->isRejectedState(),
+        ];
     }
 }

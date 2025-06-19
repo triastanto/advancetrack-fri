@@ -73,7 +73,15 @@
                                     
                                     foreach ($availableDocumentTypes as $docType) {
                                         $docStatus = $completionStatus['details'][$docType->name] ?? null;
-                                        if ($docStatus && ($docStatus['uploaded'] ?? false)) {
+                                        
+                                        // Check if there's a document for this document type in this specific semester
+                                        $semesterDocument = null;
+                                        if ($docStatus && isset($docStatus['all_documents'])) {
+                                            // Look for a document that belongs to this semester
+                                            $semesterDocument = $docStatus['all_documents']->firstWhere('semester', $semester);
+                                        }
+                                        
+                                        if ($semesterDocument && isset($semesterDocument->id)) {
                                             $semesterCompleted++;
                                         }
                                     }
@@ -94,38 +102,30 @@
                                 @foreach ($availableDocumentTypes as $docType)
                                     @php
                                         $docStatus = $completionStatus['details'][$docType->name] ?? null;
-                                        $isUploaded = $docStatus && ($docStatus['uploaded'] ?? false);
-                                        $stateInfo = $docStatus['state_info'] ?? null;
+                                        
+                                        // Find document for this specific semester
+                                        $semesterDocument = null;
+                                        if ($docStatus && isset($docStatus['all_documents'])) {
+                                            $semesterDocument = $docStatus['all_documents']->firstWhere('semester', $semester);
+                                        }
+                                        
+                                        $isUploaded = $semesterDocument !== null && isset($semesterDocument->id);
                                     @endphp
                                     
                                     <div class="flex items-center">
-                                        @if ($isUploaded && $stateInfo)
-                                            @php
-                                                $iconClass = match($stateInfo['id'] ?? null) {
-                                                    1 => 'text-gray-500',
-                                                    2 => 'text-yellow-500',
-                                                    3 => 'text-green-500',
-                                                    4 => 'text-red-500',
-                                                    default => 'text-gray-500'
-                                                };
-                                            @endphp
-                                            @switch($stateInfo['id'] ?? null)
-                                                @case(3)
-                                                    <x-heroicon-s-check-circle class="h-4 w-4 {{ $iconClass }} mr-2" />
-                                                    @break
-                                                @case(2)
-                                                    <x-heroicon-s-clock class="h-4 w-4 {{ $iconClass }} mr-2" />
-                                                    @break
-                                                @case(4)
-                                                    <x-heroicon-s-x-circle class="h-4 w-4 {{ $iconClass }} mr-2" />
-                                                    @break
-                                                @default
-                                                    <x-heroicon-s-pencil class="h-4 w-4 {{ $iconClass }} mr-2" />
-                                            @endswitch
+                                        @if ($isUploaded && $semesterDocument && isset($semesterDocument->id))
+                                            <div class="flex items-center">
+                                                <x-workflow.workflow-status :document="$semesterDocument" :icon-only="true" />
+                                                <span class="text-sm ml-2">{{ $docType->display_name }}</span>
+                                            </div>
                                         @else
-                                            <x-heroicon-s-x-circle class="h-4 w-4 text-gray-300 mr-2" />
+                                            <div class="flex items-center">
+                                                <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 text-gray-400">
+                                                    <x-heroicon-s-minus class="w-4 h-4" />
+                                                </span>
+                                                <span class="text-sm ml-2">{{ $docType->display_name }}</span>
+                                            </div>
                                         @endif
-                                        <span class="text-sm">{{ $docType->display_name }}</span>
                                     </div>
                                 @endforeach
                             </div>
@@ -163,41 +163,21 @@
                             @php
                                 $docStatus = $completionStatus['details'][$docType->name] ?? null;
                                 $isUploaded = $docStatus['uploaded'] ?? false;
-                                $stateInfo = $docStatus['state_info'] ?? null;
                             @endphp
                             
-                            @if ($isUploaded && $stateInfo)
-                                {{-- Show actual workflow state icon --}}
-                                @php
-                                    $iconClass = match($stateInfo['id'] ?? null) {
-                                        1 => 'text-gray-500',
-                                        2 => 'text-yellow-500',
-                                        3 => 'text-green-500',
-                                        4 => 'text-red-500',
-                                        default => 'text-gray-500'
-                                    };
-                                @endphp
-                                @switch($stateInfo['id'] ?? null)
-                                    @case(1)
-                                        <x-heroicon-s-pencil class="h-5 w-5 {{ $iconClass }} mr-2" />
-                                        @break
-                                    @case(2)
-                                        <x-heroicon-s-clock class="h-5 w-5 {{ $iconClass }} mr-2" />
-                                        @break
-                                    @case(3)
-                                        <x-heroicon-s-check-circle class="h-5 w-5 {{ $iconClass }} mr-2" />
-                                        @break
-                                    @case(4)
-                                        <x-heroicon-s-x-circle class="h-5 w-5 {{ $iconClass }} mr-2" />
-                                        @break
-                                    @default
-                                        <x-heroicon-s-question-mark-circle class="h-5 w-5 {{ $iconClass }} mr-2" />
-                                @endswitch
+                            @if ($isUploaded && $docStatus['document'])
+                                <div class="flex items-center">
+                                    <x-workflow.workflow-status :document="$docStatus['document']" :icon-only="true" />
+                                    <span class="text-sm ml-2">{{ $docType->display_name }}</span>
+                                </div>
                             @else
-                                {{-- Show gray circle for not uploaded --}}
-                                <x-heroicon-s-x-circle class="h-5 w-5 text-gray-300 mr-2" />
+                                <div class="flex items-center">
+                                    <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 text-gray-400">
+                                        <x-heroicon-s-minus class="w-4 h-4" />
+                                    </span>
+                                    <span class="text-sm ml-2">{{ $docType->display_name }}</span>
+                                </div>
                             @endif
-                            <span class="text-sm">{{ $docType->display_name }}</span>
                         </div>
                     @endforeach
                 </div>

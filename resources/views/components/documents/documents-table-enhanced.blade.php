@@ -75,39 +75,19 @@
                                 </td>
                             @elseif($mode === 'semester' || $showSemester)
                                 {{-- Semester mode columns --}}
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-[var(--color-text-main)]">
+                                    Semester {{ $document->semester ?? 'N/A' }}
+                                </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                        Semester {{ $document->semester ?? 'N/A' }}
+                                        {{ $document->documentType->display_name ?? 'Unknown' }}
                                     </span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-[var(--color-text-main)]">
-                                    {{ $document->documentType->display_name ?? 'Unknown' }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-[var(--color-text-secondary)]">
                                     {{ $document->created_at->format('d M Y, H:i') }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    @php
-                                        $statusColors = [
-                                            1 => 'bg-gray-100 text-gray-800',
-                                            2 => 'bg-yellow-100 text-yellow-800',
-                                            3 => 'bg-green-100 text-green-800',
-                                            4 => 'bg-red-100 text-red-800'
-                                        ];
-                                        $statusColor = $statusColors[$document->state_id] ?? 'bg-gray-100 text-gray-800';
-                                        
-                                        // Helper function or get from Livewire component
-                                        $stateLabels = [
-                                            1 => 'Draft',
-                                            2 => 'Diajukan',
-                                            3 => 'Disetujui',
-                                            4 => 'Ditolak'
-                                        ];
-                                        $stateLabel = $stateLabels[$document->state_id] ?? 'Unknown';
-                                    @endphp
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statusColor }}">
-                                        {{ $stateLabel }}
-                                    </span>
+                                    <x-workflow.workflow-status :document="$document" />
                                 </td>
                             @else
                                 {{-- Default mode columns --}}
@@ -177,8 +157,18 @@
                                                         <x-heroicon-o-check-circle class="w-4 h-4" />
                                                     @elseif($transition['icon'] == 'x-circle')
                                                         <x-heroicon-o-x-circle class="w-4 h-4" />
-                                                    @else
+                                                    @elseif($transition['icon'] == 'clock')
+                                                        <x-heroicon-o-clock class="w-4 h-4" />
+                                                    @elseif($transition['icon'] == 'document' || $transition['icon'] == 'document-text')
+                                                        <x-heroicon-o-document-text class="w-4 h-4" />
+                                                    @elseif($transition['icon'] == 'edit' || $transition['icon'] == 'pencil')
+                                                        <x-heroicon-o-pencil class="w-4 h-4" />
+                                                    @elseif($transition['icon'] == 'upload' || $transition['icon'] == 'cloud-arrow-up')
+                                                        <x-heroicon-o-cloud-arrow-up class="w-4 h-4" />
+                                                    @elseif($transition['icon'] == 'refresh-cw' || $transition['icon'] == 'arrow-path')
                                                         <x-heroicon-o-arrow-path class="w-4 h-4" />
+                                                    @else
+                                                        <x-heroicon-o-question-mark-circle class="w-4 h-4" />
                                                     @endif
                                                 </button>
                                             @elseif(count($transitions) > 1)
@@ -220,8 +210,18 @@
                                                                         <x-heroicon-o-check-circle class="w-4 h-4 mr-3 {{ $iconColor }}" />
                                                                     @elseif($transition['icon'] == 'x-circle')
                                                                         <x-heroicon-o-x-circle class="w-4 h-4 mr-3 {{ $iconColor }}" />
-                                                                    @else
+                                                                    @elseif($transition['icon'] == 'clock')
+                                                                        <x-heroicon-o-clock class="w-4 h-4 mr-3 {{ $iconColor }}" />
+                                                                    @elseif($transition['icon'] == 'document' || $transition['icon'] == 'document-text')
+                                                                        <x-heroicon-o-document-text class="w-4 h-4 mr-3 {{ $iconColor }}" />
+                                                                    @elseif($transition['icon'] == 'edit' || $transition['icon'] == 'pencil')
+                                                                        <x-heroicon-o-pencil class="w-4 h-4 mr-3 {{ $iconColor }}" />
+                                                                    @elseif($transition['icon'] == 'upload' || $transition['icon'] == 'cloud-arrow-up')
+                                                                        <x-heroicon-o-cloud-arrow-up class="w-4 h-4 mr-3 {{ $iconColor }}" />
+                                                                    @elseif($transition['icon'] == 'refresh-cw' || $transition['icon'] == 'arrow-path')
                                                                         <x-heroicon-o-arrow-path class="w-4 h-4 mr-3 {{ $iconColor }}" />
+                                                                    @else
+                                                                        <x-heroicon-o-question-mark-circle class="w-4 h-4 mr-3 {{ $iconColor }}" />
                                                                     @endif
                                                                     {{ $transition['label'] }}
                                                                 </button>

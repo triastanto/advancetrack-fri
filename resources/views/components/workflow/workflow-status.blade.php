@@ -1,4 +1,4 @@
-@props(['model', 'document'])
+@props(['model', 'document', 'iconOnly' => false])
 
 @php
     // Support both 'model' and 'document' props for backward compatibility
@@ -9,68 +9,62 @@
     }
     
     $stateInfo = $workflowModel->getWorkflowStateInfo();
-    $workflowName = $workflowModel->getWorkflowName();
-    $workflowConfig = config("workflows.workflows.{$workflowName}");
-    $workflowLabel = $workflowConfig['name'] ?? ucfirst(str_replace('_', ' ', $workflowName));
     
-    // Map semantic color names to Tailwind CSS color names
-    $colorMap = [
-        'secondary' => 'gray',
-        'warning' => 'yellow',
-        'success' => 'green',
-        'danger' => 'red',
-        'info' => 'blue',
-        'primary' => 'blue',
+    // Map semantic color names to Tailwind CSS background/text color classes
+    $colorClasses = [
+        'secondary' => 'bg-blue-100 text-blue-800', // Changed from gray to blue for draft status
+        'warning' => 'bg-yellow-100 text-yellow-800',
+        'success' => 'bg-green-100 text-green-800',
+        'danger' => 'bg-red-100 text-red-800',
+        'info' => 'bg-blue-100 text-blue-800',
+        'primary' => 'bg-blue-100 text-blue-800',
+        'gray' => 'bg-blue-100 text-blue-800', // Changed from gray to blue
+        'yellow' => 'bg-yellow-100 text-yellow-800',
+        'green' => 'bg-green-100 text-green-800',
+        'red' => 'bg-red-100 text-red-800',
+        'blue' => 'bg-blue-100 text-blue-800',
     ];
     
-    $iconColor = $colorMap[$stateInfo['color']] ?? $stateInfo['color'];
+    $statusColor = $colorClasses[$stateInfo['color']] ?? 'bg-blue-100 text-blue-800'; // Default changed to blue
+    
+    // Determine icon size and spacing based on mode
+    $iconClass = $iconOnly ? 'w-4 h-4' : 'w-3 h-3 mr-1';
+    $containerClass = $iconOnly 
+        ? 'inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium ' . $statusColor
+        : 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ' . $statusColor;
 @endphp
 
-<div class="workflow-status">
-    <div class="flex items-center space-x-2">
-        <div class="text-sm text-gray-600">{{ $workflowLabel }}:</div>
-        <div class="flex items-center space-x-1">
-            @switch($stateInfo['icon'])
-                @case('clock')
-                    <x-heroicon-o-clock class="w-4 h-4 text-{{ $iconColor }}-500" />
-                    @break
-                @case('check-circle')
-                    <x-heroicon-o-check-circle class="w-4 h-4 text-{{ $iconColor }}-500" />
-                    @break
-                @case('x-circle')
-                    <x-heroicon-o-x-circle class="w-4 h-4 text-{{ $iconColor }}-500" />
-                    @break
-                @case('document')
-                @case('document-text')
-                    <x-heroicon-o-document-text class="w-4 h-4 text-{{ $iconColor }}-500" />
-                    @break
-                @case('edit')
-                @case('pencil')
-                    <x-heroicon-o-pencil class="w-4 h-4 text-{{ $iconColor }}-500" />
-                    @break
-                @case('upload')
-                @case('cloud-arrow-up')
-                    <x-heroicon-o-cloud-arrow-up class="w-4 h-4 text-{{ $iconColor }}-500" />
-                    @break
-                @case('refresh-cw')
-                @case('arrow-path')
-                    <x-heroicon-o-arrow-path class="w-4 h-4 text-{{ $iconColor }}-500" />
-                    @break
-                @default
-                    <x-heroicon-o-question-mark-circle class="w-4 h-4 text-{{ $iconColor }}-500" />
-            @endswitch
-            <span class="text-sm font-medium text-{{ $iconColor }}-700">
-                {{ $stateInfo['label'] }}
-            </span>
-        </div>
-    </div>
-    
-    @if($workflowModel->isInTerminalState())
-        <div class="mt-1">
-            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                <x-heroicon-s-check-circle class="w-3 h-3 mr-1" />
-                Completed
-            </span>
-        </div>
-    @endif
-</div>
+<span class="{{ $containerClass }}" title="{{ $iconOnly ? $stateInfo['label'] : '' }}">
+    @switch($stateInfo['icon'])
+        @case('clock')
+            <x-heroicon-s-clock class="{{ $iconClass }}" />
+            @break
+        @case('check-circle')
+            <x-heroicon-s-check-circle class="{{ $iconClass }}" />
+            @break
+        @case('x-circle')
+            <x-heroicon-s-x-circle class="{{ $iconClass }}" />
+            @break
+        @case('document')
+        @case('document-text')
+            <x-heroicon-s-document-text class="{{ $iconClass }}" />
+            @break
+        @case('edit')
+        @case('pencil')
+            <x-heroicon-s-pencil class="{{ $iconClass }}" />
+            @break
+        @case('upload')
+        @case('cloud-arrow-up')
+            <x-heroicon-s-cloud-arrow-up class="{{ $iconClass }}" />
+            @break
+        @case('refresh-cw')
+        @case('arrow-path')
+            <x-heroicon-s-arrow-path class="{{ $iconClass }}" />
+            @break
+        @default
+            <x-heroicon-s-question-mark-circle class="{{ $iconClass }}" />
+    @endswitch
+    @unless($iconOnly)
+        {{ $stateInfo['label'] }}
+    @endunless
+</span>

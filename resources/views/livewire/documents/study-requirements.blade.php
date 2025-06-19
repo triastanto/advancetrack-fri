@@ -24,28 +24,11 @@
     <x-documents.documents-table-enhanced
         :documents="$documents"
         :can-manage-workflow="$canManageWorkflow"
-        title="Dokumen"
+        title="Dokumen Persyaratan Studi Lanjut"
         empty-message="Tidak ada dokumen persyaratan studi lanjut yang telah diunggah." />
 
-    {{-- Enhanced Upload Document Modal --}}
-    <x-documents.document-upload-modal-enhanced
-        :modal-open="$uploadModalOpen"
-        :available-document-types="$availableDocumentTypes"
-        :selected-document-type-id="$selectedDocumentTypeId"
-        :file-name="$fileName"
-        :document-file="$documentFile"
-        :supports-semester="false" />
-
-    {{-- View Document Modal --}}
-    <x-documents.document-view-modal
-        :modal-open="$viewModalOpen"
-        :document="$currentDocument"
-        :show-workflow-history="$showWorkflowHistory" />
-
-    {{-- Workflow Transition Modal --}}
-    <x-workflow.workflow-transition-modal
-        :modal-open="$workflowModalOpen"
-        :document="$currentDocument"
-        :selected-transition="$selectedTransition"
-        :transition-comment="$transitionComment" />
+    {{-- Modular Components (Event-driven) --}}
+    <livewire:components.document.document-upload-modal />
+    <livewire:components.document.document-view-modal />
+    <livewire:components.workflow.workflow-transition-modal />
 </div>

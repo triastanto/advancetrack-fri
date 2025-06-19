@@ -108,8 +108,18 @@
                                                         <x-heroicon-o-check-circle class="w-4 h-4 mr-3 {{ $iconColor }}" />
                                                     @elseif($transition['icon'] == 'x-circle')
                                                         <x-heroicon-o-x-circle class="w-4 h-4 mr-3 {{ $iconColor }}" />
-                                                    @else
+                                                    @elseif($transition['icon'] == 'clock')
+                                                        <x-heroicon-o-clock class="w-4 h-4 mr-3 {{ $iconColor }}" />
+                                                    @elseif($transition['icon'] == 'document' || $transition['icon'] == 'document-text')
+                                                        <x-heroicon-o-document-text class="w-4 h-4 mr-3 {{ $iconColor }}" />
+                                                    @elseif($transition['icon'] == 'edit' || $transition['icon'] == 'pencil')
+                                                        <x-heroicon-o-pencil class="w-4 h-4 mr-3 {{ $iconColor }}" />
+                                                    @elseif($transition['icon'] == 'upload' || $transition['icon'] == 'cloud-arrow-up')
+                                                        <x-heroicon-o-cloud-arrow-up class="w-4 h-4 mr-3 {{ $iconColor }}" />
+                                                    @elseif($transition['icon'] == 'refresh-cw' || $transition['icon'] == 'arrow-path')
                                                         <x-heroicon-o-arrow-path class="w-4 h-4 mr-3 {{ $iconColor }}" />
+                                                    @else
+                                                        <x-heroicon-o-question-mark-circle class="w-4 h-4 mr-3 {{ $iconColor }}" />
                                                     @endif
                                                     {{ $transition['label'] }}
                                                 </button>
@@ -128,8 +138,18 @@
                                         <x-heroicon-o-check-circle class="w-4 h-4" />
                                     @elseif($transition['icon'] == 'x-circle')
                                         <x-heroicon-o-x-circle class="w-4 h-4" />
-                                    @else
+                                    @elseif($transition['icon'] == 'clock')
+                                        <x-heroicon-o-clock class="w-4 h-4" />
+                                    @elseif($transition['icon'] == 'document' || $transition['icon'] == 'document-text')
+                                        <x-heroicon-o-document-text class="w-4 h-4" />
+                                    @elseif($transition['icon'] == 'edit' || $transition['icon'] == 'pencil')
+                                        <x-heroicon-o-pencil class="w-4 h-4" />
+                                    @elseif($transition['icon'] == 'upload' || $transition['icon'] == 'cloud-arrow-up')
+                                        <x-heroicon-o-cloud-arrow-up class="w-4 h-4" />
+                                    @elseif($transition['icon'] == 'refresh-cw' || $transition['icon'] == 'arrow-path')
                                         <x-heroicon-o-arrow-path class="w-4 h-4" />
+                                    @else
+                                        <x-heroicon-o-question-mark-circle class="w-4 h-4" />
                                     @endif
                                 </button>
                             @endif
@@ -208,8 +228,18 @@
                                         <x-heroicon-o-check-circle class="w-4 h-4" />
                                     @elseif($transition['icon'] == 'x-circle')
                                         <x-heroicon-o-x-circle class="w-4 h-4" />
-                                    @else
+                                    @elseif($transition['icon'] == 'clock')
+                                        <x-heroicon-o-clock class="w-4 h-4" />
+                                    @elseif($transition['icon'] == 'document')
+                                        <x-heroicon-o-document-text class="w-4 h-4" />
+                                    @elseif($transition['icon'] == 'pencil')
+                                        <x-heroicon-o-pencil class="w-4 h-4" />
+                                    @elseif($transition['icon'] == 'upload')
+                                        <x-heroicon-o-cloud-arrow-up class="w-4 h-4" />
+                                    @elseif($transition['icon'] == 'arrow-path')
                                         <x-heroicon-o-arrow-path class="w-4 h-4" />
+                                    @else
+                                        <x-heroicon-o-question-mark-circle class="w-4 h-4" />
                                     @endif
                                 </button>
                             @elseif(count($transitions) > 1)
@@ -251,8 +281,18 @@
                                                         <x-heroicon-o-check-circle class="w-4 h-4 mr-3 {{ $iconColor }}" />
                                                     @elseif($transition['icon'] == 'x-circle')
                                                         <x-heroicon-o-x-circle class="w-4 h-4 mr-3 {{ $iconColor }}" />
-                                                    @else
+                                                    @elseif($transition['icon'] == 'clock')
+                                                        <x-heroicon-o-clock class="w-4 h-4 mr-3 {{ $iconColor }}" />
+                                                    @elseif($transition['icon'] == 'document')
+                                                        <x-heroicon-o-document-text class="w-4 h-4 mr-3 {{ $iconColor }}" />
+                                                    @elseif($transition['icon'] == 'pencil')
+                                                        <x-heroicon-o-pencil class="w-4 h-4 mr-3 {{ $iconColor }}" />
+                                                    @elseif($transition['icon'] == 'upload')
+                                                        <x-heroicon-o-cloud-arrow-up class="w-4 h-4 mr-3 {{ $iconColor }}" />
+                                                    @elseif($transition['icon'] == 'arrow-path')
                                                         <x-heroicon-o-arrow-path class="w-4 h-4 mr-3 {{ $iconColor }}" />
+                                                    @else
+                                                        <x-heroicon-o-question-mark-circle class="w-4 h-4 mr-3 {{ $iconColor }}" />
                                                     @endif
                                                     {{ $transition['label'] }}
                                                 </button>

@@ -27,14 +27,13 @@
 
     {{-- Verification Document Modal --}}
     <x-verification.verification-document-modal
-        :modal-open="$showModal"
+        :modal-open="$isModalOpen"
         :document="$selectedDocument"
         :verification-note="$verificationNote" />
 
     {{-- Workflow Transition Modal --}}
-    <x-workflow.workflow-transition-modal
-        :modal-open="$workflowModalOpen"
-        :document="$workflowDocument"
-        :selected-transition="$workflowTransitionId"
-        :transition-comment="$workflowComment" />
+    <livewire:components.workflow.workflow-transition-modal />
+
+    {{-- Document View Modal --}}
+    <livewire:components.document.document-view-modal />
 </div>

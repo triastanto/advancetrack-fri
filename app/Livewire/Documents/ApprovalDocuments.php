@@ -6,6 +6,8 @@ use App\Models\Document;
 use App\Models\DocumentType;
 use App\Constants\DocumentTypeConstants;
 use App\Livewire\Base\WorkflowComponent;
+use App\Traits\HasDocumentManagement;
+use App\Traits\HasCommonValidation;
 use Carbon\Carbon;
 use Livewire\WithPagination;
 use Illuminate\Support\Facades\Log;
@@ -13,22 +15,23 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 class ApprovalDocuments extends WorkflowComponent
 {
-    use WithPagination;
+    use WithPagination, HasDocumentManagement, HasCommonValidation;
 
-    public $viewModalOpen = false;
-    public $currentDocument;
     public $availableDocumentTypes;
     public $selectedTransition;
     public $transitionComment = '';
     public $showWorkflowHistory = false;
 
-    protected $rules = [
-        'transitionComment' => 'nullable|string|max:1000'
+    protected $listeners = [
+        'document:uploaded' => 'handleDocumentUploaded',
+        'document:deleted' => 'handleDocumentDeleted', 
+        'document:submitted' => 'handleDocumentSubmitted',
+        'workflow:transition-applied' => 'handleTransitionApplied',
+        'document-list:refresh' => 'refreshData'
     ];
 
-    protected $messages = [
-        'transitionComment.max' => 'Komentar maksimal 1000 karakter.',
-    ];
+    protected $rules = [];
+    protected $messages = [];
 
     // Helper method to get Approval document types
     protected function getapprovalDocumentTypes()
@@ -49,79 +52,81 @@ class ApprovalDocuments extends WorkflowComponent
         $this->availableDocumentTypes = $this->getapprovalDocumentTypes();
     }
 
-    // Modal Methods
-    public function openViewModal($documentId)
+    // Event Handlers for Modular Components
+    public function handleDocumentUploaded($data)
     {
-        $this->currentDocument = Document::findOrFail($documentId);
-        $this->viewModalOpen = true;
+        session()->flash('message', $data['message'] ?? 'Dokumen berhasil diunggah.');
+        $this->refreshData();
     }
 
-    public function closeViewModal()
+    public function handleDocumentDeleted($data)
     {
-        $this->viewModalOpen = false;
-        $this->currentDocument = null;
-        $this->showWorkflowHistory = false;
+        session()->flash('message', $data['message'] ?? 'Dokumen berhasil dihapus.');
+        $this->refreshData();
+    }
+
+    public function handleDocumentSubmitted($data)
+    {
+        session()->flash('message', $data['message'] ?? 'Dokumen berhasil dikirim.');
+        $this->refreshData();
+    }
+
+    public function handleTransitionApplied($data)
+    {
+        session()->flash('success', $data['message'] ?? 'Status dokumen berhasil diperbarui.');
+        $this->refreshData();
+    }
+
+    public function refreshData()
+    {
+        $this->resetPage();
+        // Livewire will automatically re-render the component
+    }
+
+    // Modal Methods - Dispatch to modular components
+    public function openViewModal($documentId)
+    {
+        $this->dispatch('document-view-modal:open', ['documentId' => $documentId]);
+    }
+
+    public function showDocument($documentId)
+    {
+        $this->openViewModal($documentId);
     }
 
     public function openWorkflowModal($documentId, $transitionId)
     {
-        $this->currentDocument = Document::with(['employee.user', 'employee.studyPrograms', 'documentType'])->findOrFail($documentId);
-        $this->selectedTransition = $transitionId;
-        $this->transitionComment = '';
-        $this->workflowModalOpen = true;
+        $this->dispatch('workflow-transition-modal:open', [
+            'documentId' => $documentId,
+            'transitionId' => $transitionId
+        ]);
     }
 
-    public function closeWorkflowModal()
-    {
-        $this->workflowModalOpen = false;
-        $this->currentDocument = null;
-        $this->selectedTransition = null;
-        $this->transitionComment = '';
-    }
-
-    public function toggleWorkflowHistory()
-    {
-        $this->showWorkflowHistory = !$this->showWorkflowHistory;
-    }
-
-    public function getActiveStudyInfo()
+    // Status and Info Methods - Using traits
+    public function getActiveStudyInfoForEmployee()
     {
         try {
             $employee = $this->getEmployee();
-
-            $activeStudy = $employee->studyCalendars()
-                ->where('study_status', 'active')
-                ->latest()
-                ->first();
-
-            if (!$activeStudy) {
-                $activeStudy = $employee->studyCalendars()
-                    ->latest()
-                    ->first();
-
-                if (!$activeStudy) {
-                    return null;
-                }
-            }
-
-            $studyProgram = $employee->studyPrograms()->first();
-            $programName = $studyProgram ? $studyProgram->name : 'Tidak tersedia';
-
-            $startDate = Carbon::parse($activeStudy->study_start);
-            $now = Carbon::now();
-            $monthsDiff = $startDate->diffInMonths($now);
-            $currentSemester = floor($monthsDiff / 6) + 1;
-
-            return [
-                'program' => $programName,
-                'status' => $activeStudy->study_status,
-                'start_date' => $startDate->format('F Y'),
-                'estimated_end' => Carbon::parse($activeStudy->estimated_study_end)->format('F Y'),
-                'current_semester' => $currentSemester,
-                'has_multiple_studies' => $employee->studyCalendars()->count() > 1,
-            ];
+            return $this->getActiveStudyInfo($employee);
         } catch (\Exception $e) {
             return null;
+        }
+    }
+
+    public function getCompletionStatus()
+    {
+        try {
+            $employee = $this->getEmployee();
+            $documentTypeIds = $this->availableDocumentTypes->pluck('id')->toArray();
+            
+            return $this->getDocumentCompletionStatus($employee, $documentTypeIds);
+        } catch (\Exception $e) {
+            return [
+                'status' => 'Error',
+                'details' => [],
+                'completed_count' => 0,
+                'total_count' => 0
+            ];
         }
     }
 
@@ -143,15 +148,16 @@ class ApprovalDocuments extends WorkflowComponent
             $documentTypes = $this->getapprovalDocumentTypes();
             $documentTypeIds = $documentTypes->pluck('id')->toArray();
 
-            $ApprovalDocuments = Document::where('employee_id', $employee->id)
+            $approvalDocuments = Document::where('employee_id', $employee->id)
                 ->whereIn('document_type_id', $documentTypeIds)
                 ->with(['documentType', 'workflowHistory.user'])
                 ->orderBy('created_at', 'desc')
                 ->paginate(10);
 
             return view('livewire.documents.approval-documents', [
-                'documents' => $ApprovalDocuments,
-                'activeStudyInfo' => $this->getActiveStudyInfo(),
+                'documents' => $approvalDocuments,
+                'activeStudyInfo' => $this->getActiveStudyInfoForEmployee(),
+                'completionStatus' => $this->getCompletionStatus(),
                 'canManageWorkflow' => $this->canUserManageWorkflow()
             ]);
         } catch (\Exception $e) {
@@ -169,6 +175,7 @@ class ApprovalDocuments extends WorkflowComponent
             return view('livewire.documents.approval-documents', [
                 'documents' => $emptyPaginator,
                 'activeStudyInfo' => null,
+                'completionStatus' => ['status' => 'Error', 'details' => []],
                 'canManageWorkflow' => false
             ]);
         }

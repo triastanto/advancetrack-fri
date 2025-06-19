@@ -5,10 +5,10 @@
 ])
 
 <x-ui.modal 
-    show="showModal" 
+    show="modalOpen" 
     max-width="lg" 
     z-index="50" 
-    close-method="$wire.closeModal()">
+    close-method="$wire.closeVerificationModal()">
 
     @if($document)
         <div class="bg-white p-6">

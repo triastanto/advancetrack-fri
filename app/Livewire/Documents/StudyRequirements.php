@@ -6,8 +6,10 @@ use App\Models\Document;
 use App\Models\DocumentType;
 use App\Constants\DocumentTypeConstants;
 use App\Livewire\Base\WorkflowComponent;
+use App\Traits\HasDocumentManagement;
+use App\Traits\HasCommonValidation;
+use App\Facades\WorkflowManager;
 use Carbon\Carbon;
-use Livewire\WithFileUploads;
 use Livewire\WithPagination;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -16,37 +18,33 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 class StudyRequirements extends WorkflowComponent
 {
-    use WithFileUploads, WithPagination;
+    use WithPagination, HasDocumentManagement, HasCommonValidation;
 
-    public $documentFile;
-    public $fileName;
-    public $selectedDocumentTypeId;
-    public $uploadModalOpen = false;
-    public $viewModalOpen = false;
-    public $currentDocument;
     public $availableDocumentTypes;
+    public $selectedDocumentTypeId;
     public $selectedTransition;
     public $transitionComment = '';
-    public $showWorkflowHistory = false;
+    
+    // Modal states for backward compatibility with Blade views
+    public $uploadModalOpen = false;
+    public $viewModalOpen = false;
+    public $workflowModalOpen = false;
+    public $currentDocument;
+    public $fileName = '';
+    public $documentFile;
 
-    protected $rules = [
-        'documentFile' => 'required|file|mimes:pdf|max:10240', // 10MB limit, PDF only
-        'fileName' => 'required|string|max:255',
-        'selectedDocumentTypeId' => 'required|exists:document_types,id',
-        'transitionComment' => 'nullable|string|max:1000'
+    protected $listeners = [
+        'document:uploaded' => 'handleDocumentUploaded',
+        'document:deleted' => 'handleDocumentDeleted', 
+        'document:submitted' => 'handleDocumentSubmitted',
+        'workflow:transition-applied' => 'handleTransitionApplied',
+        'document-submit' => 'handleDocumentSubmit',
+        'document-delete' => 'handleDocumentDelete',
+        'document-list:refresh' => 'refreshData'
     ];
 
-    protected $messages = [
-        'documentFile.required' => 'File dokumen wajib dipilih.',
-        'documentFile.file' => 'File yang dipilih tidak valid.',
-        'documentFile.mimes' => 'File harus berformat PDF.',
-        'documentFile.max' => 'Ukuran file maksimal 10MB.',
-        'fileName.required' => 'Nama dokumen wajib diisi.',
-        'fileName.max' => 'Nama dokumen maksimal 255 karakter.',
-        'selectedDocumentTypeId.required' => 'Jenis dokumen persyaratan studi lanjut wajib dipilih.',
-        'selectedDocumentTypeId.exists' => 'Jenis dokumen yang dipilih tidak valid.',
-        'transitionComment.max' => 'Komentar maksimal 1000 karakter.',
-    ];
+    protected $rules = [];
+    protected $messages = [];
 
     // Helper method to get study requirements document types
     protected function getStudyRequirementDocumentTypes()
@@ -64,250 +62,244 @@ class StudyRequirements extends WorkflowComponent
     public function mount(...$parameters)
     {
         parent::mount(...$parameters);
-        $this->selectedDocumentTypeId = '';
         $this->availableDocumentTypes = $this->getStudyRequirementDocumentTypes();
+        $this->selectedDocumentTypeId = '';
     }
 
-    // Modal Methods
-    public function openUploadModal()
+    // Event Handlers for Modular Components
+    public function handleDocumentUploaded($data)
     {
-        if (!$this->selectedDocumentTypeId) {
-            return;
+        Log::info('handleDocumentUploaded called with data:', $data); // Debug log
+        session()->flash('message', $data['message'] ?? 'Dokumen berhasil diunggah.');
+        $this->refreshData();
+    }
+
+    public function handleDocumentDeleted($data)
+    {
+        session()->flash('message', $data['message'] ?? 'Dokumen berhasil dihapus.');
+        $this->refreshData();
+    }
+
+    public function handleDocumentSubmitted($data)
+    {
+        session()->flash('message', $data['message'] ?? 'Dokumen berhasil dikirim.');
+        $this->refreshData();
+    }
+
+    public function handleTransitionApplied($data)
+    {
+        session()->flash('success', $data['message'] ?? 'Status dokumen berhasil diperbarui.');
+        $this->refreshData();
+    }
+
+    // Event Handlers for Dispatched Events
+    public function handleDocumentSubmit($data)
+    {
+        try {
+            $documentId = $data['documentId'] ?? null;
+            if (!$documentId) {
+                session()->flash('error', 'ID dokumen tidak valid.');
+                return;
+            }
+
+            $document = Document::findOrFail($documentId);
+            $employee = $this->getEmployee();
+            
+            if ($document->employee_id !== $employee->id) {
+                session()->flash('error', 'Anda tidak memiliki akses untuk dokumen ini.');
+                return;
+            }
+
+            if ($document->workflow_state !== 1) { // DRAFT
+                session()->flash('error', 'Dokumen tidak dapat dikirim karena bukan dalam status draft.');
+                return;
+            }
+
+            // Get available transitions and find submit transition
+            $availableTransitions = $document->getAvailableTransitions();
+            Log::info('Available transitions for document:', [
+                'document_id' => $document->id,
+                'current_state' => $document->workflow_state,
+                'transitions' => $availableTransitions
+            ]);
+            
+            $submitTransitionId = null;
+            foreach ($availableTransitions as $transitionId => $transition) {
+                if ($transition['name'] === 'SUBMIT') {
+                    $submitTransitionId = $transitionId;
+                    break;
+                }
+            }
+            
+            if (!$submitTransitionId) {
+                Log::warning('Submit transition not found', [
+                    'document_id' => $document->id,
+                    'available_transitions' => $availableTransitions
+                ]);
+                session()->flash('error', 'Transisi submit tidak tersedia.');
+                return;
+            }
+
+            // Apply the transition
+            $context = [
+                'user_id' => Auth::id(),
+                'comment' => 'Dokumen dikirim untuk verifikasi',
+                'timestamp' => now(),
+                'user_name' => Auth::user()->name,
+            ];
+
+            $document->applyTransition($submitTransitionId, $context);
+            
+            session()->flash('message', 'Dokumen berhasil dikirim untuk verifikasi.');
+            $this->refreshData();
+            
+        } catch (\Exception $e) {
+            session()->flash('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
-
-        $this->uploadModalOpen = true;
-        $this->reset(['fileName', 'documentFile']);
     }
 
-    public function closeUploadModal()
+    public function handleDocumentDelete($data)
     {
-        $this->uploadModalOpen = false;
+        try {
+            $documentId = $data['documentId'] ?? null;
+            if (!$documentId) {
+                session()->flash('error', 'ID dokumen tidak valid.');
+                return;
+            }
+
+            $document = Document::findOrFail($documentId);
+            $employee = $this->getEmployee();
+            
+            if ($document->employee_id !== $employee->id) {
+                session()->flash('error', 'Anda tidak memiliki akses untuk dokumen ini.');
+                return;
+            }
+
+            if ($document->workflow_state !== 1) { // DRAFT
+                session()->flash('error', 'Hanya dokumen dengan status draft yang dapat dihapus.');
+                return;
+            }
+
+            // Delete file from storage
+            if ($document->file_path && Storage::disk('public')->exists($document->file_path)) {
+                Storage::disk('public')->delete($document->file_path);
+            }
+
+            $document->delete();
+            
+            session()->flash('message', 'Dokumen berhasil dihapus.');
+            $this->refreshData();
+            
+        } catch (\Exception $e) {
+            session()->flash('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
+
+    public function refreshData()
+    {
+        $this->resetPage();
+        // Livewire will automatically re-render the component
+    }
+
+    // Modal Methods - Dispatch to modular components
+    public function openUploadModal($documentTypeId = null)
+    {
+        try {
+            $employee = $this->getEmployee();
+            $this->dispatch('document-upload-modal:open', [
+                'documentTypeId' => $documentTypeId ?: $this->selectedDocumentTypeId,
+                'employeeId' => $employee->id,
+                'category' => 'study-requirements'
+            ]);
+        } catch (\Exception $e) {
+            session()->flash('error', $e->getMessage());
+        }
     }
 
     public function openViewModal($documentId)
     {
-        $this->currentDocument = Document::findOrFail($documentId);
-        $this->viewModalOpen = true;
+        $this->dispatch('document-view-modal:open', ['documentId' => $documentId]);
     }
 
-    public function closeViewModal()
+    public function showDocument($documentId)
     {
-        $this->viewModalOpen = false;
-        $this->currentDocument = null;
-        $this->showWorkflowHistory = false;
+        $this->openViewModal($documentId);
     }
 
     public function openWorkflowModal($documentId, $transitionId)
     {
-        $this->currentDocument = Document::with(['employee.user', 'employee.studyPrograms', 'documentType'])->findOrFail($documentId);
-        $this->selectedTransition = $transitionId;
-        $this->transitionComment = '';
-        $this->workflowModalOpen = true;
+        $this->dispatch('workflow-transition-modal:open', [
+            'documentId' => $documentId,
+            'transitionId' => $transitionId
+        ]);
     }
 
-    public function closeWorkflowModal()
-    {
-        $this->workflowModalOpen = false;
-        $this->currentDocument = null;
-        $this->selectedTransition = null;
-        $this->transitionComment = '';
-    }
-
-    public function toggleWorkflowHistory()
-    {
-        $this->showWorkflowHistory = !$this->showWorkflowHistory;
-    }
-
+    // Document Operations - Handle directly instead of dispatching to self
     public function submitDocument($documentId)
+    {
+        $this->handleDocumentSubmit(['documentId' => $documentId]);
+    }
+
+    public function deleteDocument($documentId)
+    {
+        $this->handleDocumentDelete(['documentId' => $documentId]);
+    }
+
+    public function downloadDocument($documentId)
     {
         try {
             $document = Document::findOrFail($documentId);
             
-            if (!$document->isInDraftState()) {
-                session()->flash('error', 'Dokumen tidak dalam status draft.');
+            if (!$document->isInVerifiedState()) {
+                session()->flash('error', 'Dokumen belum diverifikasi.');
                 return;
             }
 
             $employee = $this->getEmployee();
             if ($document->employee_id !== $employee->id) {
-                session()->flash('error', 'Anda tidak memiliki akses untuk mengirim dokumen ini.');
+                session()->flash('error', 'Anda tidak memiliki akses untuk mengunduh dokumen ini.');
                 return;
             }
 
-            if (method_exists($document, 'canTransition') && !$document->canTransition(1)) {
-                session()->flash('error', 'Anda tidak memiliki akses untuk mengirim dokumen ini.');
+            if (!Storage::disk('public')->exists($document->file_path)) {
+                session()->flash('error', 'File dokumen tidak ditemukan.');
                 return;
             }
 
-            $context = [
-                'user_id' => Auth::id(),
-                'comment' => 'Persyaratan studi dikirim untuk verifikasi',
-                'timestamp' => now(),
-                'user_name' => Auth::user()->name,
-            ];
-
-            $document->applyTransition(1, $context);
-            session()->flash('message', 'Persyaratan studi berhasil dikirim untuk verifikasi.');
+            $filePath = Storage::disk('public')->path($document->file_path);
+            return response()->download($filePath, $document->file_name);
         } catch (\Exception $e) {
-            Log::error('Error in submitDocument: ' . $e->getMessage());
-            session()->flash('error', 'Terjadi kesalahan saat mengirim dokumen: ' . $e->getMessage());
+            Log::error('Error in downloadDocument: ' . $e->getMessage());
+            session()->flash('error', 'Terjadi kesalahan saat mengunduh dokumen: ' . $e->getMessage());
         }
     }
 
-    // Document Management Methods
-    public function uploadDocument()
-    {
-        try {
-            $this->validate();
-            $employee = $this->getEmployee();
-
-            if (!$this->documentFile) {
-                throw new \Exception('No file was uploaded.');
-            }
-
-            $filePath = $this->documentFile->store('study-requirements/' . $employee->id, 'public');
-            $documentType = DocumentType::findOrFail($this->selectedDocumentTypeId);
-
-            Document::create([
-                'employee_id' => $employee->id,
-                'document_type_id' => $documentType->id,
-                'file_name' => $this->fileName,
-                'file_path' => $filePath,
-                'state_id' => 1, // DRAFT - workflow will handle this automatically
-            ]);
-
-            $this->closeUploadModal();
-            session()->flash('message', 'Dokumen persyaratan studi lanjut berhasil diunggah sebagai draft. Klik "Kirim untuk Verifikasi" untuk mengirimkan dokumen.');
-
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            throw $e;
-        } catch (\Exception $e) {
-            session()->flash('error', 'Terjadi kesalahan saat mengunggah dokumen: ' . $e->getMessage());
-        }
-    }
-
-    public function deleteDocument($documentId)
-    {
-        try {
-            $document = Document::findOrFail($documentId);
-
-            if (Storage::disk('public')->exists($document->file_path)) {
-                Storage::disk('public')->delete($document->file_path);
-            }
-
-            $document->delete();
-            session()->flash('message', 'Dokumen berhasil dihapus.');
-        } catch (\Exception $e) {
-            session()->flash('error', 'Terjadi kesalahan saat menghapus dokumen: ' . $e->getMessage());
-        }
-    }
-
-    // Status and Info Methods
+    // Status and Info Methods - Using traits
     public function getCompletionStatus()
     {
         try {
             $employee = $this->getEmployee();
-            $documentTypes = $this->getStudyRequirementDocumentTypes();
-            $documentTypeIds = $documentTypes->pluck('id')->toArray();
-
-            $uploadedDocuments = Document::where('employee_id', $employee->id)
-                ->whereIn('document_type_id', $documentTypeIds)
-                ->with('documentType')
-                ->get();
-
-            $completionStatus = [];
-            $allCompleted = true;
-
-            foreach ($this->availableDocumentTypes as $docType) {
-                $document = $uploadedDocuments->where('document_type_id', $docType->id)->first();
-                
-                if ($document) {
-                    $stateInfo = $document->getWorkflowStateInfo();
-                    $completionStatus[$docType->name] = [
-                        'uploaded' => true,
-                        'state_info' => $stateInfo
-                    ];
-                    
-                    // Consider document complete only if it's verified
-                    if ($document->state_id !== 3) { // 3 = VERIFIED
-                        $allCompleted = false;
-                    }
-                } else {
-                    $completionStatus[$docType->name] = [
-                        'uploaded' => false,
-                        'state_info' => null
-                    ];
-                    $allCompleted = false;
-                }
-            }
-
-            return [
-                'status' => $allCompleted ? 'Lengkap' : 'Belum Lengkap',
-                'details' => $completionStatus
-            ];
+            $documentTypeIds = $this->availableDocumentTypes->pluck('id')->toArray();
+            
+            return $this->getDocumentCompletionStatus($employee, $documentTypeIds);
         } catch (\Exception $e) {
             return [
                 'status' => 'Error',
-                'details' => []
+                'details' => [],
+                'completed_count' => 0,
+                'total_count' => 0
             ];
         }
     }
 
-    public function getActiveStudyInfo()
+    public function getActiveStudyInfoForEmployee()
     {
         try {
             $employee = $this->getEmployee();
-
-            $activeStudy = $employee->studyCalendars()
-                ->where('study_status', 'active')
-                ->latest()
-                ->first();
-
-            if (!$activeStudy) {
-                $activeStudy = $employee->studyCalendars()
-                    ->latest()
-                    ->first();
-
-                if (!$activeStudy) {
-                    return null;
-                }
-            }
-
-            $studyProgram = $employee->studyPrograms()->first();
-            $programName = $studyProgram ? $studyProgram->name : 'Tidak tersedia';
-
-            $startDate = Carbon::parse($activeStudy->study_start);
-            $now = Carbon::now();
-            $monthsDiff = $startDate->diffInMonths($now);
-            $currentSemester = floor($monthsDiff / 6) + 1;
-
-            return [
-                'program' => $programName,
-                'status' => $activeStudy->study_status,
-                'start_date' => $startDate->format('F Y'),
-                'estimated_end' => Carbon::parse($activeStudy->estimated_study_end)->format('F Y'),
-                'current_semester' => $currentSemester,
-                'has_multiple_studies' => $employee->studyCalendars()->count() > 1,
-            ];
+            return $this->getActiveStudyInfo($employee);
         } catch (\Exception $e) {
             return null;
         }
-    }
-
-    // Livewire Update Methods
-    public function updatedSelectedDocumentTypeId()
-    {
-        // Reserved for future enhancements
-    }
-
-    public function updatedDocumentFile()
-    {
-        $this->validateOnly('documentFile');
-    }
-
-    public function updatedFileName()
-    {
-        $this->validateOnly('fileName');
     }
 
     // Override trait methods for custom behavior
@@ -336,7 +328,7 @@ class StudyRequirements extends WorkflowComponent
 
             return view('livewire.documents.study-requirements', [
                 'documents' => $studyRequirements,
-                'activeStudyInfo' => $this->getActiveStudyInfo(),
+                'activeStudyInfo' => $this->getActiveStudyInfoForEmployee(),
                 'completionStatus' => $this->getCompletionStatus(),
                 'canManageWorkflow' => $this->canUserManageWorkflow()
             ]);
@@ -380,34 +372,5 @@ class StudyRequirements extends WorkflowComponent
     protected function getWorkflowTransitionPropertyName(): string  
     {
         return 'selectedTransition';
-    }
-
-    public function downloadDocument($documentId)
-    {
-        try {
-            $document = Document::findOrFail($documentId);
-            
-            if (!$document->isInVerifiedState()) {
-                session()->flash('error', 'Dokumen belum diverifikasi.');
-                return;
-            }
-
-            $employee = $this->getEmployee();
-            if ($document->employee_id !== $employee->id) {
-                session()->flash('error', 'Anda tidak memiliki akses untuk mengunduh dokumen ini.');
-                return;
-            }
-
-            if (!Storage::disk('public')->exists($document->file_path)) {
-                session()->flash('error', 'File dokumen tidak ditemukan.');
-                return;
-            }
-
-            $filePath = Storage::disk('public')->path($document->file_path);
-            return response()->download($filePath, $document->file_name);
-        } catch (\Exception $e) {
-            Log::error('Error in downloadDocument: ' . $e->getMessage());
-            session()->flash('error', 'Terjadi kesalahan saat mengunduh dokumen: ' . $e->getMessage());
-        }
     }
 }

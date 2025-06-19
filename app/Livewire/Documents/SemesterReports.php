@@ -6,8 +6,9 @@ use App\Models\Document;
 use App\Models\DocumentType;
 use App\Constants\DocumentTypeConstants;
 use App\Livewire\Base\WorkflowComponent;
+use App\Traits\HasDocumentManagement;
+use App\Traits\HasCommonValidation;
 use Carbon\Carbon;
-use Livewire\WithFileUploads;
 use Livewire\WithPagination;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -16,43 +17,34 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 class SemesterReports extends WorkflowComponent
 {
-    use WithFileUploads, WithPagination;
+    use WithPagination, HasDocumentManagement, HasCommonValidation;
 
-    public $documentFile;
-    public $fileName;
-    public $selectedDocumentTypeId;
-    public $selectedSemester = '';
-    public $uploadModalOpen = false;
-    public $viewModalOpen = false;
-    public $currentDocument;
     public $availableDocumentTypes;
+    public $selectedDocumentTypeId;
     public $selectedTransition;
     public $transitionComment = '';
-    public $showWorkflowHistory = false;
+    public $selectedSemester = '';
+    
+    // Modal states for backward compatibility with Blade views
+    public $uploadModalOpen = false;
+    public $viewModalOpen = false;
+    public $workflowModalOpen = false;
+    public $currentDocument;
+    public $fileName = '';
+    public $documentFile;
 
-    protected $rules = [
-        'documentFile' => 'required|file|mimes:pdf|max:10240',
-        'fileName' => 'required|string|max:255',
-        'selectedDocumentTypeId' => 'required|exists:document_types,id',
-        'selectedSemester' => 'required|integer|min:1|max:20',
-        'transitionComment' => 'nullable|string|max:1000'
+    protected $listeners = [
+        'document:uploaded' => 'handleDocumentUploaded',
+        'document:deleted' => 'handleDocumentDeleted', 
+        'document:submitted' => 'handleDocumentSubmitted',
+        'workflow:transition-applied' => 'handleTransitionApplied',
+        'document-submit' => 'handleDocumentSubmit',
+        'document-delete' => 'handleDocumentDelete',
+        'document-list:refresh' => 'refreshData'
     ];
 
-    protected $messages = [
-        'documentFile.required' => 'File dokumen wajib dipilih.',
-        'documentFile.file' => 'File yang dipilih tidak valid.',
-        'documentFile.mimes' => 'File harus berformat PDF.',
-        'documentFile.max' => 'Ukuran file maksimal 10MB.',
-        'fileName.required' => 'Nama dokumen wajib diisi.',
-        'fileName.max' => 'Nama dokumen maksimal 255 karakter.',
-        'selectedDocumentTypeId.required' => 'Jenis dokumen laporan semester wajib dipilih.',
-        'selectedDocumentTypeId.exists' => 'Jenis dokumen yang dipilih tidak valid.',
-        'selectedSemester.required' => 'Semester wajib dipilih.',
-        'selectedSemester.integer' => 'Semester harus berupa angka.',
-        'selectedSemester.min' => 'Semester minimal 1.',
-        'selectedSemester.max' => 'Semester maksimal 20.',
-        'transitionComment.max' => 'Komentar maksimal 1000 karakter.',
-    ];
+    protected $rules = [];
+    protected $messages = [];
 
     protected function getSemesterReportDocumentTypes()
     {
@@ -69,208 +61,298 @@ class SemesterReports extends WorkflowComponent
     public function mount(...$parameters)
     {
         parent::mount(...$parameters);
-        $this->selectedDocumentTypeId = '';
         $this->availableDocumentTypes = $this->getSemesterReportDocumentTypes();
+        $this->selectedDocumentTypeId = '';
         $this->selectedSemester = $this->getCurrentSemester();
     }
 
-    // Reuse modal methods from FinalReports pattern
-    public function openUploadModal()
+    // Event Handlers for Modular Components
+    public function handleDocumentUploaded($data)
     {
-        if (!$this->selectedDocumentTypeId) {
-            return;
-        }
-
-        $this->uploadModalOpen = true;
-        $this->reset(['fileName', 'documentFile']);
-        
-        // Auto-suggest filename
-        if ($this->selectedDocumentTypeId && $this->selectedSemester) {
-            $documentType = DocumentType::find($this->selectedDocumentTypeId);
-            $this->fileName = "Semester {$this->selectedSemester} - {$documentType->display_name}";
-        }
+        session()->flash('message', $data['message'] ?? 'Dokumen berhasil diunggah.');
+        $this->refreshData();
     }
 
-    public function closeUploadModal()
+    public function handleDocumentDeleted($data)
     {
-        $this->uploadModalOpen = false;
+        session()->flash('message', $data['message'] ?? 'Dokumen berhasil dihapus.');
+        $this->refreshData();
     }
 
-    public function openViewModal($documentId)
+    public function handleDocumentSubmitted($data)
     {
-        $this->currentDocument = Document::findOrFail($documentId);
-        $this->viewModalOpen = true;
+        session()->flash('message', $data['message'] ?? 'Dokumen berhasil dikirim.');
+        $this->refreshData();
     }
 
-    public function closeViewModal()
+    public function handleTransitionApplied($data)
     {
-        $this->viewModalOpen = false;
-        $this->currentDocument = null;
-        $this->showWorkflowHistory = false;
+        session()->flash('success', $data['message'] ?? 'Status dokumen berhasil diperbarui.');
+        $this->refreshData();
     }
 
-    public function openWorkflowModal($documentId, $transitionId)
-    {
-        $this->currentDocument = Document::with(['employee.user', 'employee.studyPrograms', 'documentType'])->findOrFail($documentId);
-        $this->selectedTransition = $transitionId;
-        $this->transitionComment = '';
-        $this->workflowModalOpen = true;
-    }
-
-    public function closeWorkflowModal()
-    {
-        $this->workflowModalOpen = false;
-        $this->currentDocument = null;
-        $this->selectedTransition = null;
-        $this->transitionComment = '';
-    }
-
-    public function toggleWorkflowHistory()
-    {
-        $this->showWorkflowHistory = !$this->showWorkflowHistory;
-    }
-
-    // Reuse document management methods from FinalReports pattern
-    public function submitDocument($documentId)
+    // Event Handlers for Dispatched Events
+    public function handleDocumentSubmit($data)
     {
         try {
+            $documentId = $data['documentId'] ?? null;
+            if (!$documentId) {
+                session()->flash('error', 'ID dokumen tidak valid.');
+                return;
+            }
+
             $document = Document::findOrFail($documentId);
-            
-            if (!$document->isInDraftState()) {
-                session()->flash('error', 'Dokumen tidak dalam status draft.');
-                return;
-            }
-
             $employee = $this->getEmployee();
+            
             if ($document->employee_id !== $employee->id) {
-                session()->flash('error', 'Anda tidak memiliki akses untuk mengirim dokumen ini.');
+                session()->flash('error', 'Anda tidak memiliki akses untuk dokumen ini.');
                 return;
             }
 
-            if (method_exists($document, 'canTransition') && !$document->canTransition(1)) {
-                session()->flash('error', 'Anda tidak memiliki akses untuk mengirim dokumen ini.');
+            if ($document->workflow_state !== 1) { // DRAFT
+                session()->flash('error', 'Dokumen tidak dapat dikirim karena bukan dalam status draft.');
                 return;
             }
 
+            // Get available transitions and find submit transition
+            $availableTransitions = $document->getAvailableTransitions();
+            
+            // Find the SUBMIT transition ID and data
+            $submitTransitionId = null;
+            $submitTransition = null;
+            
+            foreach ($availableTransitions as $transitionId => $transitionData) {
+                if ($transitionData['name'] === 'SUBMIT') {
+                    $submitTransitionId = $transitionId;
+                    $submitTransition = $transitionData;
+                    break;
+                }
+            }
+            
+            if (!$submitTransitionId || !$submitTransition) {
+                Log::error('Submit transition not found for document', [
+                    'document_id' => $documentId,
+                    'available_transitions' => $availableTransitions
+                ]);
+                session()->flash('error', 'Transisi submit tidak tersedia.');
+                return;
+            }
+
+            // Apply the transition
             $context = [
                 'user_id' => Auth::id(),
-                'comment' => 'Laporan semester dikirim untuk verifikasi',
+                'comment' => 'Dokumen dikirim untuk verifikasi',
                 'timestamp' => now(),
                 'user_name' => Auth::user()->name,
             ];
 
-            $document->applyTransition(1, $context);
-            session()->flash('message', 'Laporan semester berhasil dikirim untuk verifikasi.');
+            try {
+                $document->applyTransition($submitTransitionId, $context);
+                session()->flash('message', 'Dokumen berhasil dikirim untuk verifikasi.');
+                $this->refreshData();
+            } catch (\Exception $transitionError) {
+                Log::error('Error applying transition', [
+                    'document_id' => $documentId,
+                    'transition_id' => $submitTransitionId,
+                    'context' => $context,
+                    'error' => $transitionError->getMessage(),
+                    'trace' => $transitionError->getTraceAsString()
+                ]);
+                session()->flash('error', 'Gagal mengirim dokumen: ' . $transitionError->getMessage());
+            }
+            
         } catch (\Exception $e) {
-            Log::error('Error in submitDocument: ' . $e->getMessage());
-            session()->flash('error', 'Terjadi kesalahan saat mengirim dokumen: ' . $e->getMessage());
+            session()->flash('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
 
-    public function uploadDocument()
+    public function handleDocumentDelete($data)
     {
         try {
-            $this->validate();
-            $employee = $this->getEmployee();
-
-            if (!$this->documentFile) {
-                throw new \Exception('No file was uploaded.');
+            $documentId = $data['documentId'] ?? null;
+            if (!$documentId) {
+                session()->flash('error', 'ID dokumen tidak valid.');
+                return;
             }
 
-            $filePath = $this->documentFile->store('semester-reports/' . $employee->id, 'public');
-            $documentType = DocumentType::findOrFail($this->selectedDocumentTypeId);
-
-            Document::create([
-                'employee_id' => $employee->id,
-                'document_type_id' => $documentType->id,
-                'file_name' => $this->fileName,
-                'file_path' => $filePath,
-                'state_id' => 1,
-                'semester' => $this->selectedSemester,
-            ]);
-
-            $this->closeUploadModal();
-            session()->flash('message', 'Laporan semester berhasil diunggah sebagai draft. Klik "Kirim untuk Verifikasi" untuk mengirimkan dokumen.');
-
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            throw $e;
-        } catch (\Exception $e) {
-            session()->flash('error', 'Terjadi kesalahan saat mengunggah dokumen: ' . $e->getMessage());
-        }
-    }
-
-    public function deleteDocument($documentId)
-    {
-        try {
             $document = Document::findOrFail($documentId);
+            $employee = $this->getEmployee();
+            
+            if ($document->employee_id !== $employee->id) {
+                session()->flash('error', 'Anda tidak memiliki akses untuk dokumen ini.');
+                return;
+            }
 
-            if (Storage::disk('public')->exists($document->file_path)) {
+            if ($document->workflow_state !== 1) { // DRAFT
+                session()->flash('error', 'Hanya dokumen dengan status draft yang dapat dihapus.');
+                return;
+            }
+
+            // Delete file from storage
+            if ($document->file_path && Storage::disk('public')->exists($document->file_path)) {
                 Storage::disk('public')->delete($document->file_path);
             }
 
             $document->delete();
+            
             session()->flash('message', 'Dokumen berhasil dihapus.');
+            $this->refreshData();
+            
         } catch (\Exception $e) {
-            session()->flash('error', 'Terjadi kesalahan saat menghapus dokumen: ' . $e->getMessage());
+            session()->flash('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
 
-    // Enhanced completion status for semester reports with per-semester tracking
+    public function refreshData()
+    {
+        $this->resetPage();
+        // Livewire will automatically re-render the component
+    }
+
+    // Modal Methods - Dispatch to modular components
+    public function openUploadModal($documentTypeId = null)
+    {
+        try {
+            $employee = $this->getEmployee();
+            $this->dispatch('document-upload-modal:open', [
+                'documentTypeId' => $documentTypeId ?: $this->selectedDocumentTypeId,
+                'employeeId' => $employee->id,
+                'category' => 'semester-reports',
+                'semester' => $this->selectedSemester
+            ]);
+        } catch (\Exception $e) {
+            session()->flash('error', $e->getMessage());
+        }
+    }
+
+    public function openViewModal($documentId)
+    {
+        $this->dispatch('document-view-modal:open', ['documentId' => $documentId]);
+    }
+
+    public function showDocument($documentId)
+    {
+        $this->openViewModal($documentId);
+    }
+
+    public function openWorkflowModal($documentId, $transitionId)
+    {
+        $this->dispatch('workflow-transition-modal:open', [
+            'documentId' => $documentId,
+            'transitionId' => $transitionId
+        ]);
+    }
+
+    // Document Operations - Handle directly instead of dispatching to self
+    public function submitDocument($documentId)
+    {
+        $this->handleDocumentSubmit(['documentId' => $documentId]);
+    }
+
+    public function deleteDocument($documentId)
+    {
+        $this->handleDocumentDelete(['documentId' => $documentId]);
+    }
+
+    // Status and Info Methods - Using traits  
     public function getCompletionStatus()
     {
         try {
             $employee = $this->getEmployee();
-            $documentTypes = $this->getSemesterReportDocumentTypes();
-            $currentSemester = $this->getCurrentSemester();
+            $documentTypeIds = $this->availableDocumentTypes->pluck('id')->toArray();
             
-            $completionStatus = [];
-            $overallCompleted = true;
+            // For semester reports, get semester-aware completion status
+            return $this->getSemesterAwareCompletionStatus($employee, $documentTypeIds);
+        } catch (\Exception $e) {
+            Log::error('Error in SemesterReports getCompletionStatus: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile()
+            ]);
+            return [
+                'status' => 'Error',
+                'details' => [],
+                'completed_count' => 0,
+                'total_count' => 0
+            ];
+        }
+    }
 
-            // For semester reports, we need to track completion per semester per document type
+    /**
+     * Get completion status that includes all semester documents
+     */
+    protected function getSemesterAwareCompletionStatus($employee, $documentTypeIds): array
+    {
+        try {
+            // Get all documents for the employee and document types (including all semesters)
+            $allDocuments = Document::where('employee_id', $employee->id)
+                ->whereIn('document_type_id', $documentTypeIds)
+                ->with(['documentType', 'workflowHistory.user'])
+                ->get();
+            
+            $documentTypes = DocumentType::whereIn('id', $documentTypeIds)->get();
+            
+            $completionDetails = [];
+            $allCompleted = true;
+            $completedCount = 0;
+
             foreach ($documentTypes as $docType) {
-                $semesterData = [];
+                // Get all documents for this document type across all semesters
+                $documentsForType = $allDocuments->where('document_type_id', $docType->id);
                 
-                // Check each semester up to current semester
-                for ($semester = 1; $semester <= $currentSemester; $semester++) {
-                    $document = Document::where('employee_id', $employee->id)
-                        ->where('document_type_id', $docType->id)
-                        ->where('semester', $semester)
-                        ->first();
-
-                    if ($document) {
-                        $semesterData[$semester] = [
-                            'uploaded' => true,
-                            'state_info' => [
-                                'id' => $document->state_id,
-                                'label' => $this->getStateLabel($document->state_id)
-                            ]
-                        ];
+                // For display purposes, we'll use the latest document as the primary one
+                // but we'll also store all documents for semester-specific filtering
+                $latestDocument = $documentsForType->sortByDesc('created_at')->first();
+                
+                if ($latestDocument) {
+                    $stateInfo = $latestDocument->getWorkflowStateInfo();
+                    $isCompleted = $latestDocument->isInVerifiedState();
+                    
+                    $completionDetails[$docType->name] = [
+                        'uploaded' => true,
+                        'state_info' => $stateInfo,
+                        'document' => $latestDocument,
+                        'uploaded_at' => $latestDocument->created_at->format('d M Y'),
+                        'completed' => $isCompleted,
+                        'all_documents' => $documentsForType // Keep as collection for proper filtering
+                    ];
+                    
+                    if ($isCompleted) {
+                        $completedCount++;
                     } else {
-                        $semesterData[$semester] = [
-                            'uploaded' => false,
-                            'state_info' => null
-                        ];
-                        $overallCompleted = false;
+                        $allCompleted = false;
                     }
+                } else {
+                    $completionDetails[$docType->name] = [
+                        'uploaded' => false,
+                        'state_info' => null,
+                        'document' => null,
+                        'uploaded_at' => null,
+                        'completed' => false,
+                        'all_documents' => collect() // Empty collection for consistency
+                    ];
+                    $allCompleted = false;
                 }
-
-                $completionStatus[$docType->name] = [
-                    'semesters' => $semesterData,
-                    // For backward compatibility, also include current semester status
-                    'uploaded' => isset($semesterData[$currentSemester]) ? $semesterData[$currentSemester]['uploaded'] : false,
-                    'state_info' => isset($semesterData[$currentSemester]) ? $semesterData[$currentSemester]['state_info'] : null
-                ];
             }
 
             return [
-                'status' => $overallCompleted ? 'Lengkap' : 'Belum Lengkap',
-                'details' => $completionStatus
+                'status' => $allCompleted ? 'Lengkap' : 'Belum Lengkap',
+                'details' => $completionDetails,
+                'completed_count' => $completedCount,
+                'total_count' => count($documentTypes)
             ];
+
         } catch (\Exception $e) {
-            Log::error('Error in getCompletionStatus: ' . $e->getMessage());
+            Log::error('Error getting semester-aware completion status: ' . $e->getMessage(), [
+                'employee_id' => $employee->id,
+                'document_type_ids' => $documentTypeIds,
+                'trace' => $e->getTraceAsString()
+            ]);
             return [
                 'status' => 'Error',
-                'details' => []
+                'details' => [],
+                'completed_count' => 0,
+                'total_count' => 0
             ];
         }
     }
@@ -299,71 +381,14 @@ class SemesterReports extends WorkflowComponent
         }
     }
 
-    // Reuse active study info from FinalReports
-    public function getActiveStudyInfo()
+    public function getActiveStudyInfoForEmployee()
     {
         try {
             $employee = $this->getEmployee();
-
-            $activeStudy = $employee->studyCalendars()
-                ->where('study_status', 'active')
-                ->latest()
-                ->first();
-
-            if (!$activeStudy) {
-                $activeStudy = $employee->studyCalendars()
-                    ->latest()
-                    ->first();
-
-                if (!$activeStudy) {
-                    return null;
-                }
-            }
-
-            $studyProgram = $employee->studyPrograms()->first();
-            $programName = $studyProgram ? $studyProgram->name : 'Tidak tersedia';
-
-            $startDate = Carbon::parse($activeStudy->study_start);
-            $currentSemester = $this->getCurrentSemester();
-
-            return [
-                'program' => $programName,
-                'status' => $activeStudy->study_status,
-                'start_date' => $startDate->format('F Y'),
-                'estimated_end' => Carbon::parse($activeStudy->estimated_study_end)->format('F Y'),
-                'current_semester' => $currentSemester,
-                'has_multiple_studies' => $employee->studyCalendars()->count() > 1,
-            ];
+            return $this->getActiveStudyInfo($employee);
         } catch (\Exception $e) {
             return null;
         }
-    }
-
-    // Update methods
-    public function updatedSelectedDocumentTypeId()
-    {
-        if ($this->selectedDocumentTypeId && $this->selectedSemester) {
-            $documentType = DocumentType::find($this->selectedDocumentTypeId);
-            $this->fileName = "Semester {$this->selectedSemester} - {$documentType->display_name}";
-        }
-    }
-
-    public function updatedSelectedSemester()
-    {
-        if ($this->selectedDocumentTypeId && $this->selectedSemester) {
-            $documentType = DocumentType::find($this->selectedDocumentTypeId);
-            $this->fileName = "Semester {$this->selectedSemester} - {$documentType->display_name}";
-        }
-    }
-
-    public function updatedDocumentFile()
-    {
-        $this->validateOnly('documentFile');
-    }
-
-    public function updatedFileName()
-    {
-        $this->validateOnly('fileName');
     }
 
     protected function getSuccessMessage(): string
@@ -393,7 +418,8 @@ class SemesterReports extends WorkflowComponent
             return view('livewire.documents.semester-reports', [
                 'documents' => $semesterReports,
                 'completionStatus' => $this->getCompletionStatus(),
-                'activeStudyInfo' => $this->getActiveStudyInfo(),
+                'activeStudyInfo' => $this->getActiveStudyInfoForEmployee(),
+                'currentSemester' => $this->getCurrentSemester(),
                 'canManageWorkflow' => $this->canUserManageWorkflow()
             ]);
         } catch (\Exception $e) {
@@ -411,6 +437,7 @@ class SemesterReports extends WorkflowComponent
                 'documents' => $emptyPaginator,
                 'completionStatus' => ['status' => 'Error', 'details' => []],
                 'activeStudyInfo' => null,
+                'currentSemester' => 1,
                 'canManageWorkflow' => false
             ]);
         }
@@ -435,18 +462,5 @@ class SemesterReports extends WorkflowComponent
     protected function getWorkflowTransitionPropertyName(): string
     {
         return 'selectedTransition';
-    }
-
-    // Helper method to get state labels
-    private function getStateLabel($stateId)
-    {
-        $stateLabels = [
-            1 => 'Draft',
-            2 => 'Menunggu Verifikasi',
-            3 => 'Terverifikasi',
-            4 => 'Ditolak'
-        ];
-        
-        return $stateLabels[$stateId] ?? 'Unknown';
     }
 }

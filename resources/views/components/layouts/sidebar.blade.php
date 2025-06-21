@@ -112,7 +112,7 @@
                         <x-heroicon-o-check-circle class="w-5 h-5" />
                         Laporan Akhir & Kelulusan
                     </a>
-                    <a href="{{ route('documents.approval-documents') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm {{ request()->routeIs('documents.approval-documents') ? 'text-[var(--color-primary)] bg-[var(--color-primary-bg)] font-semibold' : 'text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)]' }}">
+                    <a href="{{ route('documents.study-approvals') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm {{ request()->routeIs('documents.study-approvals') ? 'text-[var(--color-primary)] bg-[var(--color-primary-bg)] font-semibold' : 'text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)]' }}">
                         <x-heroicon-o-calendar-days class="w-5 h-5" />
                         Persetujuan Studi Lanjut
                     </a>

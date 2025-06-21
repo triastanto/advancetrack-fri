@@ -30,7 +30,7 @@ class WorkflowServiceProvider extends ServiceProvider
 
         // Register a default workflow engine
         $this->app->bind('workflow.default', function ($app) {
-            return $app->make(WorkflowManager::class)->get('document_verification');
+            return $app->make(WorkflowManager::class)->get('verification_by_staff');
         });
     }
 
@@ -41,7 +41,7 @@ class WorkflowServiceProvider extends ServiceProvider
     {
         // Configure workflow guards after all services are registered
         $this->configureWorkflowGuards();
-        
+
         // Register workflow event listeners
         $this->registerEventListeners();
     }
@@ -51,7 +51,7 @@ class WorkflowServiceProvider extends ServiceProvider
      */
     protected function registerWorkflowGuards(): void
     {
-        // Register RoleBasedWorkflowGuard  
+        // Register RoleBasedWorkflowGuard
         $this->app->singleton(RoleBasedWorkflowGuard::class, function ($app) {
             return new RoleBasedWorkflowGuard();
         });
@@ -72,7 +72,7 @@ class WorkflowServiceProvider extends ServiceProvider
     protected function configureWorkflowGuards(): void
     {
         $manager = $this->app->make(WorkflowManager::class);
-        $config = $manager->getConfiguration('document_verification');
+        $config = $manager->getConfiguration('verification_by_staff');
 
         // Guards will be added based on configuration in loadGuards() method
         // But they need to be resolved from the container now

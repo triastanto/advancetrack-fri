@@ -8,12 +8,10 @@ use App\Constants\DocumentTypeConstants;
 use App\Livewire\Base\WorkflowComponent;
 use App\Traits\HasDocumentManagement;
 use App\Traits\HasCommonValidation;
-use Carbon\Carbon;
 use Livewire\WithPagination;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Pagination\LengthAwarePaginator;
 
-class ApprovalDocuments extends WorkflowComponent
+class StudyApprovals extends WorkflowComponent
 {
     use WithPagination, HasDocumentManagement, HasCommonValidation;
 
@@ -24,7 +22,7 @@ class ApprovalDocuments extends WorkflowComponent
 
     protected $listeners = [
         'document:uploaded' => 'handleDocumentUploaded',
-        'document:deleted' => 'handleDocumentDeleted', 
+        'document:deleted' => 'handleDocumentDeleted',
         'document:submitted' => 'handleDocumentSubmitted',
         'workflow:transition-applied' => 'handleTransitionApplied',
         'document-list:refresh' => 'refreshData'
@@ -118,7 +116,7 @@ class ApprovalDocuments extends WorkflowComponent
         try {
             $employee = $this->getEmployee();
             $documentTypeIds = $this->availableDocumentTypes->pluck('id')->toArray();
-            
+
             return $this->getDocumentCompletionStatus($employee, $documentTypeIds);
         } catch (\Exception $e) {
             return [
@@ -154,7 +152,7 @@ class ApprovalDocuments extends WorkflowComponent
                 ->orderBy('created_at', 'desc')
                 ->paginate(10);
 
-            return view('livewire.documents.approval-documents', [
+            return view('livewire.documents.study-approvals', [
                 'documents' => $approvalDocuments,
                 'activeStudyInfo' => $this->getActiveStudyInfoForEmployee(),
                 'completionStatus' => $this->getCompletionStatus(),
@@ -172,7 +170,7 @@ class ApprovalDocuments extends WorkflowComponent
                 ['path' => request()->url(), 'pageName' => 'page']
             );
 
-            return view('livewire.documents.approval-documents', [
+            return view('livewire.documents.study-approvals', [
                 'documents' => $emptyPaginator,
                 'activeStudyInfo' => null,
                 'completionStatus' => ['status' => 'Error', 'details' => []],
@@ -197,7 +195,7 @@ class ApprovalDocuments extends WorkflowComponent
         return 'transitionComment';
     }
 
-    protected function getWorkflowTransitionPropertyName(): string  
+    protected function getWorkflowTransitionPropertyName(): string
     {
         return 'selectedTransition';
     }

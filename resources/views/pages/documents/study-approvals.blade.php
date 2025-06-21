@@ -2,6 +2,6 @@
 
 @section('content')
 <x-ui.page-container title="Persetujuan Studi Lanjut">
-    <livewire:documents.approval-documents />
+    <livewire:documents.study-approvals />
 </x-ui.page-container>
 @endsection

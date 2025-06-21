@@ -56,7 +56,7 @@ This state machine applies to:
 ## Configuration Details
 
 - **Initial State**: DRAFT (ID: 1)
-- **Workflow Name**: `document_verification`
+- **Workflow Name**: `verification_by_staff`
 - **Settings**: History tracking enabled, auto-save enabled, strict mode enabled, auto-notify enabled
 - **Notification Channels**: Mail, Database
 - **Guards**: Role-based permissions enabled

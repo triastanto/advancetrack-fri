@@ -37,7 +37,7 @@ Route::prefix('documents')->name('documents.')->middleware(['auth', 'lecturer.on
     Route::view('study-requirements', 'pages.documents.study-requirements')->name('study-requirements');
     Route::view('semester-reports', 'pages.documents.semester-reports')->name('semester-reports');
     Route::view('final-reports', 'pages.documents.final-reports')->name('final-reports');
-    Route::view('approval-documents', 'pages.documents.approval-documents')->name('approval-documents');
+    Route::view('study-approvals', 'pages.documents.study-approvals')->name('study-approvals');
 });
 
 // Administrasi Dokumen Routes - Non-Lecturer Only

@@ -19,8 +19,8 @@ class TestEmailNotifications extends Command
      *
      * @var string
      */
-    protected $signature = 'test:email-notifications 
-                            {workflow : The workflow name to test (document_verification, study_calendar_approval, or all)}
+    protected $signature = 'test:email-notifications
+                            {workflow : The workflow name to test (verification_by_staff, study_calendar_approval, or all)}
                             {--transition= : The specific transition ID to test (optional)}
                             {--email= : The email address to send test to (required for individual tests)}
                             {--model_id= : The ID of the model to test with (optional)}
@@ -87,7 +87,7 @@ class TestEmailNotifications extends Command
 
         // Display summary
         $this->info("📊 Test Results Summary:");
-        $this->table(['Workflow', 'Result'], 
+        $this->table(['Workflow', 'Result'],
             array_map(fn($workflow, $result) => [$workflow, $result], array_keys($results), $results)
         );
 
@@ -108,7 +108,7 @@ class TestEmailNotifications extends Command
         }
 
         $workflowConfig = WorkflowDefinition::getWorkflowConfig($workflowName);
-        
+
         if ($verbose) {
             $this->info("Workflow: {$workflowName}");
             $this->line("Description: " . ($workflowConfig['description'] ?? 'No description'));
@@ -130,7 +130,7 @@ class TestEmailNotifications extends Command
 
         // Get transitions to test
         $transitions = $this->getTransitionsToTest($workflowName, $transitionId);
-        
+
         if (empty($transitions)) {
             $this->warn("No transitions found to test for workflow '{$workflowName}'");
             return 0;
@@ -140,7 +140,7 @@ class TestEmailNotifications extends Command
         foreach ($transitions as $transition) {
             $transitionId = $transition['id'];
             $transitionName = $transition['name'];
-            
+
             if ($verbose) {
                 $this->info("Testing transition: {$transitionName} (ID: {$transitionId})");
             }
@@ -171,7 +171,7 @@ class TestEmailNotifications extends Command
         // Display results
         if ($verbose) {
             $this->info("📊 Transition Test Results:");
-            $this->table(['Transition', 'Result'], 
+            $this->table(['Transition', 'Result'],
                 array_map(fn($name, $result) => [$name, $result], array_keys($results), $results)
             );
         }
@@ -203,7 +203,7 @@ class TestEmailNotifications extends Command
     private function findModelByWorkflow(string $workflowName, int $modelId): ?object
     {
         return match ($workflowName) {
-            'document_verification' => Document::find($modelId),
+            'verification_by_staff' => Document::find($modelId),
             'study_calendar_approval' => StudyCalendar::find($modelId),
             default => null,
         };
@@ -215,7 +215,7 @@ class TestEmailNotifications extends Command
     private function createTestModel(string $workflowName): ?object
     {
         return match ($workflowName) {
-            'document_verification' => Document::first() ?: Document::factory()->create(),
+            'verification_by_staff' => Document::first() ?: Document::factory()->create(),
             'study_calendar_approval' => StudyCalendar::first() ?: StudyCalendar::factory()->create(),
             default => null,
         };
@@ -227,13 +227,13 @@ class TestEmailNotifications extends Command
     private function getTransitionsToTest(string $workflowName, ?int $transitionId): array
     {
         $allTransitions = WorkflowDefinition::getAllTransitions($workflowName);
-        
+
         if ($transitionId) {
             $transition = WorkflowDefinition::getTransition($transitionId, $workflowName);
             return $transition ? [array_merge($transition, ['id' => $transitionId])] : [];
         }
 
-        return array_map(fn($id, $transition) => array_merge($transition, ['id' => $id]), 
+        return array_map(fn($id, $transition) => array_merge($transition, ['id' => $id]),
                         array_keys($allTransitions), $allTransitions);
     }
 
@@ -262,7 +262,7 @@ class TestEmailNotifications extends Command
             ['comment' => 'Test notification', 'user_name' => 'Test User'],
             $workflowName
         );
-        
+
         // Test notification
         $listener = new NotifyStakeholders();
         $listener->handle($event);
@@ -299,10 +299,10 @@ class TestEmailNotifications extends Command
             ['comment' => 'Test notification', 'user_name' => 'Test User'],
             $workflowName
         );
-        
+
         // Get notification config
         $notificationConfig = new \App\Services\Workflow\NotificationConfig($workflowName);
-        
+
         // Get email template
         $emailTemplate = $notificationConfig->getEmailTemplate($transitionId, $workflowName);
         if (!$emailTemplate) {

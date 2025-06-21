@@ -39,7 +39,7 @@ return [
     |--------------------------------------------------------------------------
     */
     'workflows' => [
-        'document_verification' => [
+        'verification_by_staff' => [
             'name' => 'Document Verification Workflow',
             'description' => 'Document verification process with draft, pending, verified, and rejected states',
             'initial_state' => 1, // DRAFT

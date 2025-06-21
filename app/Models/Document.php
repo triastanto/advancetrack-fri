@@ -54,8 +54,8 @@ class Document extends Model
             return null;
         }
 
-        $context = is_string($latestHistory->context) 
-            ? json_decode($latestHistory->context, true) 
+        $context = is_string($latestHistory->context)
+            ? json_decode($latestHistory->context, true)
             : $latestHistory->context;
 
         return $context['comment'] ?? null;
@@ -91,7 +91,7 @@ class Document extends Model
      */
     public function getWorkflowName(): string
     {
-        return 'document_verification';
+        return 'verification_by_staff';
     }
 
     /**

@@ -21,7 +21,7 @@ class WorkflowHistoryFactory extends Factory
         return [
             'workflowable_type' => 'App\\Models\\Document',
             'workflowable_id' => 1,
-            'workflow_name' => 'document_verification', // Default - use forWorkflow() to specify
+            'workflow_name' => 'verification_by_staff', // Default - use forWorkflow() to specify
             'from_state' => 1, // DRAFT
             'to_state' => 2,   // PENDING
             'transition' => 1, // SUBMIT

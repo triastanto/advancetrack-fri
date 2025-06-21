@@ -26,9 +26,9 @@ Route::middleware('auth')->group(function () {
 
     // Data Pribadi Routes - Lecturer Only
     Route::middleware('lecturer.only')->group(function () {
-        Route::view('profile','profile.index')->name('profile.index');
-        Route::view('profile/education', 'profile.education')->name('profile.education');
-        Route::view('profile/contact', 'profile.contact')->name('profile.contact');
+        Route::view('profile','pages.profile.index')->name('profile.index');
+        Route::view('profile/education', 'pages.profile.education')->name('profile.education');
+        Route::view('profile/contact', 'pages.profile.contact')->name('profile.contact');
     });
 });
 
@@ -49,9 +49,9 @@ Route::prefix('administrations')->name('administrations.')->middleware(['auth', 
 
 // Monitoring & Laporan Routes - Non-Lecturer Only
 Route::prefix('reports')->name('reports.')->middleware(['auth', 'non.lecturer.only'])->group(function () {
-    Route::view('/', 'reports.index')->name('index');
-    Route::view('verification-status', 'reports.verification-status')->name('verification-status');
-    Route::view('activity-logs', 'reports.activity-logs')->name('activity-logs');
+    Route::view('/', 'pages.reports.index')->name('index');
+    Route::view('verification-status', 'pages.reports.verification-status')->name('verification-status');
+    Route::view('activity-logs', 'pages.reports.activity-logs')->name('activity-logs');
 });
 
 // Notifikasi Route

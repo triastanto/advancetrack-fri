@@ -8,8 +8,6 @@ use App\Constants\DocumentTypeConstants;
 use App\Livewire\Base\WorkflowComponent;
 use App\Traits\HasDocumentManagement;
 use App\Traits\HasCommonValidation;
-use App\Facades\WorkflowManager;
-use Carbon\Carbon;
 use Livewire\WithPagination;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -24,7 +22,7 @@ class StudyRequirements extends WorkflowComponent
     public $selectedDocumentTypeId;
     public $selectedTransition;
     public $transitionComment = '';
-    
+
     // Modal states for backward compatibility with Blade views
     public $uploadModalOpen = false;
     public $viewModalOpen = false;
@@ -35,7 +33,7 @@ class StudyRequirements extends WorkflowComponent
 
     protected $listeners = [
         'document:uploaded' => 'handleDocumentUploaded',
-        'document:deleted' => 'handleDocumentDeleted', 
+        'document:deleted' => 'handleDocumentDeleted',
         'document:submitted' => 'handleDocumentSubmitted',
         'workflow:transition-applied' => 'handleTransitionApplied',
         'document-submit' => 'handleDocumentSubmit',
@@ -104,7 +102,7 @@ class StudyRequirements extends WorkflowComponent
 
             $document = Document::findOrFail($documentId);
             $employee = $this->getEmployee();
-            
+
             if ($document->employee_id !== $employee->id) {
                 session()->flash('error', 'Anda tidak memiliki akses untuk dokumen ini.');
                 return;
@@ -122,7 +120,7 @@ class StudyRequirements extends WorkflowComponent
                 'current_state' => $document->workflow_state,
                 'transitions' => $availableTransitions
             ]);
-            
+
             $submitTransitionId = null;
             foreach ($availableTransitions as $transitionId => $transition) {
                 if ($transition['name'] === 'SUBMIT') {
@@ -130,7 +128,7 @@ class StudyRequirements extends WorkflowComponent
                     break;
                 }
             }
-            
+
             if (!$submitTransitionId) {
                 Log::warning('Submit transition not found', [
                     'document_id' => $document->id,
@@ -149,10 +147,10 @@ class StudyRequirements extends WorkflowComponent
             ];
 
             $document->applyTransition($submitTransitionId, $context);
-            
+
             session()->flash('message', 'Dokumen berhasil dikirim untuk verifikasi.');
             $this->refreshData();
-            
+
         } catch (\Exception $e) {
             session()->flash('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
@@ -169,7 +167,7 @@ class StudyRequirements extends WorkflowComponent
 
             $document = Document::findOrFail($documentId);
             $employee = $this->getEmployee();
-            
+
             if ($document->employee_id !== $employee->id) {
                 session()->flash('error', 'Anda tidak memiliki akses untuk dokumen ini.');
                 return;
@@ -186,10 +184,10 @@ class StudyRequirements extends WorkflowComponent
             }
 
             $document->delete();
-            
+
             session()->flash('message', 'Dokumen berhasil dihapus.');
             $this->refreshData();
-            
+
         } catch (\Exception $e) {
             session()->flash('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
@@ -249,7 +247,7 @@ class StudyRequirements extends WorkflowComponent
     {
         try {
             $document = Document::findOrFail($documentId);
-            
+
             if (!$document->isInVerifiedState()) {
                 session()->flash('error', 'Dokumen belum diverifikasi.');
                 return;
@@ -280,7 +278,7 @@ class StudyRequirements extends WorkflowComponent
         try {
             $employee = $this->getEmployee();
             $documentTypeIds = $this->availableDocumentTypes->pluck('id')->toArray();
-            
+
             return $this->getDocumentCompletionStatus($employee, $documentTypeIds);
         } catch (\Exception $e) {
             return [
@@ -369,7 +367,7 @@ class StudyRequirements extends WorkflowComponent
         return 'transitionComment';
     }
 
-    protected function getWorkflowTransitionPropertyName(): string  
+    protected function getWorkflowTransitionPropertyName(): string
     {
         return 'selectedTransition';
     }

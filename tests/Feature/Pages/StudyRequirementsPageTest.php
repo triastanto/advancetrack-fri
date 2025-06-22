@@ -1,8 +1,6 @@
 <?php
 
 use App\Livewire\Documents\StudyRequirements;
-use App\Models\User;
-use App\Models\Employee;
 use App\Models\DocumentType;
 use App\Constants\DocumentTypeConstants;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -210,7 +208,7 @@ describe('Livewire Component Access & Authentication', function () {
         $transitionPropertyMethod->setAccessible(true);
 
         // Test abstract method implementations
-        expect($modelClassMethod->invoke($instance))->toBe(\App\Models\Document::class);
+        expect($modelClassMethod->invoke($instance))->toBe(\App\Models\AcademicDocument::class);
         expect($docPropertyMethod->invoke($instance))->toBe('currentDocument');
         expect($commentPropertyMethod->invoke($instance))->toBe('transitionComment');
         expect($transitionPropertyMethod->invoke($instance))->toBe('selectedTransition');
@@ -311,7 +309,7 @@ describe('Security & Authorization Tests', function () {
 
         // Create a document for employee1
         $documentType = DocumentType::factory()->create();
-        $document = \App\Models\Document::factory()->create([
+        $document = \App\Models\AcademicDocument::factory()->create([
             'employee_id' => $employee1->id,
             'document_type_id' => $documentType->id
         ]);

@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Documents;
 
-use App\Models\Document;
+use App\Models\AcademicDocument;
 use App\Models\DocumentType;
 use App\Constants\DocumentTypeConstants;
 use App\Livewire\Base\WorkflowComponent;
@@ -100,7 +100,7 @@ class StudyRequirements extends WorkflowComponent
                 return;
             }
 
-            $document = Document::findOrFail($documentId);
+            $document = AcademicDocument::findOrFail($documentId);
             $employee = $this->getEmployee();
 
             if ($document->employee_id !== $employee->id) {
@@ -165,7 +165,7 @@ class StudyRequirements extends WorkflowComponent
                 return;
             }
 
-            $document = Document::findOrFail($documentId);
+            $document = AcademicDocument::findOrFail($documentId);
             $employee = $this->getEmployee();
 
             if ($document->employee_id !== $employee->id) {
@@ -246,7 +246,7 @@ class StudyRequirements extends WorkflowComponent
     public function downloadDocument($documentId)
     {
         try {
-            $document = Document::findOrFail($documentId);
+            $document = AcademicDocument::findOrFail($documentId);
 
             if (!$document->isInVerifiedState()) {
                 session()->flash('error', 'Dokumen belum diverifikasi.');
@@ -279,7 +279,7 @@ class StudyRequirements extends WorkflowComponent
             $employee = $this->getEmployee();
             $documentTypeIds = $this->availableDocumentTypes->pluck('id')->toArray();
 
-            return $this->getDocumentCompletionStatus($employee, $documentTypeIds);
+            return $this->getDocumentCompletionStatus($employee, $documentTypeIds, true, 'AcademicDocument');
         } catch (\Exception $e) {
             return [
                 'status' => 'Error',
@@ -318,7 +318,7 @@ class StudyRequirements extends WorkflowComponent
             $documentTypes = $this->getStudyRequirementDocumentTypes();
             $documentTypeIds = $documentTypes->pluck('id')->toArray();
 
-            $studyRequirements = Document::where('employee_id', $employee->id)
+            $studyRequirements = AcademicDocument::where('employee_id', $employee->id)
                 ->whereIn('document_type_id', $documentTypeIds)
                 ->with(['documentType', 'workflowHistory.user'])
                 ->orderBy('created_at', 'desc')
@@ -354,7 +354,7 @@ class StudyRequirements extends WorkflowComponent
     // Implementation of abstract methods from WorkflowComponent
     protected function getWorkflowModelClass(): string
     {
-        return Document::class;
+        return AcademicDocument::class;
     }
 
     protected function getWorkflowDocumentPropertyName(): string

@@ -35,6 +35,17 @@
                     <div class="bg-white px-6 pt-6 pb-4 sm:p-8 sm:pb-6">
                         <h3 class="text-lg leading-6 font-medium text-gray-900 mb-6">{{ $document->file_name }}</h3>
                         
+                        <!-- Document Category Info (for debugging/development) -->
+                        @if($documentModel)
+                        <div class="mb-4 p-2 bg-blue-50 border border-blue-200 rounded-md">
+                            <p class="text-xs text-blue-700">
+                                <strong>Kategori:</strong> {{ ucfirst(str_replace('-', ' ', $this->getDocumentCategory())) }} 
+                                <br>
+                                <strong>Model:</strong> {{ class_basename($documentModel) }}
+                            </p>
+                        </div>
+                        @endif
+                        
                         <!-- Document Preview -->
                         <div class="aspect-w-16 aspect-h-9 mb-6">
                             @if(in_array(pathinfo($document->file_path, PATHINFO_EXTENSION), ['pdf']))
@@ -101,13 +112,16 @@
                     
                     <!-- Action Buttons -->
                     <div class="px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                        <a
-                            href="{{ Storage::url($document->file_path) }}"
-                            download="{{ $document->file_name }}"
+                        <button
+                            wire:click="downloadDocument"
+                            type="button"
                             class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200 sm:ml-3 sm:w-auto sm:text-sm"
-                        >
-                            Unduh
-                        </a>
+                            wire:loading.attr="disabled"
+                            wire:loading.class="opacity-50 cursor-not-allowed"
+                            wire:target="downloadDocument">
+                            <span wire:loading.remove wire:target="downloadDocument">Unduh</span>
+                            <span wire:loading wire:target="downloadDocument">Mengunduh...</span>
+                        </button>
                         <button @click="show = false; setTimeout(() => $wire.close(), 200)" type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
                             Tutup
                         </button>

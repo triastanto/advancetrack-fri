@@ -15,7 +15,7 @@
              x-transition:leave="transition ease-in duration-200"
              x-transition:leave-start="opacity-100"
              x-transition:leave-end="opacity-0"></div>
-        
+
         <!-- Modal Content -->
         <div class="fixed inset-0 z-50 overflow-y-auto">
             <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
@@ -28,12 +28,23 @@
                      x-transition:leave="transition ease-in duration-200"
                      x-transition:leave-start="opacity-100 transform scale-100"
                      x-transition:leave-end="opacity-0 transform scale-95">
-                    
+
                     <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                         <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">
                             Unggah {{ $selectedDocumentTypeId ? $availableDocumentTypes->find($selectedDocumentTypeId)?->display_name : 'Dokumen' }}
                         </h3>
-                        
+
+                        <!-- Document Category Info (for debugging/development) -->
+                        @if($documentCategory)
+                        <div class="mb-4 p-2 bg-blue-50 border border-blue-200 rounded-md">
+                            <p class="text-xs text-blue-700">
+                                <strong>Kategori:</strong> {{ ucfirst(str_replace('-', ' ', $documentCategory)) }}
+                                <br>
+                                <strong>Model:</strong> {{ class_basename($documentClass) }}
+                            </p>
+                        </div>
+                        @endif
+
                         <form wire:submit.prevent="uploadDocument">
                             <!-- Document Type Selection -->
                             @if(!$selectedDocumentTypeId || count($availableDocumentTypes) > 1)
@@ -56,7 +67,7 @@
                             <!-- Semester Selection (if required) -->
                             @if($requiresSemester)
                             <div class="mb-4">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Semester</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Semester <span class="text-red-500">*</span></label>
                                 <select wire:model="selectedSemester" class="mt-1 py-3 px-3 focus:ring-green-500 focus:border-green-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
                                     <option value="">Pilih Semester</option>
                                     @for($i = 1; $i <= 20; $i++)
@@ -66,15 +77,15 @@
                                 @error('selectedSemester') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                             </div>
                             @endif
-                            
+
                             <div class="mb-4">
                                 <label for="fileName" class="block text-sm font-medium text-gray-700 mb-2">Nama Dokumen</label>
                                 <input type="text" wire:model="fileName" id="fileName" class="mt-1 py-3 px-3 focus:ring-green-500 focus:border-green-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
                                 @error('fileName') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                             </div>
-                            
+
                             <div class="mb-4">
-                                <label for="documentFile" class="block text-sm font-medium text-gray-700 mb-2">File Dokumen</label>
+                                <label for="documentFile" class="block text-sm font-medium text-gray-700 mb-2">File Dokumen <span class="text-red-500">*</span></label>
                                 <input type="file" wire:model="documentFile" id="documentFile" class="mt-1 block w-full py-3 px-3 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-green-600 file:text-white hover:file:bg-green-700 file:cursor-pointer cursor-pointer" accept=".pdf">
                                 <div wire:loading wire:target="documentFile">
                                     <span class="text-sm text-gray-500">Mengupload...</span>
@@ -87,7 +98,7 @@
                             </div>
                         </form>
                     </div>
-                    
+
                     <div class="relative bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                         <button
                             wire:click="uploadDocument"

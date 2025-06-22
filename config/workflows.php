@@ -162,6 +162,129 @@ return [
             ],
         ],
 
+        'verification_by_management' => [
+            'name' => 'Management Approval Workflow',
+            'description' => 'Document approval process by management with draft, pending, approved, and rejected states',
+            'initial_state' => 1, // DRAFT
+            'settings' => [
+                'track_history' => true,
+                'auto_save' => true,
+                'strict_mode' => true,
+                'auto_notify' => true,
+            ],
+            'states' => [
+                1 => [
+                    'name' => 'DRAFT',
+                    'type' => 'draft',
+                    'label' => 'Draft',
+                    'color' => 'secondary',
+                    'icon' => 'edit',
+                    'is_terminal' => false,
+                    'is_initial' => true,
+                ],
+                2 => [
+                    'name' => 'PENDING',
+                    'type' => 'pending',
+                    'label' => 'Awaiting Approval',
+                    'color' => 'warning',
+                    'icon' => 'clock',
+                    'is_terminal' => false,
+                    'is_initial' => false,
+                ],
+                3 => [
+                    'name' => 'APPROVED',
+                    'type' => 'approved',
+                    'label' => 'Approved',
+                    'color' => 'success',
+                    'icon' => 'check-circle',
+                    'is_terminal' => true,
+                    'is_initial' => false,
+                ],
+                4 => [
+                    'name' => 'REJECTED',
+                    'type' => 'rejected',
+                    'label' => 'Rejected',
+                    'color' => 'danger',
+                    'icon' => 'x-circle',
+                    'is_terminal' => false,
+                    'is_initial' => false,
+                ],
+            ],
+            'transitions' => [
+                1 => [
+                    'name' => 'SUBMIT',
+                    'label' => 'Submit for Approval',
+                    'from_state' => 1, // DRAFT
+                    'to_state' => 2,   // PENDING
+                    'icon' => 'upload',
+                    'color' => 'primary',
+                    'required_roles' => ['lecturer'],
+                    'requires_comment' => false,
+                ],
+                2 => [
+                    'name' => 'APPROVE',
+                    'label' => 'Approve Document',
+                    'from_state' => 2, // PENDING
+                    'to_state' => 3,   // APPROVED
+                    'icon' => 'check-circle',
+                    'color' => 'success',
+                    'required_roles' => ['head_of_hr_finance', 'fri_vice_dean', 'head_of_study_program'],
+                    'requires_comment' => true,
+                ],
+                3 => [
+                    'name' => 'REJECT',
+                    'label' => 'Reject Document',
+                    'from_state' => 2, // PENDING
+                    'to_state' => 4,   // REJECTED
+                    'icon' => 'x-circle',
+                    'color' => 'danger',
+                    'required_roles' => ['head_of_hr_finance', 'fri_vice_dean', 'head_of_study_program'],
+                    'requires_comment' => true,
+                ],
+                4 => [
+                    'name' => 'RESUBMIT',
+                    'label' => 'Revise and Resubmit',
+                    'from_state' => 4, // REJECTED
+                    'to_state' => 2,   // PENDING
+                    'icon' => 'refresh-cw',
+                    'color' => 'primary',
+                    'required_roles' => ['lecturer'],
+                    'requires_comment' => false,
+                ],
+            ],
+            'guards' => [
+                'role_based' => ['enabled' => true],
+                'time_based' => [
+                    'enabled' => false,
+                    'business_hours_only' => [2, 3],
+                    'minimum_time_in_state' => [
+                        2 => 15,
+                    ],
+                    'cooldown_periods' => [
+                        3 => 60,
+                    ],
+                ],
+            ],
+            'notifications' => [
+                'channels' => ['mail', 'database'],
+                'auto_notify' => true,
+                'notification_types' => ['in_app', 'email'],
+                'events' => [
+                    1 => ['management'], // SUBMIT - notify management
+                    2 => ['document_owner'], // APPROVE - notify document owner
+                    3 => ['document_owner'], // REJECT - notify document owner
+                    4 => ['management'], // RESUBMIT - notify management
+                ],
+                'management_roles' => ['head_of_hr_finance', 'fri_vice_dean', 'head_of_study_program'],
+                'email_templates' => [
+                    1 => 'emails.document-submitted',
+                    2 => 'emails.document-approved',
+                    3 => 'emails.document-rejected',
+                    4 => 'emails.document-resubmitted',
+                ],
+            ],
+        ],
+
         'study_calendar_approval' => [
             'name' => 'Study Calendar Status Workflow',
             'description' => 'Study calendar submission, approval, and status management for tracking student progress',

@@ -15,7 +15,7 @@ test('workflow management trait requires livewire component', function () {
         protected function getWorkflowTransitionPropertyName(): string { return 'workflow_transition_id'; }
         protected function getWorkflowModelClass(): string { return \App\Models\Document::class; }
     };
-    
+
     // This should not throw an exception
     TraitValidator::validateWorkflowManagement($validComponent);
     expect(true)->toBeTrue(); // If we reach here, validation passed
@@ -26,7 +26,7 @@ test('workflow management trait throws exception for invalid class', function ()
     $invalidClass = new class {
         use HasWorkflowManagement;
     };
-    
+
     // This should throw an exception
     expect(fn() => TraitValidator::validateWorkflowManagement($invalidClass))
         ->toThrow(\InvalidArgumentException::class, 'HasWorkflowManagement trait can only be used in Livewire Components');
@@ -37,7 +37,7 @@ test('document operations validates context', function () {
     $validComponent = new class extends Component {
         // Component context
     };
-    
+
     // This should not throw an exception
     TraitValidator::validateDocumentOperations($validComponent);
     expect(true)->toBeTrue();
@@ -45,8 +45,8 @@ test('document operations validates context', function () {
 
 test('document operations validates model context', function () {
     // Valid model
-    $validModel = new \App\Models\Document();
-    
+    $validModel = new \App\Models\AcademicDocument();
+
     // This should not throw an exception
     TraitValidator::validateDocumentOperations($validModel);
     expect(true)->toBeTrue();
@@ -55,7 +55,7 @@ test('document operations validates model context', function () {
 test('document operations throws exception for invalid context', function () {
     // Invalid context
     $invalidClass = new \stdClass();
-    
+
     // This should throw an exception
     expect(fn() => TraitValidator::validateDocumentOperations($invalidClass))
         ->toThrow(\InvalidArgumentException::class, 'HasDocumentOperations trait should be used in Livewire Components or Eloquent Models');
@@ -66,7 +66,7 @@ test('employee authentication validates context', function () {
     $validComponent = new class extends Component {
         // Component context
     };
-    
+
     // This should not throw an exception
     TraitValidator::validateEmployeeAuthentication($validComponent);
     expect(true)->toBeTrue();
@@ -75,7 +75,7 @@ test('employee authentication validates context', function () {
 test('employee authentication warns for invalid context', function () {
     // Invalid context
     $invalidClass = new \stdClass();
-    
+
     // Set up error handler to catch the warning
     $warningCaught = false;
     set_error_handler(function($severity, $message, $file, $line) use (&$warningCaught) {
@@ -85,13 +85,13 @@ test('employee authentication warns for invalid context', function () {
         }
         return false; // Let other errors through
     });
-    
+
     // This should trigger a warning but not throw an exception
     TraitValidator::validateEmployeeAuthentication($invalidClass);
-    
+
     // Restore error handler
     restore_error_handler();
-    
+
     // Verify that the warning was triggered
     expect($warningCaught)->toBeTrue();
 });

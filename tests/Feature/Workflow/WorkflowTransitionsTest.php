@@ -1,6 +1,8 @@
 <?php
 
-use App\Models\Document;
+use App\Models\AcademicDocument;
+use App\Models\ApprovalDocument;
+use App\Models\StudyCalendar;
 use Illuminate\Support\Facades\Auth;
 
 beforeEach(function () {
@@ -10,9 +12,9 @@ beforeEach(function () {
     $this->documentType = createDocumentType();
 });
 
-test('document with null workflow state handles correctly', function () {
-    $document = new Document();
-    
+test('academic document with null workflow state handles correctly', function () {
+    $document = new AcademicDocument();
+
     expectDocumentState($document, 1);
     expectDocumentDraft($document);
     expect($document->isInPendingState())->toBeFalse();
@@ -22,23 +24,23 @@ test('document with null workflow state handles correctly', function () {
 
 test('study calendar with null workflow state handles correctly', function () {
     $studyCalendar = new \App\Models\StudyCalendar();
-    
+
     expectDocumentState($studyCalendar, 1);
     expectDocumentDraft($studyCalendar);
     expect($studyCalendar->isInPendingState())->toBeFalse();
 });
 
-test('document with explicit workflow state', function () {
-    $document = new Document();
+test('academic document with explicit workflow state', function () {
+    $document = new AcademicDocument();
     $document->workflow_state = 2; // PENDING
-    
+
     expectDocumentState($document, 2);
     expect($document->isInDraftState())->toBeFalse();
     expectDocumentPending($document);
 });
 
 test('workflow state persistence', function () {
-    $document = Document::create([
+    $document = AcademicDocument::create([
         'employee_id' => $this->employee->id,
         'document_type_id' => $this->documentType->id,
         'file_name' => 'test-document.pdf',
@@ -57,8 +59,8 @@ test('workflow state persistence', function () {
     expectDocumentPending($document);
 });
 
-test('document can transition from draft to pending', function () {
-    $document = createDocument([
+test('academic document can transition from draft to pending', function () {
+    $document = createAcademicDocument([
         'employee_id' => $this->employee->id,
         'document_type_id' => $this->documentType->id,
         'workflow_state' => 1
@@ -71,8 +73,8 @@ test('document can transition from draft to pending', function () {
     expectDocumentPending($document);
 });
 
-test('document cannot transition to invalid state', function () {
-    $document = createDocument([
+test('academic document cannot transition to invalid state', function () {
+    $document = createAcademicDocument([
         'employee_id' => $this->employee->id,
         'document_type_id' => $this->documentType->id,
         'workflow_state' => 1
@@ -83,7 +85,7 @@ test('document cannot transition to invalid state', function () {
 });
 
 test('workflow transition creates history record', function () {
-    $document = createDocument([
+    $document = createAcademicDocument([
         'employee_id' => $this->employee->id,
         'document_type_id' => $this->documentType->id,
         'workflow_state' => 1
@@ -98,29 +100,105 @@ test('workflow transition creates history record', function () {
     expect($latestHistory->to_state)->toBe(2); // Check to_state, not workflow_state
 });
 
-test('document state info returns correct data', function () {
-    $document = createDocument([
+test('academic document state info returns correct data', function () {
+    $document = createAcademicDocument([
         'employee_id' => $this->employee->id,
         'document_type_id' => $this->documentType->id,
         'workflow_state' => 1
     ]);
 
     $stateInfo = $document->getWorkflowStateInfo();
-    
+
     expect($stateInfo)->toHaveKeys(['label', 'color', 'icon']);
     expect($stateInfo['label'])->toBe('Draft');
     expect($stateInfo['color'])->toBe('secondary');
 });
 
-test('document available transitions are correct', function () {
-    $document = createDocument([
+test('academic document available transitions are correct', function () {
+    $document = createAcademicDocument([
         'employee_id' => $this->employee->id,
         'document_type_id' => $this->documentType->id,
         'workflow_state' => 1
     ]);
 
     $transitions = $document->getAvailableTransitions();
-    
+
     expect($transitions)->toBeArray();
     expect(array_keys($transitions))->toContain(1); // Should be able to transition to pending (SUBMIT)
-}); 
+});
+
+test('email notifications command handles both document models', function () {
+    // Create test models for both document types
+    $academicDocument = AcademicDocument::factory()->create([
+        'employee_id' => $this->employee->id,
+        'workflow_state' => 1, // DRAFT
+    ]);
+
+    $approvalDocument = ApprovalDocument::factory()->create([
+        'employee_id' => $this->employee->id,
+        'workflow_state' => 1, // DRAFT
+    ]);
+
+    // Test verification_by_staff workflow with AcademicDocument
+    $this->artisan('test:email-notifications', [
+        'workflow' => 'verification_by_staff',
+        '--simulate' => true,
+    ])
+    ->assertExitCode(0);
+
+    // Test verification_by_management workflow with ApprovalDocument
+    $this->artisan('test:email-notifications', [
+        'workflow' => 'verification_by_management',
+        '--simulate' => true,
+    ])
+    ->assertExitCode(0);
+
+    // Test with specific model IDs
+    $this->artisan('test:email-notifications', [
+        'workflow' => 'verification_by_staff',
+        '--model_id' => $academicDocument->id,
+        '--simulate' => true,
+    ])
+    ->assertExitCode(0);
+
+    $this->artisan('test:email-notifications', [
+        'workflow' => 'verification_by_management',
+        '--model_id' => $approvalDocument->id,
+        '--simulate' => true,
+    ])
+    ->assertExitCode(0);
+});
+
+test('email notifications command handles all workflows', function () {
+    // Create test models
+    AcademicDocument::factory()->create(['employee_id' => $this->employee->id]);
+    ApprovalDocument::factory()->create(['employee_id' => $this->employee->id]);
+    StudyCalendar::factory()->create(['employee_id' => $this->employee->id]);
+
+    // Test all workflows
+    $this->artisan('test:email-notifications', [
+        'workflow' => 'all',
+        '--simulate' => true,
+    ])
+    ->assertExitCode(0)
+    ->expectsOutput('Testing workflow: verification_by_staff')
+    ->expectsOutput('Testing workflow: verification_by_management')
+    ->expectsOutput('Testing workflow: study_calendar_approval');
+});
+
+test('email notifications command validates workflow names', function () {
+    $this->artisan('test:email-notifications', [
+        'workflow' => 'invalid_workflow',
+    ])
+    ->assertExitCode(1)
+    ->expectsOutput("Workflow 'invalid_workflow' not found!");
+});
+
+test('email notifications command requires email for direct testing', function () {
+    $this->artisan('test:email-notifications', [
+        'workflow' => 'verification_by_staff',
+        '--transition' => 1,
+    ])
+    ->assertExitCode(1)
+    ->expectsOutput('Email address is required for direct email testing. Use --email option or --simulate flag.');
+});

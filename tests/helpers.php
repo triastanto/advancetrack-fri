@@ -1,12 +1,11 @@
 <?php
 
-use App\Models\Document;
 use App\Models\DocumentType;
 use App\Models\Employee;
 use App\Models\StudyCalendar;
 use App\Models\User;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
+use App\Models\AcademicDocument;
+use App\Models\ApprovalDocument;
 
 /**
  * Create a user for testing
@@ -33,19 +32,27 @@ function createDocumentType($attributes = []): DocumentType
 }
 
 /**
- * Create a document for testing
- */
-function createDocument($attributes = []): Document
-{
-    return Document::factory()->create($attributes);
-}
-
-/**
  * Create a study calendar for testing
  */
 function createStudyCalendar($attributes = []): StudyCalendar
 {
     return StudyCalendar::factory()->create($attributes);
+}
+
+/**
+ * Create an academic document for testing
+ */
+function createAcademicDocument($attributes = []): AcademicDocument
+{
+    return AcademicDocument::factory()->create($attributes);
+}
+
+/**
+ * Create an approval document for testing
+ */
+function createApprovalDocument($attributes = []): ApprovalDocument
+{
+    return ApprovalDocument::factory()->create($attributes);
 }
 
 /**
@@ -78,4 +85,4 @@ function expectDocumentPending($document): void
 function expectDocumentRejected($document): void
 {
     expect($document->isInRejectedState())->toBeTrue();
-} 
+}

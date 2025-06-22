@@ -2,7 +2,8 @@
 
 namespace App\Providers;
 
-use App\Models\Document;
+use App\Models\AcademicDocument;
+use App\Models\ApprovalDocument;
 use App\Observers\WorkflowObserver;
 use Illuminate\Support\ServiceProvider;
 
@@ -21,7 +22,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Register workflow observer for models that use workflows
-        Document::observe(WorkflowObserver::class);
+        // Register workflow observer for specialized document models
+        AcademicDocument::observe(WorkflowObserver::class);
+        ApprovalDocument::observe(WorkflowObserver::class);
     }
 }

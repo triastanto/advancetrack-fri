@@ -7,11 +7,9 @@ use App\Traits\HasDocumentManagement;
 use App\Traits\HasCommonValidation;
 use App\Traits\HasModal;
 use Livewire\WithPagination;
-use App\Models\Document;
+use App\Models\AcademicDocument;
 use App\Models\DocumentType;
-use App\Models\Employee;
 use App\Models\StudyProgram;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class Verification extends WorkflowComponent
@@ -22,17 +20,17 @@ class Verification extends WorkflowComponent
     public $search = '';
     public $documentType = '';
     public $studyProgram = '';
-    
+
     // Verification Modal Properties
     public $selectedDocument = null;
     public $verificationNote = '';
-    
+
     // Workflow Modal Properties
     public $workflowModalOpen = false;
     public $workflowDocument = null;
     public $workflowTransitionId = null;
     public $workflowComment = '';
-    
+
     // Workflow Properties
     public $selectedTransition = null;
     public $transitionComment = '';
@@ -63,7 +61,7 @@ class Verification extends WorkflowComponent
         } catch (\Exception $e) {
             Log::error('Error in Verification render: ' . $e->getMessage());
             session()->flash('error', 'Terjadi kesalahan saat memuat data verifikasi.');
-            
+
             return view('livewire.administrations.verification', [
                 'documents' => collect(),
                 'documentTypes' => collect(),
@@ -78,7 +76,7 @@ class Verification extends WorkflowComponent
      */
     protected function getFilteredDocuments()
     {
-        $query = Document::with(['employee.user', 'employee.studyPrograms', 'workflowHistory.user', 'documentType'])
+        $query = AcademicDocument::with(['employee.user', 'employee.studyPrograms', 'workflowHistory.user', 'documentType'])
             ->where(function($q) {
                 $q->where('workflow_state', 2) // PENDING
                   ->orWhere('workflow_state', 4); // REJECTED (for resubmission)
@@ -142,7 +140,7 @@ class Verification extends WorkflowComponent
 
     public function openVerificationModal($documentId)
     {
-        $this->selectedDocument = Document::with(['employee.user', 'documentType'])->find($documentId);
+        $this->selectedDocument = AcademicDocument::with(['employee.user', 'documentType'])->find($documentId);
         $this->verificationNote = '';
         $this->openModal(['document' => $this->selectedDocument]);
     }
@@ -156,7 +154,7 @@ class Verification extends WorkflowComponent
 
     public function openWorkflowModal($documentId, $transitionId)
     {
-        $this->workflowDocument = Document::with(['employee.user', 'documentType'])->find($documentId);
+        $this->workflowDocument = AcademicDocument::with(['employee.user', 'documentType'])->find($documentId);
         $this->workflowTransitionId = $transitionId;
         $this->workflowComment = '';
         $this->workflowModalOpen = true;
@@ -184,7 +182,7 @@ class Verification extends WorkflowComponent
     // Implementation of abstract methods from WorkflowComponent
     protected function getWorkflowModelClass(): string
     {
-        return Document::class;
+        return AcademicDocument::class;
     }
 
     protected function getWorkflowDocumentPropertyName(): string
@@ -197,7 +195,7 @@ class Verification extends WorkflowComponent
         return 'transitionComment';
     }
 
-    protected function getWorkflowTransitionPropertyName(): string  
+    protected function getWorkflowTransitionPropertyName(): string
     {
         return 'selectedTransition';
     }

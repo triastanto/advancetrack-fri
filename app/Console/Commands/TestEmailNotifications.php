@@ -4,9 +4,9 @@ namespace App\Console\Commands;
 
 use App\Events\Workflow\WorkflowTransitionApplied;
 use App\Listeners\NotifyStakeholders;
-use App\Models\Document;
+use App\Models\AcademicDocument;
+use App\Models\ApprovalDocument;
 use App\Models\StudyCalendar;
-use App\Models\User;
 use App\Services\Workflow\WorkflowDefinition;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
@@ -20,7 +20,7 @@ class TestEmailNotifications extends Command
      * @var string
      */
     protected $signature = 'test:email-notifications
-                            {workflow : The workflow name to test (verification_by_staff, study_calendar_approval, or all)}
+                            {workflow : The workflow name to test (verification_by_staff, verification_by_management, study_calendar_approval, or all)}
                             {--transition= : The specific transition ID to test (optional)}
                             {--email= : The email address to send test to (required for individual tests)}
                             {--model_id= : The ID of the model to test with (optional)}
@@ -32,6 +32,15 @@ class TestEmailNotifications extends Command
      * @var string
      */
     protected $description = 'Test email notifications for multiple workflows';
+
+    /**
+     * Workflow to model mapping
+     */
+    private const WORKFLOW_MODEL_MAP = [
+        'verification_by_staff' => AcademicDocument::class,
+        'verification_by_management' => ApprovalDocument::class,
+        'study_calendar_approval' => StudyCalendar::class,
+    ];
 
     /**
      * Execute the console command.
@@ -202,11 +211,13 @@ class TestEmailNotifications extends Command
      */
     private function findModelByWorkflow(string $workflowName, int $modelId): ?object
     {
-        return match ($workflowName) {
-            'verification_by_staff' => Document::find($modelId),
-            'study_calendar_approval' => StudyCalendar::find($modelId),
-            default => null,
-        };
+        $modelClass = self::WORKFLOW_MODEL_MAP[$workflowName] ?? null;
+
+        if (!$modelClass) {
+            return null;
+        }
+
+        return $modelClass::find($modelId);
     }
 
     /**
@@ -214,11 +225,26 @@ class TestEmailNotifications extends Command
      */
     private function createTestModel(string $workflowName): ?object
     {
-        return match ($workflowName) {
-            'verification_by_staff' => Document::first() ?: Document::factory()->create(),
-            'study_calendar_approval' => StudyCalendar::first() ?: StudyCalendar::factory()->create(),
-            default => null,
-        };
+        $modelClass = self::WORKFLOW_MODEL_MAP[$workflowName] ?? null;
+
+        if (!$modelClass) {
+            $this->error("No model class mapped for workflow '{$workflowName}'");
+            return null;
+        }
+
+        // Try to find existing model first, then create new one
+        $existingModel = $modelClass::first();
+        if ($existingModel) {
+            return $existingModel;
+        }
+
+        // Create new model using factory
+        try {
+            return $modelClass::factory()->create();
+        } catch (\Exception $e) {
+            $this->error("Failed to create test model for workflow '{$workflowName}': " . $e->getMessage());
+            return null;
+        }
     }
 
     /**
@@ -310,8 +336,9 @@ class TestEmailNotifications extends Command
             return 1;
         }
 
-        // Send test email
-        Mail::to($testEmail)->send(new \App\Mail\DocumentSubmittedMail($model, [
+        // Send test email based on workflow type
+        $mailClass = $this->getMailClassForWorkflow($workflowName);
+        Mail::to($testEmail)->send(new $mailClass($model, [
             'transition_id' => $transitionId,
             'workflow_name' => $workflowName,
             'test_mode' => true,
@@ -322,5 +349,17 @@ class TestEmailNotifications extends Command
         }
 
         return 0;
+    }
+
+    /**
+     * Get appropriate mail class for workflow
+     */
+    private function getMailClassForWorkflow(string $workflowName): string
+    {
+        return match ($workflowName) {
+            'verification_by_staff', 'verification_by_management' => \App\Mail\DocumentSubmittedMail::class,
+            'study_calendar_approval' => \App\Mail\DocumentSubmittedMail::class, // Adjust as needed
+            default => \App\Mail\DocumentSubmittedMail::class,
+        };
     }
 }

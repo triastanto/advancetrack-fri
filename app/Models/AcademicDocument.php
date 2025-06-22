@@ -3,31 +3,50 @@
 namespace App\Models;
 
 use App\Constants\DocumentTypeConstants;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class AcademicDocument extends Document
 {
+    use HasFactory;
 
-    protected static function booted()
+    /**
+     * Create a new factory instance for the model.
+     */
+    protected static function newFactory()
     {
-        static::addGlobalScope('academic_category', function ($query) {
-            $query->whereHas('documentType', function ($subQuery) {
-                $subQuery->whereIn('name', self::getAllowedTypes());
-            });
-        });
+        return \Database\Factories\AcademicDocumentFactory::new();
     }
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'documents';
 
+    /**
+     * Boot the model.
+     */
     protected static function boot()
     {
         parent::boot();
-        static::saving(function ($model) {
-            // Check if the document type is valid for AcademicDocument
-            if ($model->documentType && !in_array($model->documentType->name, self::getAllowedTypes())) {
-                throw new \InvalidArgumentException('Invalid document type for AcademicDocument.');
-            }
+
+        // Apply the academic document type restriction
+        static::addGlobalScope('academic_document', function ($query) {
+            $validTypeIds = DocumentType::whereIn('name', array_merge(
+                DocumentTypeConstants::getStudyRequirementNames(),
+                DocumentTypeConstants::getSemesterDocumentNames(),
+                DocumentTypeConstants::getFinalDocumentNames()
+            ))->pluck('id')->toArray();
+
+            $query->whereIn('document_type_id', $validTypeIds);
         });
     }
 
-    public static function getAllowedTypes()
+    /**
+     * Get allowed document types for this document model
+     */
+    public static function getAllowedTypes(): array
     {
         return array_merge(
             DocumentTypeConstants::getStudyRequirementNames(),
@@ -36,85 +55,48 @@ class AcademicDocument extends Document
         );
     }
 
+    /**
+     * Get the workflow name for this document.
+     */
     public function getWorkflowName(): string
     {
         return 'verification_by_staff';
     }
 
     /**
-     * Create a new AcademicDocument with a document type by name
+     * Scope a query to only include documents of specific types.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param array $types
+     * @return \Illuminate\Database\Eloquent\Builder
      */
-    public static function createWithDocumentType(string $documentTypeName, array $attributes = []): self
+    public function scopeOfTypes($query, array $types)
     {
-        $documentType = DocumentType::where('name', $documentTypeName)->first();
-
-        if (!$documentType) {
-            throw new \InvalidArgumentException("Document type '{$documentTypeName}' not found.");
-        }
-
-        if (!in_array($documentTypeName, self::getAllowedTypes())) {
-            throw new \InvalidArgumentException("Document type '{$documentTypeName}' is not allowed for AcademicDocument.");
-        }
-
-        $attributes['document_type_id'] = $documentType->id;
-
-        return self::create($attributes);
+        $typeIds = DocumentType::whereIn('name', $types)->pluck('id')->toArray();
+        return $query->whereIn('document_type_id', $typeIds);
     }
 
     /**
-     * Scope to filter by document type name
+     * Query scope to get all study requirements documents
      */
-    public function scopeByDocumentTypeName($query, string $documentTypeName)
+    public function scopeStudyRequirements($query)
     {
-        return $query->whereHas('documentType', function ($subQuery) use ($documentTypeName) {
-            $subQuery->where('name', $documentTypeName);
-        });
+        return $this->scopeOfTypes($query, DocumentTypeConstants::getStudyRequirementNames());
     }
 
     /**
-     * Scope to filter by document category
+     * Query scope to get all semester reports
      */
-    public function scopeByCategory($query, string $category)
+    public function scopeSemesterReports($query)
     {
-        $typeNames = match($category) {
-            'study_requirements' => DocumentTypeConstants::getStudyRequirementNames(),
-            'semester_documents' => DocumentTypeConstants::getSemesterDocumentNames(),
-            'final_documents' => DocumentTypeConstants::getFinalDocumentNames(),
-            default => []
-        };
-
-        if (empty($typeNames)) {
-            return $query->whereRaw('1 = 0'); // Return empty result
-        }
-
-        return $query->whereHas('documentType', function ($subQuery) use ($typeNames) {
-            $subQuery->whereIn('name', $typeNames);
-        });
+        return $this->scopeOfTypes($query, DocumentTypeConstants::getSemesterDocumentNames());
     }
 
     /**
-     * Get the category of this academic document
+     * Query scope to get all final reports
      */
-    public function getCategory(): ?string
+    public function scopeFinalReports($query)
     {
-        if (!$this->documentType) {
-            return null;
-        }
-
-        $typeName = $this->documentType->name;
-
-        if (in_array($typeName, DocumentTypeConstants::getStudyRequirementNames())) {
-            return 'study_requirements';
-        }
-
-        if (in_array($typeName, DocumentTypeConstants::getSemesterDocumentNames())) {
-            return 'semester_documents';
-        }
-
-        if (in_array($typeName, DocumentTypeConstants::getFinalDocumentNames())) {
-            return 'final_documents';
-        }
-
-        return null;
+        return $this->scopeOfTypes($query, DocumentTypeConstants::getFinalDocumentNames());
     }
 }

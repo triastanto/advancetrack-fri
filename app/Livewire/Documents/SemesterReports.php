@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Documents;
 
-use App\Models\Document;
+use App\Models\AcademicDocument;
 use App\Models\DocumentType;
 use App\Constants\DocumentTypeConstants;
 use App\Livewire\Base\WorkflowComponent;
@@ -24,7 +24,7 @@ class SemesterReports extends WorkflowComponent
     public $selectedTransition;
     public $transitionComment = '';
     public $selectedSemester = '';
-    
+
     // Modal states for backward compatibility with Blade views
     public $uploadModalOpen = false;
     public $viewModalOpen = false;
@@ -35,7 +35,7 @@ class SemesterReports extends WorkflowComponent
 
     protected $listeners = [
         'document:uploaded' => 'handleDocumentUploaded',
-        'document:deleted' => 'handleDocumentDeleted', 
+        'document:deleted' => 'handleDocumentDeleted',
         'document:submitted' => 'handleDocumentSubmitted',
         'workflow:transition-applied' => 'handleTransitionApplied',
         'document-submit' => 'handleDocumentSubmit',
@@ -101,9 +101,9 @@ class SemesterReports extends WorkflowComponent
                 return;
             }
 
-            $document = Document::findOrFail($documentId);
+            $document = AcademicDocument::findOrFail($documentId);
             $employee = $this->getEmployee();
-            
+
             if ($document->employee_id !== $employee->id) {
                 session()->flash('error', 'Anda tidak memiliki akses untuk dokumen ini.');
                 return;
@@ -116,11 +116,11 @@ class SemesterReports extends WorkflowComponent
 
             // Get available transitions and find submit transition
             $availableTransitions = $document->getAvailableTransitions();
-            
+
             // Find the SUBMIT transition ID and data
             $submitTransitionId = null;
             $submitTransition = null;
-            
+
             foreach ($availableTransitions as $transitionId => $transitionData) {
                 if ($transitionData['name'] === 'SUBMIT') {
                     $submitTransitionId = $transitionId;
@@ -128,7 +128,7 @@ class SemesterReports extends WorkflowComponent
                     break;
                 }
             }
-            
+
             if (!$submitTransitionId || !$submitTransition) {
                 Log::error('Submit transition not found for document', [
                     'document_id' => $documentId,
@@ -160,7 +160,7 @@ class SemesterReports extends WorkflowComponent
                 ]);
                 session()->flash('error', 'Gagal mengirim dokumen: ' . $transitionError->getMessage());
             }
-            
+
         } catch (\Exception $e) {
             session()->flash('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
@@ -175,9 +175,9 @@ class SemesterReports extends WorkflowComponent
                 return;
             }
 
-            $document = Document::findOrFail($documentId);
+            $document = AcademicDocument::findOrFail($documentId);
             $employee = $this->getEmployee();
-            
+
             if ($document->employee_id !== $employee->id) {
                 session()->flash('error', 'Anda tidak memiliki akses untuk dokumen ini.');
                 return;
@@ -194,10 +194,10 @@ class SemesterReports extends WorkflowComponent
             }
 
             $document->delete();
-            
+
             session()->flash('message', 'Dokumen berhasil dihapus.');
             $this->refreshData();
-            
+
         } catch (\Exception $e) {
             session()->flash('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
@@ -254,13 +254,13 @@ class SemesterReports extends WorkflowComponent
         $this->handleDocumentDelete(['documentId' => $documentId]);
     }
 
-    // Status and Info Methods - Using traits  
+    // Status and Info Methods - Using traits
     public function getCompletionStatus()
     {
         try {
             $employee = $this->getEmployee();
             $documentTypeIds = $this->availableDocumentTypes->pluck('id')->toArray();
-            
+
             // For semester reports, get semester-aware completion status
             return $this->getSemesterAwareCompletionStatus($employee, $documentTypeIds);
         } catch (\Exception $e) {
@@ -285,13 +285,13 @@ class SemesterReports extends WorkflowComponent
     {
         try {
             // Get all documents for the employee and document types (including all semesters)
-            $allDocuments = Document::where('employee_id', $employee->id)
+            $allDocuments = AcademicDocument::where('employee_id', $employee->id)
                 ->whereIn('document_type_id', $documentTypeIds)
                 ->with(['documentType', 'workflowHistory.user'])
                 ->get();
-            
+
             $documentTypes = DocumentType::whereIn('id', $documentTypeIds)->get();
-            
+
             $completionDetails = [];
             $allCompleted = true;
             $completedCount = 0;
@@ -299,15 +299,15 @@ class SemesterReports extends WorkflowComponent
             foreach ($documentTypes as $docType) {
                 // Get all documents for this document type across all semesters
                 $documentsForType = $allDocuments->where('document_type_id', $docType->id);
-                
+
                 // For display purposes, we'll use the latest document as the primary one
                 // but we'll also store all documents for semester-specific filtering
                 $latestDocument = $documentsForType->sortByDesc('created_at')->first();
-                
+
                 if ($latestDocument) {
                     $stateInfo = $latestDocument->getWorkflowStateInfo();
                     $isCompleted = $latestDocument->isInVerifiedState();
-                    
+
                     $completionDetails[$docType->name] = [
                         'uploaded' => true,
                         'state_info' => $stateInfo,
@@ -316,7 +316,7 @@ class SemesterReports extends WorkflowComponent
                         'completed' => $isCompleted,
                         'all_documents' => $documentsForType // Keep as collection for proper filtering
                     ];
-                    
+
                     if ($isCompleted) {
                         $completedCount++;
                     } else {
@@ -361,7 +361,7 @@ class SemesterReports extends WorkflowComponent
     {
         try {
             $employee = $this->getEmployee();
-            
+
             $activeStudy = $employee->studyCalendars()
                 ->where('study_status', 'active')
                 ->latest()
@@ -374,7 +374,7 @@ class SemesterReports extends WorkflowComponent
             $startDate = Carbon::parse($activeStudy->study_start);
             $now = Carbon::now();
             $monthsDiff = $startDate->diffInMonths($now);
-            
+
             return max(1, floor($monthsDiff / 6) + 1);
         } catch (\Exception $e) {
             return 1;
@@ -408,7 +408,7 @@ class SemesterReports extends WorkflowComponent
             $documentTypes = $this->getSemesterReportDocumentTypes();
             $documentTypeIds = $documentTypes->pluck('id')->toArray();
 
-            $semesterReports = Document::where('employee_id', $employee->id)
+            $semesterReports = AcademicDocument::where('employee_id', $employee->id)
                 ->whereIn('document_type_id', $documentTypeIds)
                 ->with(['documentType', 'workflowHistory.user'])
                 ->orderBy('semester', 'desc')
@@ -446,7 +446,7 @@ class SemesterReports extends WorkflowComponent
     // Required abstract method implementations
     protected function getWorkflowModelClass(): string
     {
-        return Document::class;
+        return AcademicDocument::class;
     }
 
     protected function getWorkflowDocumentPropertyName(): string

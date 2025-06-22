@@ -2,10 +2,10 @@
 
 namespace App\Livewire\Documents;
 
-use App\Models\Document;
 use App\Models\DocumentType;
 use App\Constants\DocumentTypeConstants;
 use App\Livewire\Base\WorkflowComponent;
+use App\Models\AcademicDocument;
 use App\Traits\HasDocumentManagement;
 use App\Traits\HasCommonValidation;
 use Carbon\Carbon;
@@ -23,7 +23,7 @@ class FinalReports extends WorkflowComponent
     public $selectedDocumentTypeId;
     public $selectedTransition;
     public $transitionComment = '';
-    
+
     // Modal states for backward compatibility with Blade views
     public $uploadModalOpen = false;
     public $viewModalOpen = false;
@@ -34,7 +34,7 @@ class FinalReports extends WorkflowComponent
 
     protected $listeners = [
         'document:uploaded' => 'handleDocumentUploaded',
-        'document:deleted' => 'handleDocumentDeleted', 
+        'document:deleted' => 'handleDocumentDeleted',
         'document:submitted' => 'handleDocumentSubmitted',
         'workflow:transition-applied' => 'handleTransitionApplied',
         'document-submit' => 'handleDocumentSubmit',
@@ -100,9 +100,9 @@ class FinalReports extends WorkflowComponent
                 return;
             }
 
-            $document = Document::findOrFail($documentId);
+            $document = AcademicDocument::findOrFail($documentId);
             $employee = $this->getEmployee();
-            
+
             if ($document->employee_id !== $employee->id) {
                 session()->flash('error', 'Anda tidak memiliki akses untuk dokumen ini.');
                 return;
@@ -115,11 +115,11 @@ class FinalReports extends WorkflowComponent
 
             // Get available transitions and find submit transition
             $availableTransitions = $document->getAvailableTransitions();
-            
+
             // Find the SUBMIT transition ID and data
             $submitTransitionId = null;
             $submitTransition = null;
-            
+
             foreach ($availableTransitions as $transitionId => $transitionData) {
                 if ($transitionData['name'] === 'SUBMIT') {
                     $submitTransitionId = $transitionId;
@@ -127,7 +127,7 @@ class FinalReports extends WorkflowComponent
                     break;
                 }
             }
-            
+
             if (!$submitTransitionId || !$submitTransition) {
                 session()->flash('error', 'Transisi submit tidak tersedia.');
                 return;
@@ -142,10 +142,10 @@ class FinalReports extends WorkflowComponent
             ];
 
             $document->applyTransition($submitTransitionId, $context);
-            
+
             session()->flash('message', 'Dokumen berhasil dikirim untuk verifikasi.');
             $this->refreshData();
-            
+
         } catch (\Exception $e) {
             session()->flash('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
@@ -160,9 +160,9 @@ class FinalReports extends WorkflowComponent
                 return;
             }
 
-            $document = Document::findOrFail($documentId);
+            $document = AcademicDocument::findOrFail($documentId);
             $employee = $this->getEmployee();
-            
+
             if ($document->employee_id !== $employee->id) {
                 session()->flash('error', 'Anda tidak memiliki akses untuk dokumen ini.');
                 return;
@@ -179,10 +179,10 @@ class FinalReports extends WorkflowComponent
             }
 
             $document->delete();
-            
+
             session()->flash('message', 'Dokumen berhasil dihapus.');
             $this->refreshData();
-            
+
         } catch (\Exception $e) {
             session()->flash('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
@@ -241,8 +241,8 @@ class FinalReports extends WorkflowComponent
     public function downloadDocument($documentId)
     {
         try {
-            $document = Document::findOrFail($documentId);
-            
+            $document = AcademicDocument::findOrFail($documentId);
+
             if (!$document->isInVerifiedState()) {
                 session()->flash('error', 'Dokumen belum diverifikasi.');
                 return;
@@ -273,8 +273,8 @@ class FinalReports extends WorkflowComponent
         try {
             $employee = $this->getEmployee();
             $documentTypeIds = $this->availableDocumentTypes->pluck('id')->toArray();
-            
-            return $this->getDocumentCompletionStatus($employee, $documentTypeIds);
+
+            return $this->getDocumentCompletionStatus($employee, $documentTypeIds, true, 'AcademicDocument');
         } catch (\Exception $e) {
             return [
                 'status' => 'Error',
@@ -313,7 +313,7 @@ class FinalReports extends WorkflowComponent
             $documentTypes = $this->getFinalDocumentTypes();
             $documentTypeIds = $documentTypes->pluck('id')->toArray();
 
-            $finalReports = Document::where('employee_id', $employee->id)
+            $finalReports = AcademicDocument::where('employee_id', $employee->id)
                 ->whereIn('document_type_id', $documentTypeIds)
                 ->with(['documentType', 'workflowHistory.user'])
                 ->orderBy('created_at', 'desc')
@@ -349,7 +349,7 @@ class FinalReports extends WorkflowComponent
     // Implementation of abstract methods from WorkflowComponent
     protected function getWorkflowModelClass(): string
     {
-        return Document::class;
+        return AcademicDocument::class;
     }
 
     protected function getWorkflowDocumentPropertyName(): string
@@ -362,7 +362,7 @@ class FinalReports extends WorkflowComponent
         return 'transitionComment';
     }
 
-    protected function getWorkflowTransitionPropertyName(): string  
+    protected function getWorkflowTransitionPropertyName(): string
     {
         return 'selectedTransition';
     }

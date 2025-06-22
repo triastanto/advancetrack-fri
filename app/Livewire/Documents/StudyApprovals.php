@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Documents;
 
-use App\Models\Document;
+use App\Models\ApprovalDocument;
 use App\Models\DocumentType;
 use App\Constants\DocumentTypeConstants;
 use App\Livewire\Base\WorkflowComponent;
@@ -117,7 +117,7 @@ class StudyApprovals extends WorkflowComponent
             $employee = $this->getEmployee();
             $documentTypeIds = $this->availableDocumentTypes->pluck('id')->toArray();
 
-            return $this->getDocumentCompletionStatus($employee, $documentTypeIds);
+            return $this->getDocumentCompletionStatus($employee, $documentTypeIds, true, 'ApprovalDocument');
         } catch (\Exception $e) {
             return [
                 'status' => 'Error',
@@ -146,7 +146,7 @@ class StudyApprovals extends WorkflowComponent
             $documentTypes = $this->getapprovalDocumentTypes();
             $documentTypeIds = $documentTypes->pluck('id')->toArray();
 
-            $approvalDocuments = Document::where('employee_id', $employee->id)
+            $approvalDocuments = ApprovalDocument::where('employee_id', $employee->id)
                 ->whereIn('document_type_id', $documentTypeIds)
                 ->with(['documentType', 'workflowHistory.user'])
                 ->orderBy('created_at', 'desc')
@@ -182,7 +182,7 @@ class StudyApprovals extends WorkflowComponent
     // Implementation of abstract methods from WorkflowComponent
     protected function getWorkflowModelClass(): string
     {
-        return Document::class;
+        return ApprovalDocument::class;
     }
 
     protected function getWorkflowDocumentPropertyName(): string

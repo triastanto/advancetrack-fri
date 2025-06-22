@@ -6,7 +6,7 @@ use App\Traits\HasWorkflow;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Document extends Model
+abstract class Document extends Model
 {
     use HasFactory, HasWorkflow;
 
@@ -89,9 +89,19 @@ class Document extends Model
     /**
      * Get the workflow name for this model
      */
-    public function getWorkflowName(): string
+    abstract public function getWorkflowName(): string;
+
+    /**
+     * Get allowed document types for this document model
+     */
+    abstract public static function getAllowedTypes(): array;
+
+    /**
+     * Check if document type is allowed for this document model
+     */
+    public static function isAllowedType(string $documentTypeName): bool
     {
-        return 'verification_by_staff';
+        return in_array($documentTypeName, static::getAllowedTypes());
     }
 
     /**

@@ -5,9 +5,10 @@ namespace App\Livewire\Components\Document;
 use App\Models\Document;
 use App\Models\DocumentType;
 use App\Models\Employee;
+use App\Models\AcademicDocument;
+use App\Models\ApprovalDocument;
 use Livewire\Component;
 use Livewire\WithFileUploads;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 
 class DocumentUploadModal extends Component
@@ -23,7 +24,9 @@ class DocumentUploadModal extends Component
     public $availableDocumentTypes = [];
     public $employee;
     public $storageBasePath = 'documents';
-    
+    public $documentClass = Document::class; // Default document model
+    public $documentCategory = ''; // Track the current document category
+
     // Component configuration
     public $requiresSemester = false;
     public $autoGenerateFileName = true;
@@ -49,13 +52,14 @@ class DocumentUploadModal extends Component
         'selectedSemester.max' => 'Semester maksimal 20.'
     ];
 
-    public function mount($employee = null, $documentTypes = [], $storageBasePath = 'documents', $requiresSemester = false)
+    public function mount($employee = null, $documentTypes = [], $storageBasePath = 'documents', $requiresSemester = false, $documentClass = Document::class)
     {
         $this->employee = $employee;
         $this->availableDocumentTypes = $documentTypes;
         $this->storageBasePath = $storageBasePath;
         $this->requiresSemester = $requiresSemester;
-        
+        $this->documentClass = $documentClass;
+
         if ($this->requiresSemester) {
             $this->rules['selectedSemester'] = 'required|integer|min:1|max:20';
             $this->messages['selectedSemester.required'] = 'Semester wajib dipilih.';
@@ -68,21 +72,37 @@ class DocumentUploadModal extends Component
         if (isset($data['employeeId'])) {
             $this->employee = Employee::find($data['employeeId']);
         }
-        
+
+        // Set document category
+        $this->documentCategory = $data['category'] ?? '';
+
         // Set available document types based on category
         if (isset($data['category'])) {
             $this->setDocumentTypesForCategory($data['category']);
         }
-        
+
+        // Set document class based on category
+        if (isset($data['category'])) {
+            $this->setDocumentClass($data['category']);
+        }
+
         // Set document type ID
         $this->selectedDocumentTypeId = $data['documentTypeId'] ?? $this->selectedDocumentTypeId;
-        
+
         // Set semester if provided
         $this->selectedSemester = $data['semester'] ?? $this->selectedSemester;
-        
+
         // Determine if semester is required based on category
         $this->requiresSemester = in_array($data['category'] ?? '', ['semester-reports']);
-        
+
+        // Update validation rules based on semester requirement
+        if ($this->requiresSemester) {
+            $this->rules['selectedSemester'] = 'required|integer|min:1|max:20';
+            $this->messages['selectedSemester.required'] = 'Semester wajib dipilih.';
+        } else {
+            $this->rules['selectedSemester'] = 'nullable|integer|min:1|max:20';
+        }
+
         // Reset and generate filename
         $this->fileName = '';
         $this->documentFile = null;
@@ -90,11 +110,11 @@ class DocumentUploadModal extends Component
         $this->generateFileName();
         $this->isOpen = true;
     }
-    
+
     protected function setDocumentTypesForCategory($category)
     {
         $documentTypeConstants = new \App\Constants\DocumentTypeConstants();
-        
+
         switch ($category) {
             case 'study-requirements':
                 $names = array_column($documentTypeConstants::getByCategory('study_requirements'), 'name');
@@ -105,19 +125,45 @@ class DocumentUploadModal extends Component
             case 'final-reports':
                 $names = array_column($documentTypeConstants::getByCategory('final_documents'), 'name');
                 break;
+            case 'approvals':
+                $names = $documentTypeConstants::getApprovalDocumentNames();
+                break;
             default:
                 $names = [];
         }
-        
+
         $this->availableDocumentTypes = DocumentType::whereIn('name', $names)
             ->orderBy('display_name')
             ->get();
+    }
+
+    /**
+     * Set the document class based on category
+     *
+     * @param string $category
+     */
+    protected function setDocumentClass($category)
+    {
+        switch ($category) {
+            case 'study-requirements':
+            case 'semester-reports':
+            case 'final-reports':
+                $this->documentClass = AcademicDocument::class;
+                break;
+            case 'approvals':
+                $this->documentClass = ApprovalDocument::class;
+                break;
+            default:
+                $this->documentClass = Document::class;
+                break;
+        }
     }
 
     public function close()
     {
         $this->isOpen = false;
         $this->documentFile = null;
+        $this->documentCategory = '';
         $this->reset(['fileName', 'selectedDocumentTypeId', 'selectedSemester']);
         $this->resetValidation();
     }
@@ -136,7 +182,7 @@ class DocumentUploadModal extends Component
                 'documentFile' => 'required|file|mimes:pdf|max:10240',
                 'fileName' => 'required|string|max:255',
                 'selectedDocumentTypeId' => 'required|exists:document_types,id',
-                'selectedSemester' => 'nullable|integer|min:1|max:20'
+                'selectedSemester' => $this->requiresSemester ? 'required|integer|min:1|max:20' : 'nullable|integer|min:1|max:20'
             ]);
 
             if (!$this->employee) {
@@ -153,11 +199,14 @@ class DocumentUploadModal extends Component
             }
 
             $filePath = $this->documentFile->store(
-                $this->storageBasePath . '/' . $this->employee->id, 
+                $this->storageBasePath . '/' . $this->employee->id,
                 'public'
             );
 
             $documentType = DocumentType::findOrFail($this->selectedDocumentTypeId);
+
+            // Validate document type compatibility with the selected model
+            $this->validateDocumentTypeCompatibility($documentType);
 
             $documentData = [
                 'employee_id' => $this->employee->id,
@@ -171,14 +220,17 @@ class DocumentUploadModal extends Component
                 $documentData['semester'] = $this->selectedSemester;
             }
 
-            $document = Document::create($documentData);
+            // Create document using the appropriate model class
+            $document = $this->documentClass::create($documentData);
 
             $this->close();
-            
+
             // Emit success event globally so parent components can catch it
             $this->dispatch('document:uploaded', [
                 'document' => $document,
-                'message' => 'Dokumen berhasil diunggah sebagai draft.'
+                'message' => 'Dokumen berhasil diunggah sebagai draft.',
+                'documentModel' => class_basename($this->documentClass),
+                'category' => $this->documentCategory
             ]);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -186,6 +238,25 @@ class DocumentUploadModal extends Component
         } catch (\Exception $e) {
             Log::error('Error uploading document: ' . $e->getMessage());
             $this->addError('upload', 'Terjadi kesalahan saat mengunggah dokumen: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Validate that the document type is compatible with the selected document class
+     *
+     * @param DocumentType $documentType
+     * @throws \Exception
+     */
+    protected function validateDocumentTypeCompatibility($documentType)
+    {
+        if ($this->documentClass === AcademicDocument::class) {
+            if (!AcademicDocument::isAllowedType($documentType->name)) {
+                throw new \Exception("Document type '{$documentType->display_name}' is not allowed for academic documents.");
+            }
+        } elseif ($this->documentClass === ApprovalDocument::class) {
+            if (!ApprovalDocument::isAllowedType($documentType->name)) {
+                throw new \Exception("Document type '{$documentType->display_name}' is not allowed for approval documents.");
+            }
         }
     }
 
@@ -208,7 +279,7 @@ class DocumentUploadModal extends Component
                     ['documentFile' => $this->documentFile],
                     ['documentFile' => 'file|mimes:pdf|max:10240']
                 );
-                
+
                 if ($validator->fails()) {
                     $this->addError('documentFile', $validator->errors()->first('documentFile'));
                 }
@@ -235,7 +306,7 @@ class DocumentUploadModal extends Component
         }
 
         $filename = $documentType->display_name;
-        
+
         if ($this->requiresSemester && $this->selectedSemester) {
             $filename = "Semester {$this->selectedSemester} - {$filename}";
         }

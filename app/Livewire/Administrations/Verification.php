@@ -10,6 +10,7 @@ use Livewire\WithPagination;
 use App\Models\AcademicDocument;
 use App\Models\DocumentType;
 use App\Models\StudyProgram;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class Verification extends WorkflowComponent
@@ -38,11 +39,16 @@ class Verification extends WorkflowComponent
     protected $paginationTheme = 'tailwind';
     protected $queryString = ['search', 'documentType', 'studyProgram'];
 
+    // Add a property to track if we should open the modal
+    public $shouldOpenDocumentModal = false;
+    public $documentIdToOpen = null;
+
     protected $listeners = [
         'document-verified' => 'handleDocumentVerified',
         'document-rejected' => 'handleDocumentRejected',
         'workflow-transition-applied' => 'handleTransitionApplied',
-        'verification-list:refresh' => 'refreshData'
+        'verification-list:refresh' => 'refreshData',
+        'open-verification-modal' => 'openVerificationModal'
     ];
 
     public function render()
@@ -52,11 +58,23 @@ class Verification extends WorkflowComponent
             $documentTypes = DocumentType::orderBy('display_name')->get();
             $studyPrograms = StudyProgram::all();
 
+            // Check if we should open the modal after rendering
+            if ($this->shouldOpenDocumentModal && $this->documentIdToOpen) {
+                // Reset flags to prevent reopening on refresh
+                $this->shouldOpenDocumentModal = false;
+                $openDocumentId = $this->documentIdToOpen;
+                $this->documentIdToOpen = null;
+
+                // Use dispatch to ensure component is fully rendered before opening modal
+                $this->dispatch('open-verification-modal', ['documentId' => $openDocumentId]);
+            }
+
             return view('livewire.administrations.verification', [
                 'documents' => $documents,
                 'documentTypes' => $documentTypes,
                 'studyPrograms' => $studyPrograms,
                 'canManageWorkflow' => $this->canUserManageWorkflow(),
+                'userRoles' => Auth::user()->roles,
             ]);
         } catch (\Exception $e) {
             Log::error('Error in Verification render: ' . $e->getMessage());
@@ -140,14 +158,19 @@ class Verification extends WorkflowComponent
 
     public function openVerificationModal($documentId)
     {
+        // Handle both direct calls and calls from event
+        if (is_array($documentId) && isset($documentId['documentId'])) {
+            $documentId = $documentId['documentId'];
+        }
+
         $this->selectedDocument = AcademicDocument::with(['employee.user', 'documentType'])->find($documentId);
         $this->verificationNote = '';
-        $this->openModal(['document' => $this->selectedDocument]);
+        $this->isModalOpen = true;
     }
 
     public function closeVerificationModal()
     {
-        $this->closeModal();
+        $this->isModalOpen = false;
         $this->selectedDocument = null;
         $this->verificationNote = '';
     }
@@ -166,6 +189,104 @@ class Verification extends WorkflowComponent
         $this->workflowDocument = null;
         $this->workflowTransitionId = null;
         $this->workflowComment = '';
+    }
+
+    /**
+     * Verify the currently selected document
+     */
+    public function verifyDocument()
+    {
+        if (!$this->selectedDocument) {
+            return;
+        }
+
+        try {
+            // Find the verify transition ID
+            $transitions = $this->selectedDocument->getFormattedTransitions();
+            $verifyTransitionId = null;
+
+            foreach ($transitions as $transition) {
+                if (strtoupper($transition['name']) == 'VERIFY') {
+                    $verifyTransitionId = $transition['id'];
+                    break;
+                }
+            }
+
+            if ($verifyTransitionId) {
+                // Apply the transition using the document's own method
+                try {
+                    // Build context for transition
+                    $context = [
+                        'user_id' => Auth::id(),
+                        'comment' => $this->verificationNote,
+                        'timestamp' => now(),
+                        'user_name' => Auth::user()->name,
+                    ];
+
+                    // Apply the transition directly on the document
+                    $this->selectedDocument->applyTransition($verifyTransitionId, $context);
+
+                    $this->closeVerificationModal();
+                    $this->dispatch('document-verified', ['message' => 'Dokumen berhasil diverifikasi.']);
+                } catch (\Exception $e) {
+                    session()->flash('error', 'Error saat memverifikasi dokumen: ' . $e->getMessage());
+                }
+            } else {
+                session()->flash('error', 'Transisi verifikasi tidak ditemukan.');
+                $this->closeVerificationModal();
+            }
+        } catch (\Exception $e) {
+            session()->flash('error', 'Error saat memverifikasi dokumen: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Reject the currently selected document
+     */
+    public function rejectDocument()
+    {
+        if (!$this->selectedDocument) {
+            return;
+        }
+
+        try {
+            // Find the reject transition ID
+            $transitions = $this->selectedDocument->getFormattedTransitions();
+            $rejectTransitionId = null;
+
+            foreach ($transitions as $transition) {
+                if (                    strtoupper($transition['label']) == 'REJECT') {
+                    $rejectTransitionId = $transition['id'];
+                    break;
+                }
+            }
+
+            if ($rejectTransitionId) {
+                // Apply the transition using the document's own method
+                try {
+                    // Build context for transition
+                    $context = [
+                        'user_id' => Auth::id(),
+                        'comment' => $this->verificationNote,
+                        'timestamp' => now(),
+                        'user_name' => Auth::user()->name,
+                    ];
+
+                    // Apply the transition directly on the document
+                    $this->selectedDocument->applyTransition($rejectTransitionId, $context);
+
+                    $this->closeVerificationModal();
+                    $this->dispatch('document-rejected', ['message' => 'Dokumen berhasil ditolak.']);
+                } catch (\Exception $e) {
+                    session()->flash('error', 'Error saat menolak dokumen: ' . $e->getMessage());
+                }
+            } else {
+                session()->flash('error', 'Transisi penolakan tidak ditemukan.');
+                $this->closeVerificationModal();
+            }
+        } catch (\Exception $e) {
+            session()->flash('error', 'Error saat menolak dokumen: ' . $e->getMessage());
+        }
     }
 
     // Override trait methods for custom behavior
@@ -198,5 +319,29 @@ class Verification extends WorkflowComponent
     protected function getWorkflowTransitionPropertyName(): string
     {
         return 'selectedTransition';
+    }
+
+    /**
+     * Extends the parent mount method to also handle opening documents from email links
+     */
+    public function mount(...$parameters)
+    {
+        // Call the parent mount method first
+        parent::mount(...$parameters);
+
+        // Check if document_id is in the request and select the document if present
+        if (request()->has('document_id')) {
+            $documentId = request()->get('document_id');
+            $document = AcademicDocument::find($documentId);
+
+            if ($document) {
+                // Schedule the modal to be opened after the component is fully rendered
+                $this->shouldOpenDocumentModal = true;
+                $this->documentIdToOpen = $document->id;
+
+                // Add a flash message to indicate document was automatically selected
+                session()->flash('success', 'Dokumen dari notifikasi email telah dipilih untuk verifikasi.');
+            }
+        }
     }
 }

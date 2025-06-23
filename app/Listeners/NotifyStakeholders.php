@@ -23,7 +23,7 @@ class NotifyStakeholders
     public function handle(WorkflowTransitionApplied $event): void
     {
         $workflowName = $event->workflowName;
-        
+
         if (!$workflowName) {
             Log::error('Workflow name is required for notifications', [
                 'model' => get_class($event->model),
@@ -70,7 +70,9 @@ class NotifyStakeholders
      */
     private function logTransitionEvent(WorkflowTransitionApplied $event): void
     {
+        $uniqueId = uniqid('notify_', true);
         Log::info('Processing workflow notifications', [
+            'unique_id' => $uniqueId,
             'workflow' => $event->workflowName,
             'model' => get_class($event->model),
             'id' => $event->model->id,
@@ -78,6 +80,7 @@ class NotifyStakeholders
             'to' => WorkflowDefinition::getStateLabel($event->toState, $event->workflowName),
             'transition' => WorkflowDefinition::getTransitionLabel($event->transition, $event->workflowName),
             'user' => $event->context['user_name'] ?? 'System',
+            'timestamp' => now()->toISOString(),
         ]);
     }
 
@@ -90,6 +93,7 @@ class NotifyStakeholders
             'workflow_name' => $workflowName,
             'model_id' => $event->model->id,
             'model_type' => get_class($event->model),
+            'transition_id' => $event->transition,
             'from_state' => WorkflowDefinition::getStateLabel($event->fromState, $workflowName),
             'to_state' => WorkflowDefinition::getStateLabel($event->toState, $workflowName),
             'transition' => WorkflowDefinition::getTransitionLabel($event->transition, $workflowName),
@@ -114,14 +118,30 @@ class NotifyStakeholders
      */
     private function sendInAppNotifications($model, int $transition, array $notificationData, string $workflowName): void
     {
-        // Notify model owner
+        // Get all notification recipients for this transition
+        $recipients = NotificationConfig::getNotificationRecipients($transition, $workflowName);
+
+        // Notify model owner if configured
         if (NotificationConfig::shouldNotifyModelOwner($transition, $workflowName)) {
             $this->notifyModelOwner($model, $notificationData);
         }
 
-        // Notify staff/reviewers
+        // Notify staff/reviewers using legacy method (for backward compatibility)
         if (NotificationConfig::shouldNotifyStaff($transition, $workflowName)) {
             $this->notifyStaff($notificationData, $workflowName);
+        }
+
+        // Process all other role type notifications
+        foreach ($recipients as $recipient) {
+            // Skip standard recipients that are handled separately
+            if (in_array($recipient, ['staff', 'reviewers', 'document_owner', 'model_owner'])) {
+                continue;
+            }
+
+            // Handle any role-based recipient dynamically
+            if (NotificationConfig::shouldNotifyRoleType($recipient, $transition, $workflowName)) {
+                $this->notifyRoleType($recipient, $notificationData, $workflowName);
+            }
         }
     }
 
@@ -152,16 +172,12 @@ class NotifyStakeholders
      */
     private function handleDocumentEmails(Document $document, int $transition, array $notificationData): void
     {
-        // Map transitions to email classes (this could be made configurable)
-        $emailMap = [
-            1 => DocumentSubmittedMail::class,    // SUBMIT
-            2 => DocumentVerifiedMail::class,     // VERIFY
-            3 => DocumentRejectedMail::class,     // REJECT
-            4 => DocumentResubmittedMail::class,  // RESUBMIT
-        ];
+        // Map transitions to email classes based on transition type
+        $workflowName = $notificationData['workflow_name'] ?? null;
 
-        $emailClass = $emailMap[$transition] ?? null;
-        
+        // Get a better email mapping based on the workflow config and transition purpose
+        $emailClass = $this->determineEmailClassForTransition($transition, $workflowName);
+
         if ($emailClass && class_exists($emailClass)) {
             $this->sendEmail($document, $emailClass, $notificationData);
         } else {
@@ -170,12 +186,64 @@ class NotifyStakeholders
     }
 
     /**
+     * Determine which email class to use based on transition characteristics
+     */
+    private function determineEmailClassForTransition(int $transition, ?string $workflowName): ?string
+    {
+        // First check for a configured email class mapping
+        $configuredClass = NotificationConfig::getEmailClassForTransition($transition, $workflowName);
+        if ($configuredClass && class_exists($configuredClass)) {
+            return $configuredClass;
+        }
+
+        // If we're using a workflow that doesn't have email_class_mapping configuration
+        if ($workflowName === 'verification_by_management') {
+            $recipientTypes = NotificationConfig::getNotificationRecipients($transition, $workflowName);
+
+            // For transitions notifying approvers at any level, use DocumentSubmittedMail
+            if (in_array('reviewers', $recipientTypes) ||
+                in_array('level_one_approvers', $recipientTypes) ||
+                in_array('level_two_approvers', $recipientTypes)) {
+
+                // Special case for resubmission
+                if ($transition === 8) {
+                    return DocumentResubmittedMail::class;
+                }
+
+                return DocumentSubmittedMail::class;
+            }
+
+            // For transitions to document owner indicating approval
+            if (in_array('document_owner', $recipientTypes) && in_array($transition, [4])) {
+                return DocumentVerifiedMail::class;
+            }
+
+            // For transitions to document owner indicating rejection
+            if (in_array('document_owner', $recipientTypes) && in_array($transition, [5, 6, 7])) {
+                return DocumentRejectedMail::class;
+            }
+        } else {
+            // Legacy behavior for other workflows
+            $legacyMap = [
+                1 => DocumentSubmittedMail::class,    // SUBMIT
+                2 => DocumentVerifiedMail::class,     // VERIFY
+                3 => DocumentRejectedMail::class,     // REJECT
+                4 => DocumentResubmittedMail::class,  // RESUBMIT
+            ];
+
+            return $legacyMap[$transition] ?? null;
+        }
+
+        return null;
+    }
+
+    /**
      * Handle generic workflow email notifications
      */
     private function handleGenericWorkflowEmails($model, int $transition, array $notificationData, string $workflowName): void
     {
         $emailTemplate = NotificationConfig::getEmailTemplate($transition, $workflowName);
-        
+
         if ($emailTemplate) {
             // Send using custom email template
             $this->sendCustomEmail($model, $emailTemplate, $notificationData);
@@ -196,9 +264,26 @@ class NotifyStakeholders
     private function sendEmail($model, string $mailClass, array $notificationData): void
     {
         $recipients = $this->getEmailRecipients($model, $notificationData);
-        
+        $uniqueId = uniqid('email_', true);
+
+        Log::info('Sending workflow emails', [
+            'unique_id' => $uniqueId,
+            'mail_class' => $mailClass,
+            'recipients_count' => count($recipients),
+            'recipients' => $recipients,
+            'workflow' => $notificationData['workflow_name'],
+            'transition' => $notificationData['transition_id'],
+            'model_id' => $notificationData['model_id'],
+        ]);
+
         foreach ($recipients as $recipient) {
             Mail::to($recipient)->send(new $mailClass($model, $notificationData));
+
+            Log::info('Email sent successfully', [
+                'unique_id' => $uniqueId,
+                'recipient' => $recipient,
+                'mail_class' => $mailClass,
+            ]);
         }
     }
 
@@ -208,7 +293,7 @@ class NotifyStakeholders
     private function sendCustomEmail($model, string $template, array $notificationData): void
     {
         $recipients = $this->getEmailRecipients($model, $notificationData);
-        
+
         foreach ($recipients as $recipient) {
             Mail::send($template, $notificationData, function ($message) use ($recipient, $notificationData) {
                 $message->to($recipient)
@@ -223,18 +308,43 @@ class NotifyStakeholders
     private function getEmailRecipients($model, array $notificationData): array
     {
         $recipients = [];
+        $workflowName = $notificationData['workflow_name'];
+        $transition = $notificationData['transition_id'] ?? null;
 
-        // Add model owner
-        $owner = $this->getModelOwner($model);
-        if ($owner && $owner->email) {
-            $recipients[] = $owner->email;
+        // Get all notification recipients for this transition
+        $notifyRecipients = NotificationConfig::getNotificationRecipients($transition, $workflowName);
+
+        // Add model owner if transition should notify document owner
+        if (NotificationConfig::shouldNotifyModelOwner($transition, $workflowName)) {
+            $owner = $this->getModelOwner($model);
+            if ($owner && $owner->email) {
+                $recipients[] = $owner->email;
+            }
         }
 
-        // Add staff emails
-        $staffUsers = $this->getStaffUsers($notificationData['workflow_name']);
-        foreach ($staffUsers as $staffUser) {
-            if ($staffUser->email) {
-                $recipients[] = $staffUser->email;
+        // Add staff emails only if transition should notify staff (backward compatibility)
+        if (NotificationConfig::shouldNotifyStaff($transition, $workflowName)) {
+            $staffUsers = $this->getStaffUsers($workflowName);
+            foreach ($staffUsers as $staffUser) {
+                if ($staffUser->email) {
+                    $recipients[] = $staffUser->email;
+                }
+            }
+        }
+
+        // Process all other role type notifications
+        foreach ($notifyRecipients as $recipient) {
+            // Skip standard recipients that are handled separately
+            if (in_array($recipient, ['staff', 'reviewers', 'document_owner', 'model_owner'])) {
+                continue;
+            }
+
+            // Get users for this role type
+            $roleUsers = $this->getUsersByRoleType($recipient, $workflowName);
+            foreach ($roleUsers as $roleUser) {
+                if ($roleUser->email) {
+                    $recipients[] = $roleUser->email;
+                }
             }
         }
 
@@ -247,7 +357,7 @@ class NotifyStakeholders
     private function notifyModelOwner($model, array $notificationData): void
     {
         $owner = $this->getModelOwner($model);
-        
+
         if ($owner) {
             $this->sendNotificationToUser(
                 $owner,
@@ -286,7 +396,7 @@ class NotifyStakeholders
     private function notifyStaff(array $notificationData, string $workflowName): void
     {
         $staffUsers = $this->getStaffUsers($workflowName);
-        
+
         foreach ($staffUsers as $staffUser) {
             $this->sendNotificationToUser(
                 $staffUser,
@@ -302,7 +412,7 @@ class NotifyStakeholders
     private function getStaffUsers(string $workflowName): Collection
     {
         $staffRoles = NotificationConfig::getStaffRoles($workflowName);
-        
+
         if (empty($staffRoles)) {
             return collect();
         }
@@ -362,5 +472,45 @@ class NotifyStakeholders
             'error' => $e->getMessage(),
             'trace' => $e->getTraceAsString(),
         ]);
+    }
+
+    /**
+     * Get users by role type
+     */
+    private function getUsersByRoleType(string $roleType, string $workflowName): Collection
+    {
+        $roles = NotificationConfig::getRolesByType($roleType, $workflowName);
+
+        if (empty($roles)) {
+            return collect();
+        }
+
+        return User::whereHas('employee', function ($query) use ($roles) {
+            $query->whereIn('role', $roles);
+        })->get();
+    }
+
+    /**
+     * Notify users with a specific role type
+     */
+    private function notifyRoleType(string $roleType, array $notificationData, string $workflowName): void
+    {
+        $users = $this->getUsersByRoleType($roleType, $workflowName);
+        $uniqueId = uniqid('notify_role_', true);
+
+        Log::info('Notifying role type', [
+            'unique_id' => $uniqueId,
+            'role_type' => $roleType,
+            'workflow' => $workflowName,
+            'users_count' => $users->count(),
+        ]);
+
+        foreach ($users as $user) {
+            $this->sendNotificationToUser(
+                $user,
+                'workflow_action_required',
+                $notificationData
+            );
+        }
     }
 }

@@ -23,12 +23,12 @@
 @endphp
 
 <!-- Modal Backdrop -->
-<div x-data="{ show: @entangle($show) }"
+<div x-data="{ show: @if(is_string($show)) {{ $show === 'true' ? 'true' : 'false' }} @else @entangle($show).defer @endif }"
      x-show="show"
      class="fixed inset-0 z-{{ $zIndex }} overflow-y-auto"
      x-cloak
      style="display: none;"
-     role="dialog" 
+     role="dialog"
      aria-modal="true">
 
     <!-- Background overlay -->
@@ -49,7 +49,7 @@
         </div>
 
         <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-        
+
         <!-- Modal panel -->
         <div x-show="show"
              x-transition:enter="ease-out duration-300"
@@ -63,9 +63,9 @@
                 @click.away="{{ $closeMethod }}"
              @endif
              @click.stop>
-            
+
             {{ $slot }}
-            
+
         </div>
     </div>
 </div>

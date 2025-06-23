@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Administrations;
 
-use App\Models\Document;
+use App\Models\ApprovalDocument;
 use App\Models\DocumentType;
 use App\Models\Employee;
 use App\Constants\DocumentTypeConstants;
@@ -26,7 +26,7 @@ class Upload extends WorkflowComponent
     public $selectedTransition;
     public $transitionComment = '';
     public $showWorkflowHistory = false;
-    
+
     // Employee selection properties
     public $selectedEmployeeId;
     public $selectedEmployee;
@@ -39,7 +39,8 @@ class Upload extends WorkflowComponent
         'document:deleted' => 'handleDocumentDeleted',
         'document:submitted' => 'handleDocumentSubmitted',
         'workflow:transition-applied' => 'handleTransitionApplied',
-        'document-list:refresh' => 'refreshData'
+        'document-list:refresh' => 'refreshData',
+        'document-submit' => 'handleDocumentSubmit'
     ];
 
     protected $rules = [];
@@ -70,7 +71,7 @@ class Upload extends WorkflowComponent
 
         $nonLecturerRoles = [
             'hr_finance_staff',
-            'head_of_hr_finance', 
+            'head_of_hr_finance',
             'fri_vice_dean',
             'head_of_study_program',
             'head_of_research_group'
@@ -90,15 +91,15 @@ class Upload extends WorkflowComponent
             if (!$this->selectedEmployeeId) {
                 throw new \Exception('Silakan pilih dosen terlebih dahulu.');
             }
-            
+
             $employee = Employee::with(['user', 'studyPrograms'])->find($this->selectedEmployeeId);
             if (!$employee) {
                 throw new \Exception('Data dosen tidak ditemukan.');
             }
-            
+
             return $employee;
         }
-        
+
         // For lecturers, use the standard getEmployee method
         return $this->getEmployee();
     }
@@ -110,7 +111,7 @@ class Upload extends WorkflowComponent
     {
         $this->selectedEmployeeId = $data['employeeId'];
         $this->selectedEmployee = Employee::with(['user', 'studyPrograms'])->find($data['employeeId']);
-        
+
         // Force refresh of the component data
         $this->refreshData();
     }
@@ -122,7 +123,7 @@ class Upload extends WorkflowComponent
     {
         $this->selectedEmployeeId = null;
         $this->selectedEmployee = null;
-        
+
         // Force refresh of the component data
         $this->refreshData();
     }
@@ -134,7 +135,7 @@ class Upload extends WorkflowComponent
     {
         // Reset pagination to first page
         $this->resetPage();
-        
+
         // Clear any cached data
         $this->dispatch('$refresh');
     }
@@ -156,6 +157,74 @@ class Upload extends WorkflowComponent
     {
         session()->flash('message', $data['message'] ?? 'Dokumen berhasil dikirim.');
         $this->refreshData();
+    }
+
+    /**
+     * Handle document submission directly
+     */
+    public function handleDocumentSubmit($data)
+    {
+        try {
+            $documentId = $data['documentId'] ?? null;
+            if (!$documentId) {
+                session()->flash('error', 'ID dokumen tidak valid.');
+                return;
+            }
+
+            $document = ApprovalDocument::findOrFail($documentId);
+            $employee = $this->getEmployeeForDocuments();
+
+            if ($document->employee_id !== $employee->id) {
+                session()->flash('error', 'Anda tidak memiliki akses untuk dokumen ini.');
+                return;
+            }
+
+            if ($document->workflow_state !== 1) { // DRAFT
+                session()->flash('error', 'Dokumen tidak dapat dikirim karena bukan dalam status draft.');
+                return;
+            }
+
+            // Get available transitions and find submit transition
+            $availableTransitions = $document->getAvailableTransitions();
+            Log::info('Available transitions for document:', [
+                'document_id' => $document->id,
+                'current_state' => $document->workflow_state,
+                'transitions' => $availableTransitions
+            ]);
+
+            $submitTransitionId = null;
+            foreach ($availableTransitions as $transitionId => $transition) {
+                if ($transition['name'] === 'SUBMIT') {
+                    $submitTransitionId = $transitionId;
+                    break;
+                }
+            }
+
+            if (!$submitTransitionId) {
+                Log::warning('Submit transition not found', [
+                    'document_id' => $document->id,
+                    'available_transitions' => $availableTransitions
+                ]);
+                session()->flash('error', 'Transisi submit tidak tersedia.');
+                return;
+            }
+
+            // Apply the transition
+            $context = [
+                'user_id' => Auth::id(),
+                'comment' => 'Dokumen dikirim untuk verifikasi',
+                'timestamp' => now(),
+                'user_name' => Auth::user()->name,
+            ];
+
+            $document->applyTransition($submitTransitionId, $context);
+
+            session()->flash('message', 'Dokumen berhasil dikirim untuk verifikasi.');
+            $this->refreshData();
+
+        } catch (\Exception $e) {
+            session()->flash('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
     }
 
     public function handleTransitionApplied($data)
@@ -194,6 +263,15 @@ class Upload extends WorkflowComponent
         $this->dispatch('document-view-modal:open', ['documentId' => $documentId]);
     }
 
+    /**
+     * Show document in modal view
+     * This method is called from the documents table component
+     */
+    public function showDocument($documentId)
+    {
+        $this->openViewModal($documentId);
+    }
+
     public function openWorkflowModal($documentId, $transitionId)
     {
         $this->dispatch('workflow-transition-modal:open', [
@@ -205,7 +283,7 @@ class Upload extends WorkflowComponent
     // Document Operations - Delegated to modular components via events
     public function submitDocument($documentId)
     {
-        $this->dispatch('document-submit', ['documentId' => $documentId]);
+        $this->handleDocumentSubmit(['documentId' => $documentId]);
     }
 
     public function deleteDocument($documentId)
@@ -216,8 +294,8 @@ class Upload extends WorkflowComponent
     public function downloadDocument($documentId)
     {
         try {
-            $document = Document::findOrFail($documentId);
-            
+            $document = ApprovalDocument::findOrFail($documentId);
+
             if (!$document->isInVerifiedState()) {
                 session()->flash('error', 'Dokumen belum diverifikasi.');
                 return;
@@ -252,8 +330,8 @@ class Upload extends WorkflowComponent
         try {
             $employee = $this->getEmployeeForDocuments();
             $documentTypeIds = $this->availableDocumentTypes->pluck('id')->toArray();
-            
-            return $this->getDocumentCompletionStatus($employee, $documentTypeIds);
+
+            return $this->getDocumentCompletionStatus($employee, $documentTypeIds, true, 'ApprovalDocument');
         } catch (\Exception $e) {
             return [
                 'status' => 'Error',
@@ -295,17 +373,17 @@ class Upload extends WorkflowComponent
     {
         parent::mount(...$parameters);
         $this->selectedDocumentTypeId = '';
-        
+
         // Ensure availableDocumentTypes is always initialized
         try {
             $this->availableDocumentTypes = $this->getapprovalDocumentTypes();
         } catch (\Exception $e) {
             $this->availableDocumentTypes = collect();
         }
-        
+
         // Check if current user is non-lecturer role
         $this->isNonLecturerRole = $this->checkIsNonLecturerRole();
-        
+
         // If user is lecturer, auto-select their employee record
         if (!$this->isNonLecturerRole) {
             try {
@@ -324,7 +402,7 @@ class Upload extends WorkflowComponent
      */
     protected function getWorkflowModelClass(): string
     {
-        return Document::class;
+        return ApprovalDocument::class;
     }
 
     protected function getWorkflowDocumentPropertyName(): string
@@ -337,7 +415,7 @@ class Upload extends WorkflowComponent
         return 'transitionComment';
     }
 
-    protected function getWorkflowTransitionPropertyName(): string  
+    protected function getWorkflowTransitionPropertyName(): string
     {
         return 'selectedTransition';
     }
@@ -373,7 +451,7 @@ class Upload extends WorkflowComponent
             $documentTypes = $this->getapprovalDocumentTypes();
             $documentTypeIds = $documentTypes->pluck('id')->toArray();
 
-            $ApprovalDocuments = Document::where('employee_id', $employee->id)
+            $ApprovalDocuments = ApprovalDocument::where('employee_id', $employee->id)
                 ->whereIn('document_type_id', $documentTypeIds)
                 ->with(['documentType', 'workflowHistory.user'])
                 ->orderBy('created_at', 'desc')

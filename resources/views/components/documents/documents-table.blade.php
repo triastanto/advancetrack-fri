@@ -41,7 +41,7 @@
                     </div>
                     <span>{{ $document->employee->user->name }}</span>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm">{{ $document->employee->employee_number }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm">{{ $document->employee->nidn }}</td>
                 <td class="px-6 py-4 whitespace-nowrap">
                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
                         {{ $document->documentType->display_name ?? 'N/A' }}
@@ -66,8 +66,8 @@
                             </button>
                         @else
                             <!-- View/Check Button for Non-Draft Documents -->
-                            <button 
-                                wire:click="showDocument({{ $document->id }})" 
+                            <button
+                                wire:click="showDocument({{ $document->id }})"
                                 class="inline-flex items-center justify-center w-8 h-8 text-indigo-700 bg-indigo-100 rounded-md hover:bg-indigo-200 transition-colors duration-200"
                                 title="Periksa dokumen">
                                 <x-heroicon-o-eye class="w-4 h-4" />
@@ -80,14 +80,14 @@
                             @if(count($transitions) > 1)
                                 <!-- Dropdown for multiple transitions -->
                                 <div class="relative inline-block text-left">
-                                    <button 
-                                        type="button" 
+                                    <button
+                                        type="button"
                                         class="inline-flex items-center justify-center w-8 h-8 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors duration-200"
                                         onclick="this.nextElementSibling.classList.toggle('hidden')"
                                         title="Aksi workflow">
                                         <x-heroicon-o-ellipsis-vertical class="w-4 h-4" />
                                     </button>
-                                    
+
                                     <div class="hidden absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5">
                                         <div class="py-1">
                                             @foreach($transitions as $transition)
@@ -207,10 +207,10 @@
                         <!-- Workflow Actions (exclude submit transitions for draft documents to avoid duplication) -->
                         @if($document->hasAvailableTransitions() && !$document->isInDraftState())
                             @php $transitions = $document->getFormattedTransitions(); @endphp
-                            
+
                             @if(count($transitions) == 1)
                                 <!-- Single transition button -->
-                                @php 
+                                @php
                                     $transition = $transitions[0];
                                     $buttonClass = match($transition['color']) {
                                         'success', 'green' => 'text-white bg-green-600 hover:bg-green-700 focus:ring-green-500',
@@ -245,14 +245,14 @@
                             @elseif(count($transitions) > 1)
                                 <!-- Multiple transitions dropdown -->
                                 <div class="relative inline-block text-left" x-data="{ open: false }">
-                                    <button 
+                                    <button
                                         @click="open = !open"
                                         class="inline-flex items-center justify-center w-8 h-8 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:ring-2 focus:ring-gray-500 focus:ring-offset-1 transition-all duration-200"
                                         title="Pilih aksi workflow">
                                         <x-heroicon-o-ellipsis-vertical class="w-4 h-4" />
                                     </button>
-                                    
-                                    <div x-show="open" 
+
+                                    <div x-show="open"
                                          @click.away="open = false"
                                          x-transition:enter="transition ease-out duration-100"
                                          x-transition:enter-start="transform opacity-0 scale-95"

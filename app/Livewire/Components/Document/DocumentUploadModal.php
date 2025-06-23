@@ -52,13 +52,21 @@ class DocumentUploadModal extends Component
         'selectedSemester.max' => 'Semester maksimal 20.'
     ];
 
-    public function mount($employee = null, $documentTypes = [], $storageBasePath = 'documents', $requiresSemester = false, $documentClass = Document::class)
+    public function mount($employee = null, $documentTypes = [], $storageBasePath = 'documents', $requiresSemester = false, $documentClass = null)
     {
         $this->employee = $employee;
-        $this->availableDocumentTypes = $documentTypes;
+        // Ensure availableDocumentTypes is always a collection
+        $this->availableDocumentTypes = collect($documentTypes);
         $this->storageBasePath = $storageBasePath;
         $this->requiresSemester = $requiresSemester;
-        $this->documentClass = $documentClass;
+
+        // Ensure we use a concrete document class
+        if ($documentClass && $documentClass !== Document::class && !(new \ReflectionClass($documentClass))->isAbstract()) {
+            $this->documentClass = $documentClass;
+        } else {
+            // Default to ApprovalDocument if no concrete class is provided
+            $this->documentClass = ApprovalDocument::class;
+        }
 
         if ($this->requiresSemester) {
             $this->rules['selectedSemester'] = 'required|integer|min:1|max:20';
@@ -114,6 +122,7 @@ class DocumentUploadModal extends Component
     protected function setDocumentTypesForCategory($category)
     {
         $documentTypeConstants = new \App\Constants\DocumentTypeConstants();
+        $names = [];
 
         switch ($category) {
             case 'study-requirements':
@@ -128,8 +137,12 @@ class DocumentUploadModal extends Component
             case 'approvals':
                 $names = $documentTypeConstants::getApprovalDocumentNames();
                 break;
-            default:
-                $names = [];
+        }
+
+        if (empty($names)) {
+            // Ensure we return an empty collection if no names are found
+            $this->availableDocumentTypes = collect();
+            return;
         }
 
         $this->availableDocumentTypes = DocumentType::whereIn('name', $names)
@@ -151,10 +164,9 @@ class DocumentUploadModal extends Component
                 $this->documentClass = AcademicDocument::class;
                 break;
             case 'approvals':
-                $this->documentClass = ApprovalDocument::class;
-                break;
             default:
-                $this->documentClass = Document::class;
+                // Use ApprovalDocument as the default concrete implementation
+                $this->documentClass = ApprovalDocument::class;
                 break;
         }
     }
@@ -220,8 +232,14 @@ class DocumentUploadModal extends Component
                 $documentData['semester'] = $this->selectedSemester;
             }
 
-            // Create document using the appropriate model class
-            $document = $this->documentClass::create($documentData);
+            // Check if document class is abstract (Document) and use a concrete implementation
+            if ($this->documentClass === Document::class || (new \ReflectionClass($this->documentClass))->isAbstract()) {
+                // Default to ApprovalDocument if no concrete class is specified
+                $document = ApprovalDocument::create($documentData);
+            } else {
+                // Create document using the appropriate model class
+                $document = $this->documentClass::create($documentData);
+            }
 
             $this->close();
 

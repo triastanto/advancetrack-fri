@@ -93,7 +93,7 @@ trait HasWorkflow
     {
         $stateId = $this->getCurrentState();
         $workflowName = $this->getWorkflowName();
-        
+
         return [
             'id' => $stateId,
             'name' => WorkflowDefinition::getState($stateId, $workflowName)['name'] ?? 'UNKNOWN',
@@ -118,7 +118,6 @@ trait HasWorkflow
     {
         $transitions = $this->getAvailableTransitions();
         $formatted = [];
-        $workflowName = $this->getWorkflowName();
 
         foreach ($transitions as $id => $transition) {
             $formatted[] = [
@@ -150,7 +149,7 @@ trait HasWorkflow
     {
         $workflowName = $this->getWorkflowName();
         $transition = WorkflowDefinition::getTransition($transitionId, $workflowName);
-        
+
         if (!$transition) {
             return 'Transisi tidak valid.';
         }

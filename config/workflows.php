@@ -105,7 +105,7 @@ return [
                     'to_state' => 3,   // VERIFIED
                     'icon' => 'check-circle',
                     'color' => 'success',
-                    'required_roles' => ['hr_finance_staff', 'head_of_hr_finance', 'fri_vice_dean', 'head_of_study_program', 'head_of_research_group'],
+                    'required_roles' => ['hr_finance_staff'],
                     'requires_comment' => true,
                 ],
                 3 => [
@@ -115,7 +115,7 @@ return [
                     'to_state' => 4,   // REJECTED
                     'icon' => 'x-circle',
                     'color' => 'danger',
-                    'required_roles' => ['hr_finance_staff', 'head_of_hr_finance', 'fri_vice_dean', 'head_of_study_program', 'head_of_research_group'],
+                    'required_roles' => ['hr_finance_staff'],
                     'requires_comment' => true,
                 ],
                 4 => [
@@ -152,7 +152,7 @@ return [
                     3 => ['document_owner'], // REJECT - notify document owner
                     4 => ['staff'], // RESUBMIT - notify verification staff
                 ],
-                'staff_roles' => ['hr_finance_staff', 'head_of_hr_finance', 'fri_vice_dean', 'head_of_study_program', 'head_of_research_group'],
+                'staff_roles' => ['hr_finance_staff'],
                 'email_templates' => [
                     1 => 'emails.document-submitted',
                     2 => 'emails.document-verified',
@@ -163,8 +163,8 @@ return [
         ],
 
         'verification_by_management' => [
-            'name' => 'Management Approval Workflow',
-            'description' => 'Document approval process by management with draft, pending, approved, and rejected states',
+            'name' => 'Management Multi-Level Approval Workflow',
+            'description' => 'Document approval process with multiple approval levels',
             'initial_state' => 1, // DRAFT
             'settings' => [
                 'track_history' => true,
@@ -176,34 +176,43 @@ return [
                 1 => [
                     'name' => 'DRAFT',
                     'type' => 'draft',
-                    'label' => 'Draft',
+                    'label' => 'Initial document draft',
                     'color' => 'secondary',
                     'icon' => 'edit',
                     'is_terminal' => false,
                     'is_initial' => true,
                 ],
                 2 => [
-                    'name' => 'PENDING',
-                    'type' => 'pending',
-                    'label' => 'Awaiting Approval',
-                    'color' => 'warning',
-                    'icon' => 'clock',
+                    'name' => 'PENDING_L1',
+                    'type' => 'pending_l1',
+                    'label' => 'Pending first level approval',
+                    'color' => 'info',
+                    'icon' => 'user-check',
                     'is_terminal' => false,
                     'is_initial' => false,
                 ],
                 3 => [
+                    'name' => 'PENDING_L2',
+                    'type' => 'pending_l2',
+                    'label' => 'Pending second level approval',
+                    'color' => 'primary',
+                    'icon' => 'shield',
+                    'is_terminal' => false,
+                    'is_initial' => false,
+                ],
+                4 => [
                     'name' => 'APPROVED',
                     'type' => 'approved',
-                    'label' => 'Approved',
+                    'label' => 'Final approved state',
                     'color' => 'success',
                     'icon' => 'check-circle',
                     'is_terminal' => true,
                     'is_initial' => false,
                 ],
-                4 => [
+                5 => [
                     'name' => 'REJECTED',
                     'type' => 'rejected',
-                    'label' => 'Rejected',
+                    'label' => 'Rejected document',
                     'color' => 'danger',
                     'icon' => 'x-circle',
                     'is_terminal' => false,
@@ -213,42 +222,62 @@ return [
             'transitions' => [
                 1 => [
                     'name' => 'SUBMIT',
-                    'label' => 'Submit for Approval',
+                    'label' => 'Submit for Level 1 Approval',
                     'from_state' => 1, // DRAFT
-                    'to_state' => 2,   // PENDING
+                    'to_state' => 2,   // PENDING_L1
                     'icon' => 'upload',
                     'color' => 'primary',
-                    'required_roles' => ['lecturer'],
+                    'required_roles' => ['hr_finance_staff'],
                     'requires_comment' => false,
                 ],
                 2 => [
-                    'name' => 'APPROVE',
-                    'label' => 'Approve Document',
-                    'from_state' => 2, // PENDING
-                    'to_state' => 3,   // APPROVED
-                    'icon' => 'check-circle',
+                    'name' => 'APPROVE_L1',
+                    'label' => 'Approve (Level 1)',
+                    'from_state' => 2, // PENDING_L1
+                    'to_state' => 3,   // PENDING_L2
+                    'icon' => 'thumbs-up',
                     'color' => 'success',
-                    'required_roles' => ['head_of_hr_finance', 'fri_vice_dean', 'head_of_study_program'],
+                    'required_roles' => ['head_of_study_program'],
                     'requires_comment' => true,
                 ],
                 3 => [
-                    'name' => 'REJECT',
-                    'label' => 'Reject Document',
-                    'from_state' => 2, // PENDING
-                    'to_state' => 4,   // REJECTED
-                    'icon' => 'x-circle',
-                    'color' => 'danger',
-                    'required_roles' => ['head_of_hr_finance', 'fri_vice_dean', 'head_of_study_program'],
+                    'name' => 'APPROVE_L2',
+                    'label' => 'Approve (Level 2)',
+                    'from_state' => 3, // PENDING_L2
+                    'to_state' => 4,   // APPROVED
+                    'icon' => 'check-circle',
+                    'color' => 'success',
+                    'required_roles' => ['head_of_research_group'],
                     'requires_comment' => true,
                 ],
                 4 => [
-                    'name' => 'RESUBMIT',
-                    'label' => 'Revise and Resubmit',
-                    'from_state' => 4, // REJECTED
-                    'to_state' => 2,   // PENDING
+                    'name' => 'REJECT_L1',
+                    'label' => 'Reject Document (Level 1)',
+                    'from_state' => 2, // PENDING_L1
+                    'to_state' => 5,   // REJECTED
+                    'icon' => 'x-circle',
+                    'color' => 'danger',
+                    'required_roles' => ['head_of_study_program'],
+                    'requires_comment' => true,
+                ],
+                5 => [
+                    'name' => 'REJECT_L2',
+                    'label' => 'Reject Document (Level 2)',
+                    'from_state' => 3, // PENDING_L2
+                    'to_state' => 5,   // REJECTED
+                    'icon' => 'x-circle',
+                    'color' => 'danger',
+                    'required_roles' => ['head_of_research_group'],
+                    'requires_comment' => true,
+                ],
+                6 => [
+                    'name' => 'REVISE',
+                    'label' => 'Revise Document',
+                    'from_state' => 5, // REJECTED
+                    'to_state' => 1,   // DRAFT
                     'icon' => 'refresh-cw',
                     'color' => 'primary',
-                    'required_roles' => ['lecturer'],
+                    'required_roles' => ['hr_finance_staff'],
                     'requires_comment' => false,
                 ],
             ],
@@ -256,13 +285,6 @@ return [
                 'role_based' => ['enabled' => true],
                 'time_based' => [
                     'enabled' => false,
-                    'business_hours_only' => [2, 3],
-                    'minimum_time_in_state' => [
-                        2 => 15,
-                    ],
-                    'cooldown_periods' => [
-                        3 => 60,
-                    ],
                 ],
             ],
             'notifications' => [
@@ -270,17 +292,31 @@ return [
                 'auto_notify' => true,
                 'notification_types' => ['in_app', 'email'],
                 'events' => [
-                    1 => ['management'], // SUBMIT - notify management
-                    2 => ['document_owner'], // APPROVE - notify document owner
-                    3 => ['document_owner'], // REJECT - notify document owner
-                    4 => ['management'], // RESUBMIT - notify management
+                    1 => ['level_one_approvers'], // SUBMIT - notify level one approvers
+                    2 => ['level_two_approvers'], // APPROVE_L1 - notify level two approvers
+                    3 => ['document_owner'],      // APPROVE_L2 - notify document owner of final approval
+                    4 => ['document_owner'],      // REJECT_L1 - notify document owner of rejection
+                    5 => ['document_owner'],      // REJECT_L2 - notify document owner of rejection
+                    6 => ['reviewers'],           // REVISE - no email sent
                 ],
-                'management_roles' => ['head_of_hr_finance', 'fri_vice_dean', 'head_of_study_program'],
+                'reviewers_roles' => ['hr_finance_staff'],
+                'level_one_approvers_roles' => ['head_of_study_program'],
+                'level_two_approvers_roles' => ['head_of_research_group'],
                 'email_templates' => [
-                    1 => 'emails.document-submitted',
-                    2 => 'emails.document-approved',
-                    3 => 'emails.document-rejected',
-                    4 => 'emails.document-resubmitted',
+                    1 => 'emails.document-sent-for-level-one-review',
+                    2 => 'emails.document-sent-for-level-two-review',
+                    3 => 'emails.document-fully-approved',
+                    4 => 'emails.document-rejected',
+                    5 => 'emails.document-rejected',
+                    6 => 'emails.document-resubmitted',
+                ],
+                'email_class_mapping' => [
+                    1 => 'App\\Mail\\DocumentSubmittedMail',     // SUBMIT - to level one approval
+                    2 => 'App\\Mail\\DocumentSubmittedMail',     // APPROVE_L1 - to level two approval
+                    3 => 'App\\Mail\\DocumentVerifiedMail',      // APPROVE_L2 - final approval
+                    4 => 'App\\Mail\\DocumentRejectedMail',      // REJECT_L1 - document rejection
+                    5 => 'App\\Mail\\DocumentRejectedMail',      // REJECT_L2 - document rejection
+                    6 => 'App\\Mail\\DocumentResubmittedMail',   // REVISE - document revision
                 ],
             ],
         ],

@@ -67,13 +67,8 @@ class User extends Authenticatable
      */
     public function roles()
     {
-        if (!$this->employee) {
-            return collect([]);
-        }
-
-        return collect([
-            (object) ['name' => $this->employee->role]
-        ]);
+        return $this->hasOne(Employee::class)
+            ->select('role');
     }
 
     // Relationships

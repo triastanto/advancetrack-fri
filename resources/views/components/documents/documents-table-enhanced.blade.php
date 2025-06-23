@@ -15,7 +15,7 @@
             {{ $title }}
         </h3>
     </div>
-    
+
     @if($documents->count() > 0)
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-[var(--color-border)]">
@@ -61,7 +61,7 @@
                                     </div>
                                     <span>{{ $document->employee->user->name }}</span>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-[var(--color-text-main)]">{{ $document->employee->employee_number }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-[var(--color-text-main)]">{{ $document->employee->nidn }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
                                         {{ $document->documentType->display_name ?? 'N/A' }}
@@ -136,10 +136,10 @@
                                         {{-- Workflow Actions for Admin/Verifier --}}
                                         @if($document->hasAvailableTransitions() && !$document->isInDraftState())
                                             @php $transitions = $document->getFormattedTransitions(); @endphp
-                                            
+
                                             @if(count($transitions) == 1)
                                                 {{-- Single transition button --}}
-                                                @php 
+                                                @php
                                                     $transition = $transitions[0];
                                                     $buttonClass = match($transition['color']) {
                                                         'success', 'green' => 'text-white bg-green-600 hover:bg-green-700 focus:ring-green-500',
@@ -174,14 +174,14 @@
                                             @elseif(count($transitions) > 1)
                                                 {{-- Multiple transitions dropdown --}}
                                                 <div class="relative inline-block text-left" x-data="{ open: false }">
-                                                    <button 
+                                                    <button
                                                         @click="open = !open"
                                                         class="inline-flex items-center justify-center w-8 h-8 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:ring-2 focus:ring-gray-500 focus:ring-offset-1 transition-all duration-200"
                                                         title="Pilih aksi workflow">
                                                         <x-heroicon-o-ellipsis-vertical class="w-4 h-4" />
                                                     </button>
-                                                    
-                                                    <div x-show="open" 
+
+                                                    <div x-show="open"
                                                          @click.away="open = false"
                                                          x-transition:enter="transition ease-out duration-100"
                                                          x-transition:enter-start="transform opacity-0 scale-95"
@@ -250,7 +250,7 @@
                 </tbody>
             </table>
         </div>
-        
+
         {{-- Pagination --}}
         @if(method_exists($documents, 'hasPages') && $documents->hasPages())
             <div class="px-6 py-4 border-t border-[var(--color-border)]">

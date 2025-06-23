@@ -117,4 +117,35 @@ class NotificationConfig
         $templates = $config['email_templates'] ?? [];
         return $templates[$transition] ?? null;
     }
+
+    /**
+     * Get roles for a specific role type from workflow configuration
+     */
+    public static function getRolesByType(string $roleType, string $workflowName): array
+    {
+        $config = self::getWorkflowNotificationConfig($workflowName);
+        $key = "{$roleType}_roles";
+        return $config[$key] ?? [];
+    }
+
+    /**
+     * Check if a specific role type should be notified for a transition
+     */
+    public static function shouldNotifyRoleType(string $roleType, int $transition, string $workflowName): bool
+    {
+        return self::shouldNotifyForEvent($transition, $roleType, $workflowName);
+    }
+
+    /**
+     * Get the email class mapping for a transition
+     *
+     * @param int $transition The transition ID
+     * @param string $workflowName The workflow name
+     * @return string|null The email class name
+     */
+    public static function getEmailClassForTransition(int $transition, string $workflowName): ?string
+    {
+        $config = self::getWorkflowNotificationConfig($workflowName);
+        return $config['email_class_mapping'][$transition] ?? null;
+    }
 }

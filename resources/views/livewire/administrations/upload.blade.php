@@ -18,8 +18,8 @@
     {{-- Only show document sections if employee is selected (or if user is lecturer) --}}
     @if(!$isNonLecturerRole || $selectedEmployeeId)
         {{-- Active Advanced Study Information --}}
-        <x-documents.study-info-card 
-            :study-info="$activeStudyInfo" 
+        <x-documents.study-info-card
+            :study-info="$activeStudyInfo"
             :key="'study-info-' . ($selectedEmployeeId ?? 'default')" />
 
         {{-- Document Completion Status Card --}}
@@ -62,7 +62,7 @@
     @endif
 
     {{-- Modular Components (Event-driven) --}}
-    <livewire:components.document.document-upload-modal />
+    <livewire:components.document.document-upload-modal :available-document-types="$availableDocumentTypes" />
     <livewire:components.document.document-view-modal />
     <livewire:components.workflow.workflow-transition-modal />
 </div>

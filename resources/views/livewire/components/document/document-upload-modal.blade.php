@@ -31,7 +31,26 @@
 
                     <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                         <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">
-                            Unggah {{ $selectedDocumentTypeId ? $availableDocumentTypes->find($selectedDocumentTypeId)?->display_name : 'Dokumen' }}
+                            @php
+                                $documentTypeName = 'Dokumen';
+                                if ($selectedDocumentTypeId) {
+                                    // Try to find the document type in the collection or array
+                                    if (method_exists($availableDocumentTypes, 'find')) {
+                                        $foundType = $availableDocumentTypes->find($selectedDocumentTypeId);
+                                        if ($foundType) {
+                                            $documentTypeName = $foundType->display_name;
+                                        }
+                                    } elseif (is_array($availableDocumentTypes)) {
+                                        foreach ($availableDocumentTypes as $type) {
+                                            if (isset($type->id) && $type->id == $selectedDocumentTypeId) {
+                                                $documentTypeName = $type->display_name;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                            @endphp
+                            Unggah {{ $documentTypeName }}
                         </h3>
 
                         <!-- Document Category Info (for debugging/development) -->

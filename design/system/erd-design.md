@@ -8,7 +8,7 @@
 | users                     | pengguna                      |
 | study program             | program studi                 |
 | study_programs            | program studi                 |
-| employee_number           | NIP                           |
+| nidn           | NIP                           |
 | NIDN                      | NIDN (Nomor Induk Dosen Nasional) |
 | document                  | dokumen                       |
 | documents                 | dokumen-dokumen               |

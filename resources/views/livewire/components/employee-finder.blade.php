@@ -17,7 +17,7 @@
                             </span>
                         </div>
                         <div class="text-xs text-gray-600 space-y-0.5">
-                            <p><span class="font-medium">NIP:</span> {{ $selectedEmployee->employee_number }} • <span class="font-medium">Jabatan:</span> {{ $selectedEmployee->position }}</p>
+                            <p><span class="font-medium">NIP:</span> {{ $selectedEmployee->nidn }} • <span class="font-medium">Jabatan:</span> {{ $selectedEmployee->position }}</p>
                             @if($selectedEmployee->studyPrograms->count() > 0)
                                 <p class="text-blue-600">
                                     <span class="font-medium">Program Studi:</span> {{ $selectedEmployee->studyPrograms->pluck('name')->join(', ') }}
@@ -27,13 +27,13 @@
                     </div>
                 </div>
                 <div class="flex items-center space-x-2 ml-3">
-                    <button 
+                    <button
                         wire:click="openEmployeeModal"
                         class="inline-flex items-center px-2.5 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded hover:bg-blue-100 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors duration-150"
                     >
                         Ganti
                     </button>
-                    <button 
+                    <button
                         wire:click="clearSelection"
                         class="inline-flex items-center px-2.5 py-1.5 text-xs font-medium text-red-700 bg-red-50 border border-red-200 rounded hover:bg-red-100 focus:outline-none focus:ring-1 focus:ring-red-500 transition-colors duration-150"
                     >
@@ -52,7 +52,7 @@
             </div>
             <h3 class="text-sm font-semibold text-gray-900 mb-1">Pilih Dosen</h3>
             <p class="text-xs text-gray-600 mb-4">Pilih dosen yang akan dikelola dokumen persetujuan studi lanjutnya</p>
-            <button 
+            <button
                 wire:click="openEmployeeModal"
                 class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200 shadow-sm"
             >
@@ -67,7 +67,7 @@
     {{-- Employee Selection Modal --}}
     <div class="relative z-10 {{ $showEmployeeModal ? '' : 'hidden' }}" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
-        
+
         <div class="fixed inset-0 z-10 overflow-y-auto">
             <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
                 <div class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl">
@@ -77,7 +77,7 @@
                             <h3 class="text-lg font-medium leading-6 text-gray-900" id="modal-title">
                                 Pilih Dosen
                             </h3>
-                            <button 
+                            <button
                                 wire:click="closeEmployeeModal"
                                 class="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                             >
@@ -95,9 +95,9 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                     </svg>
                                 </div>
-                                <input 
-                                    wire:model.live.debounce.300ms="search" 
-                                    type="text" 
+                                <input
+                                    wire:model.live.debounce.300ms="search"
+                                    type="text"
                                     class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                                     placeholder="Cari berdasarkan nama, nomor induk, atau email..."
                                 >
@@ -122,7 +122,7 @@
                                                         {{ $employee->user->name }}
                                                     </p>
                                                     <p class="text-sm text-gray-500">
-                                                        {{ $employee->employee_number }} - {{ $employee->position }}
+                                                        {{ $employee->nidn }} - {{ $employee->position }}
                                                     </p>
                                                     <p class="text-xs text-gray-400">
                                                         {{ $employee->user->email }}
@@ -167,7 +167,7 @@
 
                     {{-- Modal Footer --}}
                     <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
-                        <button 
+                        <button
                             wire:click="closeEmployeeModal"
                             class="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
                         >

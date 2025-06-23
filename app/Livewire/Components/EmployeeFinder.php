@@ -53,12 +53,12 @@ class EmployeeFinder extends Component
     public function selectEmployee($employeeId)
     {
         $employee = Employee::with(['user', 'studyPrograms'])->find($employeeId);
-        
+
         if ($employee) {
             $this->selectedEmployeeId = $employeeId;
             $this->selectedEmployee = $employee;
             $this->closeEmployeeModal();
-            
+
             // Emit event to parent component
             $this->dispatch('employeeSelected', [
                 'employeeId' => $employeeId,
@@ -72,7 +72,7 @@ class EmployeeFinder extends Component
         $this->selectedEmployeeId = null;
         $this->selectedEmployee = null;
         $this->search = '';
-        
+
         // Emit event to parent component
         $this->dispatch('employeeCleared');
     }
@@ -89,7 +89,7 @@ class EmployeeFinder extends Component
             ->where('role', 'lecturer') // Only show lecturers for approval documents
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
-                    $q->where('employee_number', 'like', '%' . $this->search . '%')
+                    $q->where('nidn', 'like', '%' . $this->search . '%')
                       ->orWhere('position', 'like', '%' . $this->search . '%')
                       ->orWhereHas('user', function ($userQuery) {
                           $userQuery->where('name', 'like', '%' . $this->search . '%')
@@ -97,7 +97,7 @@ class EmployeeFinder extends Component
                       });
                 });
             })
-            ->orderBy('employee_number')
+            ->orderBy('nidn')
             ->paginate($this->perPage);
     }
 

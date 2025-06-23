@@ -49,7 +49,7 @@ class DocumentSubmittedMail extends Mailable
                 'employeeNip' => $this->document->employee->nip ?? 'N/A',
                 'documentType' => $this->document->documentType->display_name ?? 'Unknown',
                 'submissionDate' => $this->notificationData['timestamp']->format('d M Y H:i'),
-                'verificationUrl' => route('verification'),
+                'verificationUrl' => route('administrations.verification', ['document_id' => $this->document->id]),
             ]
         );
     }

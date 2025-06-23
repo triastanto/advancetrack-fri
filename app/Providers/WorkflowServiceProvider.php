@@ -83,19 +83,11 @@ class WorkflowServiceProvider extends ServiceProvider
      */
     protected function registerEventListeners(): void
     {
-        Event::listen(
-            WorkflowTransitionAttempted::class,
-            [LogTransitionAttempt::class, 'handle']
-        );
-
-        Event::listen(
-            WorkflowTransitionApplied::class,
-            [NotifyStakeholders::class, 'handle']
-        );
-
-        Event::listen(
-            WorkflowTransitionApplied::class,
-            [UpdateRelatedModels::class, 'handle']
-        );
+        // All event listeners are auto-discovered by Laravel
+        // No manual registration needed to avoid duplication
+        // Event::listen(
+        //     WorkflowTransitionAttempted::class,
+        //     [LogTransitionAttempt::class, 'handle']
+        // );
     }
 }

@@ -70,112 +70,22 @@
         <!-- Navigation Links -->
         <nav class="flex-1 px-4">
             <ul class="mt-4">
-                <!-- Dashboard Link - Available to All Roles -->
-                <li>
-                    <a href="/dashboard" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm {{ request()->routeIs('dashboard') ? 'text-[var(--color-primary)] bg-[var(--color-primary-bg)]' : 'text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)]' }}">
-                        <x-heroicon-o-squares-2x2 class="w-5 h-5" />
-                        Dasbor
-                    </a>
-                </li>
-                <!-- Notifikasi Link with Badge - Available to All Roles -->
-                <li>
-                    <a href="/notifications" class="flex items-center gap-3 px-3 py-2 rounded-lg relative text-sm {{ request()->is('notifications*') ? 'text-[var(--color-primary)] bg-[var(--color-primary-bg)] font-semibold' : 'text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)]' }}">
-                        <x-heroicon-o-bell class="w-5 h-5" />
-                        Notifikasi
-                        <span class="ml-auto inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-bold bg-[var(--color-primary)] text-white absolute right-3 top-1/2 -translate-y-1/2">8</span>
-                    </a>
-                </li>
-                <!-- Lecturer Role Menu Items -->
+                <!-- Dashboard Section -->
+                <x-sidebar.dashboard />
                 @auth
                 @if(Auth::user()->employee && Auth::user()->employee->role === 'lecturer')
-                <!-- Data Pribadi Link - Lecturer Only -->
-                <li>
-                    <a href="{{ route('personal-data') ?? '/personal-data' }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm {{ request()->is('personal-data*') ? 'text-[var(--color-primary)] bg-[var(--color-primary-bg)] font-semibold' : 'text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)]' }}">
-                        <x-heroicon-o-user class="w-5 h-5" />
-                        Data Pribadi
-                    </a>
-                </li>
-                <!-- Dokumen Saya Group - Lecturer Only -->
-                <li>
-                    <div class="py-1">
-                        <span class="text-xs font-medium text-gray-500 uppercase tracking-wider">Dokumen Saya</span>
-                    </div>
-                    <a href="{{ route('documents.study-requirements') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm {{ request()->routeIs('documents.study-requirements') ? 'text-[var(--color-primary)] bg-[var(--color-primary-bg)] font-semibold' : 'text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)]' }}">
-                        <x-heroicon-o-document-text class="w-5 h-5" />
-                        Persyaratan Studi Lanjut
-                    </a>
-                    <a href="{{ route('documents.semester-reports') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm {{ request()->routeIs('documents.semester-reports') ? 'text-[var(--color-primary)] bg-[var(--color-primary-bg)] font-semibold' : 'text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)]' }}">
-                        <x-heroicon-o-clipboard-document-list class="w-5 h-5" />
-                        Laporan Per Semester
-                    </a>
-                    <a href="{{ route('documents.final-reports') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm {{ request()->routeIs('documents.final-reports') ? 'text-[var(--color-primary)] bg-[var(--color-primary-bg)] font-semibold' : 'text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)]' }}">
-                        <x-heroicon-o-check-circle class="w-5 h-5" />
-                        Laporan Akhir & Kelulusan
-                    </a>
-                    <a href="{{ route('documents.study-approvals') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm {{ request()->routeIs('documents.study-approvals') ? 'text-[var(--color-primary)] bg-[var(--color-primary-bg)] font-semibold' : 'text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)]' }}">
-                        <x-heroicon-o-calendar-days class="w-5 h-5" />
-                        Persetujuan Studi Lanjut
-                    </a>
-                </li>
+                    <x-sidebar.personal-data />
+                    <x-sidebar.documents />
                 @endif
-
-                <!-- Fallback for users without employee data or not authenticated -->
                 @if(!Auth::check() || !Auth::user()->employee)
-                <!-- Default menu items for guests or users without employee records -->
-                <li>
-                    <div class="py-1 mt-3">
-                        <span class="text-xs font-medium text-gray-500 uppercase tracking-wider">Menu Umum</span>
-                    </div>
-                    <a href="/help" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)]">
-                        <x-heroicon-o-question-mark-circle class="w-5 h-5" />
-                        Bantuan
-                    </a>
-                </li>
+                    <x-sidebar.general />
                 @endif
                 @endauth
-                <!-- Non-Lecturer Role Menu Items -->
+                <x-sidebar.study-calendar />
                 @auth
                 @if(Auth::user()->employee && Auth::user()->employee->role !== 'lecturer')
-                <!-- Administrasi Dokumen Group - Non-Lecturer Only -->
-                <li>
-                    <div class="py-1 mt-3">
-                        <span class="text-xs font-medium text-gray-500 uppercase tracking-wider">Administrasi Dokumen</span>
-                    </div>
-                    <a href="{{ route('administrations.lecturers') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm {{ request()->routeIs('administrations.lecturers') ? 'text-[var(--color-primary)] bg-[var(--color-primary-bg)] font-semibold' : 'text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)]' }}">
-                        <x-heroicon-o-magnifying-glass class="w-5 h-5" />
-                        Cari & Pilih Dosen
-                    </a>
-                    <a href="{{ route('administrations.upload') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm {{ request()->routeIs('administrations.upload') ? 'text-[var(--color-primary)] bg-[var(--color-primary-bg)] font-semibold' : 'text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)]' }}">
-                        <x-heroicon-o-cloud-arrow-up class="w-5 h-5" />
-                        Unggah Persetujuan Studi Lanjut
-                    </a>
-                    <a href="{{ route('administrations.verification') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm {{ request()->routeIs('administrations.verification') ? 'text-[var(--color-primary)] bg-[var(--color-primary-bg)] font-semibold' : 'text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)]' }}">
-                        <x-heroicon-o-check-circle class="w-5 h-5" />
-                        Verifikasi Dokumen
-                    </a>
-                </li>
-                <!-- Monitoring & Laporan Group - Non-Lecturer Only -->
-                <li>
-                    <div class="py-1 mt-3">
-                        <span class="text-xs font-medium text-gray-500 uppercase tracking-wider">Monitoring & Laporan</span>
-                    </div>
-                    <a href="{{ route('monitoring.analytics') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm {{ request()->routeIs('monitoring.analytics') ? 'text-[var(--color-primary)] bg-[var(--color-primary-bg)] font-semibold' : 'text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)]' }}">
-                        <x-heroicon-o-chart-bar class="w-5 h-5" />
-                        Dasbor Analitik
-                    </a>
-                    <a href="{{ route('monitoring.activity') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm {{ request()->routeIs('monitoring.activity') ? 'text-[var(--color-primary)] bg-[var(--color-primary-bg)] font-semibold' : 'text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)]' }}">
-                        <x-heroicon-o-users class="w-5 h-5" />
-                        Aktivitas Dosen
-                    </a>
-                    <a href="{{ route('monitoring.document-status') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm {{ request()->routeIs('monitoring.document-status') ? 'text-[var(--color-primary)] bg-[var(--color-primary-bg)] font-semibold' : 'text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)]' }}">
-                        <x-heroicon-o-document-chart-bar class="w-5 h-5" />
-                        Status Dokumen
-                    </a>
-                    <a href="{{ route('monitoring.audit-log') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm {{ request()->routeIs('monitoring.audit-log') ? 'text-[var(--color-primary)] bg-[var(--color-primary-bg)] font-semibold' : 'text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)]' }}">
-                        <x-heroicon-o-shield-check class="w-5 h-5" />
-                        Audit & Log
-                    </a>
-                </li>
+                    <x-sidebar.administration />
+                    <x-sidebar.monitoring />
                 @endif
                 @endauth
             </ul>

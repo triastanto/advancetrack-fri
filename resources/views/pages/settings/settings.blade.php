@@ -1,5 +1,5 @@
 @extends('layouts.app')
 
 @section('content')
-<livewire:lecturer />
+<livewire:settings.settings />
 @endsection

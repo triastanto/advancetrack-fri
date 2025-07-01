@@ -12,23 +12,15 @@ Route::middleware('guest')->group(function () {
     Route::post('forgot-password', [App\Http\Controllers\Auth\ForgotPasswordController::class, 'store'])->name('password.email');
 });
 
-Route::middleware('auth')->group(function () {
-    Route::post('logout', [App\Http\Controllers\Auth\LoginController::class, 'destroy'])->name('logout');
-});
+Route::middleware('auth')->post('logout', [App\Http\Controllers\Auth\LoginController::class, 'destroy'])->name('logout');
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', fn () => view('welcome'));
 
 // Main Routes
 Route::middleware('auth')->group(function () {
-    Route::view('dashboard', 'dashboard')->name('dashboard');
-
-    // Data Pribadi Routes - Lecturer Only
+    Route::view('dashboard', 'pages.dashboard.dashboard')->name('dashboard');
     Route::middleware('lecturer.only')->group(function () {
-        Route::view('profile','pages.profile.index')->name('profile.index');
-        Route::view('profile/education', 'pages.profile.education')->name('profile.education');
-        Route::view('profile/contact', 'pages.profile.contact')->name('profile.contact');
+        Route::view('personal-data', 'pages.personal-data.personal-data')->name('personal-data');
     });
 });
 
@@ -42,25 +34,25 @@ Route::prefix('documents')->name('documents.')->middleware(['auth', 'lecturer.on
 
 // Administrasi Dokumen Routes - Non-Lecturer Only
 Route::prefix('administrations')->name('administrations.')->middleware(['auth', 'non.lecturer.only'])->group(function () {
-    Route::view('lecturers', 'pages.administrations.lecturers')->name('lecturers');
+    Route::view('lecturers', 'pages.administrations.lecturer')->name('lecturers');
     Route::view('upload', 'pages.administrations.upload')->name('upload');
     Route::view('verification', 'pages.administrations.verification')->name('verification');
 });
 
 // Monitoring & Laporan Routes - Non-Lecturer Only
-Route::prefix('reports')->name('reports.')->middleware(['auth', 'non.lecturer.only'])->group(function () {
-    Route::view('/', 'pages.reports.index')->name('index');
-    Route::view('verification-status', 'pages.reports.verification-status')->name('verification-status');
-    Route::view('activity-logs', 'pages.reports.activity-logs')->name('activity-logs');
+Route::prefix('monitoring')->name('monitoring.')->middleware(['auth', 'non.lecturer.only'])->group(function () {
+    Route::view('analytics', 'pages.monitoring.analytics')->name('analytics');
+    Route::view('activity', 'pages.monitoring.activity')->name('activity');
+    Route::view('document-status', 'pages.monitoring.document-status')->name('document-status');
+    Route::view('audit-log', 'pages.monitoring.audit-log')->name('audit-log');
 });
 
-// Notifikasi Route
-Route::view('notifications', 'notifications.index')->name('notifications')->middleware('auth');
-
-// Pengaturan Routes
-Route::prefix('settings')->name('settings.')->middleware('auth')->group(function() {
-    Route::view('/', 'settings.index')->name('index');
-    Route::view('account', 'settings.account')->name('account');
-    Route::view('password', 'settings.password')->name('password');
-    Route::view('notifications', 'settings.notifications')->name('notifications');
+// Notifikasi, Help, Settings Routes
+Route::middleware('auth')->group(function () {
+    Route::view('notifications', 'pages.notifications.notification')->name('notifications');
+    Route::view('help', 'pages.help.help')->name('help');
+    Route::view('settings', 'pages.settings.settings')->name('settings.index');
+    Route::prefix('settings')->name('settings.')->group(function () {
+        Route::view('account', 'pages.settings.account')->name('account');
+    });
 });

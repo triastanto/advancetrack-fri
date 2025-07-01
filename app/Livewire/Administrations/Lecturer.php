@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\Administrations;
 
 use App\Models\Employee;
 use App\Models\StudyProgram;
@@ -43,7 +43,7 @@ class Lecturer extends Component
         $lecturers = $query->paginate(9);
         $studyPrograms = StudyProgram::orderBy('name')->get();
 
-        return view('livewire.lecturer', [
+        return view('livewire.administrations.lecturer', [
             'lecturers' => $lecturers,
             'studyPrograms' => $studyPrograms
         ]);

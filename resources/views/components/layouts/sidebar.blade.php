@@ -50,7 +50,7 @@
                         Manajemen Akun
                     </a>
                     <!-- Help Link -->
-                    <a href="/help" class="flex items-center gap-2 px-3 py-2 text-sm text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)]">
+                    <a href={{ route('help') }} class="flex items-center gap-2 px-3 py-2 text-sm text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)]">
                         <x-heroicon-o-question-mark-circle class="w-5 h-5" />
                         Bantuan
                     </a>
@@ -74,7 +74,7 @@
                 <li>
                     <a href="/dashboard" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm {{ request()->routeIs('dashboard') ? 'text-[var(--color-primary)] bg-[var(--color-primary-bg)]' : 'text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)]' }}">
                         <x-heroicon-o-squares-2x2 class="w-5 h-5" />
-                        Dashboard
+                        Dasbor
                     </a>
                 </li>
                 <!-- Notifikasi Link with Badge - Available to All Roles -->
@@ -90,7 +90,7 @@
                 @if(Auth::user()->employee && Auth::user()->employee->role === 'lecturer')
                 <!-- Data Pribadi Link - Lecturer Only -->
                 <li>
-                    <a href="{{ route('profile.index') ?? '/profile' }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm {{ request()->is('profile*') ? 'text-[var(--color-primary)] bg-[var(--color-primary-bg)] font-semibold' : 'text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)]' }}">
+                    <a href="{{ route('personal-data') ?? '/personal-data' }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm {{ request()->is('personal-data*') ? 'text-[var(--color-primary)] bg-[var(--color-primary-bg)] font-semibold' : 'text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)]' }}">
                         <x-heroicon-o-user class="w-5 h-5" />
                         Data Pribadi
                     </a>
@@ -141,15 +141,15 @@
                     <div class="py-1 mt-3">
                         <span class="text-xs font-medium text-gray-500 uppercase tracking-wider">Administrasi Dokumen</span>
                     </div>
-                    <a href="{{ route('administrations.lecturers') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm {{ request()->routeIs('admin.documents.lecturers') ? 'text-[var(--color-primary)] bg-[var(--color-primary-bg)] font-semibold' : 'text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)]' }}">
+                    <a href="{{ route('administrations.lecturers') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm {{ request()->routeIs('administrations.lecturers') ? 'text-[var(--color-primary)] bg-[var(--color-primary-bg)] font-semibold' : 'text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)]' }}">
                         <x-heroicon-o-magnifying-glass class="w-5 h-5" />
                         Cari & Pilih Dosen
                     </a>
-                    <a href="{{ route('administrations.upload') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm {{ request()->routeIs('admin.documents.upload') ? 'text-[var(--color-primary)] bg-[var(--color-primary-bg)] font-semibold' : 'text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)]' }}">
+                    <a href="{{ route('administrations.upload') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm {{ request()->routeIs('administrations.upload') ? 'text-[var(--color-primary)] bg-[var(--color-primary-bg)] font-semibold' : 'text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)]' }}">
                         <x-heroicon-o-cloud-arrow-up class="w-5 h-5" />
                         Unggah Persetujuan Studi Lanjut
                     </a>
-                    <a href="{{ route('administrations.verification') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm {{ request()->routeIs('verification') ? 'text-[var(--color-primary)] bg-[var(--color-primary-bg)] font-semibold' : 'text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)]' }}">
+                    <a href="{{ route('administrations.verification') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm {{ request()->routeIs('administrations.verification') ? 'text-[var(--color-primary)] bg-[var(--color-primary-bg)] font-semibold' : 'text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)]' }}">
                         <x-heroicon-o-check-circle class="w-5 h-5" />
                         Verifikasi Dokumen
                     </a>
@@ -159,19 +159,19 @@
                     <div class="py-1 mt-3">
                         <span class="text-xs font-medium text-gray-500 uppercase tracking-wider">Monitoring & Laporan</span>
                     </div>
-                    <a href="/monitoring/analytics" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)]">
+                    <a href="{{ route('monitoring.analytics') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm {{ request()->routeIs('monitoring.analytics') ? 'text-[var(--color-primary)] bg-[var(--color-primary-bg)] font-semibold' : 'text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)]' }}">
                         <x-heroicon-o-chart-bar class="w-5 h-5" />
-                        Dashboard Analytics
+                        Dasbor Analitik
                     </a>
-                    <a href="/reports/lecturers" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)]">
+                    <a href="{{ route('monitoring.activity') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm {{ request()->routeIs('monitoring.activity') ? 'text-[var(--color-primary)] bg-[var(--color-primary-bg)] font-semibold' : 'text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)]' }}">
                         <x-heroicon-o-users class="w-5 h-5" />
-                        Laporan Dosen
+                        Aktivitas Dosen
                     </a>
-                    <a href="/monitoring/documents" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)]">
+                    <a href="{{ route('monitoring.document-status') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm {{ request()->routeIs('monitoring.document-status') ? 'text-[var(--color-primary)] bg-[var(--color-primary-bg)] font-semibold' : 'text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)]' }}">
                         <x-heroicon-o-document-chart-bar class="w-5 h-5" />
                         Status Dokumen
                     </a>
-                    <a href="/audit" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)]">
+                    <a href="{{ route('monitoring.audit-log') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm {{ request()->routeIs('monitoring.audit-log') ? 'text-[var(--color-primary)] bg-[var(--color-primary-bg)] font-semibold' : 'text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)]' }}">
                         <x-heroicon-o-shield-check class="w-5 h-5" />
                         Audit & Log
                     </a>
@@ -182,10 +182,3 @@
         </nav>
     </aside>
 </div>
-
-<!-- Responsive Sidebar Toggle Button Style -->
-<style>
-    @media (min-width: 768px) {
-        #sidebar-toggle { display: none; }
-    }
-</style>

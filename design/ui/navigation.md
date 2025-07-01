@@ -14,7 +14,7 @@
 ├── 📁 Dokumen Saya (Dosen)
 │   ├── 📂 Persyaratan Studi Lanjut (Study Requirements)
 │   │   ├── Letter of Acceptance
-│   │   ├── Surat Pengantar Beasiswa  
+│   │   ├── Surat Pengantar Beasiswa
 │   │   ├── Surat Izin Rektor
 │   │   ├── SK Dosen Tetap Yayasan
 │   │   ├── Ijazah
@@ -53,7 +53,7 @@
 ## 📊 Monitoring & Laporan
 *Fitur monitoring dan pelaporan untuk keperluan manajemen dan audit*
 
-### 📈 Dashboard Analytics
+### 📈 Dasbor Analitik
 *Visualisasi data dan statistik studi lanjut secara real-time*
 ├── Overview Statistik Umum (Grafik jumlah dosen aktif, lulus, dan dropout)
 ├── Tren Studi Lanjut per Tahun (Analisis tren pertumbuhan studi lanjut)

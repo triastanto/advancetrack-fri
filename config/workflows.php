@@ -321,8 +321,8 @@ return [
             ],
         ],
 
-        'study_calendar_approval' => [
-            'name' => 'Study Calendar Status Workflow',
+        'study_calendar' => [
+            'name' => 'Study Calendar Workflow',
             'description' => 'Study calendar submission, approval, and status management for tracking student progress',
             'initial_state' => 1, // DRAFT
             'settings' => [

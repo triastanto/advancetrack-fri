@@ -34,7 +34,7 @@ class StudyCalendar extends Model
      */
     public function getWorkflowName(): string
     {
-        return 'study_calendar_approval';
+        return 'study_calendar';
     }
 
     /**

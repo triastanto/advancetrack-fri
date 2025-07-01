@@ -7,14 +7,14 @@ This state machine applies to:
 
 | State ID | State Name       | Type      | Description                                 | Color     | Icon         | Terminal |
 |----------|------------------|-----------|---------------------------------------------|-----------|--------------|----------|
-| 1        | DRAFT            | draft     | Draft calendar being prepared               | secondary | edit         | No       |
-| 2        | PENDING_APPROVAL | pending   | Calendar submitted, awaiting approval       | warning   | clock        | No       |
-| 3        | APPROVED         | approved  | Calendar approved, ready to start study     | info      | check-circle | No       |
-| 4        | REJECTED         | rejected  | Calendar rejected, needs revision           | danger    | x-circle     | No       |
-| 5        | ACTIVE           | active    | Currently studying                          | success   | book-open    | No       |
-| 6        | LEAVE            | leave     | On official leave                           | warning   | pause-circle | No       |
-| 7        | FINISHED         | finished  | Study completed                             | success   | award        | Yes      |
-| 8        | DROP_OUT         | drop_out  | Study discontinued (resigned/failed, etc.)  | danger    | x-circle     | Yes      |
+| 1        | DRAFT            | draft     | Draft Calendar                             | secondary | edit         | No       |
+| 2        | PENDING_APPROVAL | pending   | Pending Approval                           | warning   | clock        | No       |
+| 3        | APPROVED         | approved  | Calendar Approved                          | info      | check-circle | No       |
+| 4        | REJECTED         | rejected  | Calendar Rejected                          | danger    | x-circle     | No       |
+| 5        | ACTIVE           | active    | Currently Studying                         | success   | book-open    | No       |
+| 6        | LEAVE            | leave     | On Official Leave                          | warning   | pause-circle | No       |
+| 7        | FINISHED         | finished  | Study Completed                            | success   | award        | Yes      |
+| 8        | DROP_OUT         | drop_out  | Study Discontinued                         | danger    | x-circle     | Yes      |
 
 ## Transitions
 
@@ -41,7 +41,7 @@ This state machine applies to:
                                |         +--REJECT_STUDY--> [REJECTED]
                                |                                |
                                +--RESUBMIT_STUDY---------------+
-                                                                      
+
 [APPROVED] --START_STUDY--> [ACTIVE] --TAKE_LEAVE--> [LEAVE]
                              |            |             |
                              |            +--RETURN_FROM_LEAVE--> (back to ACTIVE)
@@ -104,7 +104,7 @@ This state machine applies to:
 ## Configuration Details
 
 - **Initial State**: DRAFT (ID: 1)
-- **Workflow Name**: `study_calendar_approval`
+- **Workflow Name**: `study_calendar`
 - **Settings**: History tracking enabled, auto-save enabled, strict mode enabled, auto-notify enabled
 - **Notification Channels**: Mail, Database
 - **Guards**: Role-based permissions enabled
@@ -115,7 +115,7 @@ This state machine applies to:
 - **FINISHED** and **DROP_OUT** are terminal states; no further transitions allowed
 - Students must get their calendar approved before they can start studying
 - The workflow has three distinct phases: submission/approval, study execution, and completion
-- All transitions (except submissions) require comments for proper documentation and audit trail
+- All transitions (except submissions and resubmissions) require comments for proper documentation and audit trail
 - Students (lecturers) can submit and resubmit calendars, and participate in study status changes
 - Only authorized supervisors can approve/reject calendars and mark studies as completed or discontinued
 - Study discontinuation can happen from both ACTIVE and LEAVE states

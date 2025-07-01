@@ -1,5 +1,6 @@
 # 📚 Navigasi Sistem Studi Lanjut (Tampilan Visual Hirarki)
 
+```
 ├── 🏠 Dashboard
 │   ├── Ringkasan Status Dokumen
 │   ├── Notifikasi Terbaru
@@ -11,7 +12,12 @@
 │   ├── Riwayat Pendidikan
 │   └── Informasi Kontak
 
-├── 📁 Dokumen Saya (Dosen)
+├── 📅 Kalender Studi Lanjut (Workflow Utama)
+│   ├── Kelola Kalender Studi Lanjut (Dosen)
+│   ├── Linimasa Kalender Studi Lanjut
+│   └── Persetujuan Kalender Studi Lanjut (Supervisor)
+
+├── 📁 Dokumen Akademik (Academic Documents)
 │   ├── 📂 Persyaratan Studi Lanjut (Study Requirements)
 │   │   ├── Letter of Acceptance
 │   │   ├── Surat Pengantar Beasiswa
@@ -35,20 +41,22 @@
 │   │   ├── Transkrip Nilai Akhir
 │   │   ├── Surat Keterangan Lulus
 │   │   └── Surat Pernyataan Telah Menyelesaikan Studi
-│   └── 📂 Persetujuan Studi Lanjut (View Only - Managed by Staf SDM & Keuangan)
-│       ├── Dokumen Kesesuaian Studi Lanjut
-│       ├── Berita Acara Studi Lanjut
-│       ├── NDE Studi Lanjut
-│       └── Perjanjian Ikatan Dinas (PID)
+│   └── Status & Riwayat Verifikasi Dokumen
+
+├── 📄 Persetujuan Studi Lanjut (Approval Documents)
+│   ├── Upload/Submit Persetujuan Studi Lanjut (Dosen/Staf)
+│   ├── Status & Progress Persetujuan (L1, L2, etc)
+│   └── Riwayat & Komentar Approval
 
 ├── 🗂️ Administrasi Dokumen (Staf SDM & Keuangan / Kepala Urusan SDM & Keuangan)
 │   ├── 🔍 Cari & Pilih Dosen
-│   ├── 📥 Unggah Persetujuan Studi Lanjut:
+│   ├── 📥 Unggah Persetujuan Studi Lanjut
 │   │   ├── Dokumen Kesesuaian Studi Lanjut
 │   │   ├── Berita Acara Studi Lanjut
 │   │   ├── NDE Studi Lanjut
 │   │   └── Perjanjian Ikatan Dinas (PID)
-│   └── ✅ Verifikasi Dokumen
+│   └── ✅ Verifikasi Dokumen (Semua Workflow)
+```
 
 ## 📊 Monitoring & Laporan
 *Fitur monitoring dan pelaporan untuk keperluan manajemen dan audit*

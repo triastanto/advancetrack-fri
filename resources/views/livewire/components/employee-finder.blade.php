@@ -46,9 +46,7 @@
         {{-- Employee Selection Button --}}
         <div class="bg-white border border-gray-200 rounded-lg p-4 text-center shadow-sm">
             <div class="w-12 h-12 mx-auto bg-blue-100 rounded-full flex items-center justify-center mb-3">
-                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
+                <x-heroicon-o-user class="w-6 h-6 text-blue-600" />
             </div>
             <h3 class="text-sm font-semibold text-gray-900 mb-1">Pilih Dosen</h3>
             <p class="text-xs text-gray-600 mb-4">Pilih dosen yang akan dikelola dokumen persetujuan studi lanjutnya</p>
@@ -56,9 +54,7 @@
                 wire:click="openEmployeeModal"
                 class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200 shadow-sm"
             >
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
+                <x-heroicon-o-magnifying-glass class="w-4 h-4 mr-2" />
                 Cari & Pilih Dosen
             </button>
         </div>
@@ -81,9 +77,7 @@
                                 wire:click="closeEmployeeModal"
                                 class="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                             >
-                                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
+                                <x-heroicon-o-x-mark class="h-6 w-6" />
                             </button>
                         </div>
 
@@ -135,9 +129,7 @@
                                                 </div>
                                             </div>
                                             <div class="flex-shrink-0">
-                                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                                                </svg>
+                                                <x-heroicon-o-chevron-right class="w-5 h-5 text-gray-400" />
                                             </div>
                                         </div>
                                     @endforeach
@@ -149,9 +141,7 @@
                                 </div>
                             @else
                                 <div class="text-center py-8">
-                                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                    </svg>
+                                    <x-heroicon-o-user class="mx-auto h-12 w-12 text-gray-400" />
                                     <h3 class="mt-2 text-sm font-medium text-gray-900">Tidak ada dosen ditemukan</h3>
                                     <p class="mt-1 text-sm text-gray-500">
                                         @if($search)

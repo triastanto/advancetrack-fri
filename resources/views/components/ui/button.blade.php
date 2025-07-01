@@ -38,7 +38,7 @@ if ($loading) {
 }
 @endphp
 
-<button 
+<button
     type="{{ $type }}"
     @if($loading) disabled @endif
     {{ $attributes->merge(['class' => $classes]) }}
@@ -51,17 +51,13 @@ if ($loading) {
         {{ $loadingText }}
     @else
         @if($icon && $iconPosition === 'left')
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                {!! $icon !!}
-            </svg>
+            <x-dynamic-component :component="$icon" class="w-4 h-4 mr-2" />
         @endif
-        
+
         {{ $slot }}
-        
+
         @if($icon && $iconPosition === 'right')
-            <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                {!! $icon !!}
-            </svg>
+            <x-dynamic-component :component="$icon" class="w-4 h-4 ml-2" />
         @endif
     @endif
 </button>

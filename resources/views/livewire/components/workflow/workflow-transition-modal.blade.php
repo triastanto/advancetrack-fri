@@ -1,10 +1,10 @@
 <div>
     @if($isOpen)
-        <div class="fixed inset-0 z-50 overflow-y-auto" 
+        <div class="fixed inset-0 z-50 overflow-y-auto"
              x-data="{ show: @entangle('isOpen') }"
              x-show="show">
             <!-- Overlay -->
-            <div class="fixed inset-0 bg-gray-500 bg-opacity-30 backdrop-blur-sm" 
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-30 backdrop-blur-sm"
                  wire:click="close"
                  x-show="show"
                  x-transition:enter="transition ease-out duration-300"
@@ -30,12 +30,9 @@
                             <h3 class="text-lg font-semibold text-gray-900">
                                 Transisi Workflow
                             </h3>
-                            <button wire:click="close" 
+                            <button wire:click="close"
                                     class="text-gray-400 hover:text-gray-500">
-                                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                          d="M6 18L18 6M6 6l12 12"/>
-                                </svg>
+                                <x-heroicon-o-x-mark class="h-6 w-6" />
                             </button>
                         </div>
                     </div>
@@ -78,7 +75,7 @@
                                     <label class="block text-sm font-medium text-gray-700">
                                         Pilih Transisi
                                     </label>
-                                    <select wire:model="selectedTransition" 
+                                    <select wire:model="selectedTransition"
                                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
                                         <option value="">Pilih transisi...</option>
                                         @foreach($availableTransitions as $transition)
@@ -100,7 +97,7 @@
                                             <span class="text-red-500">*</span>
                                         @endif
                                     </label>
-                                    <textarea wire:model="comment" 
+                                    <textarea wire:model="comment"
                                               rows="3"
                                               placeholder="Tambahkan komentar untuk transisi ini..."
                                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"></textarea>
@@ -111,9 +108,7 @@
                             @else
                                 <div class="mb-6 rounded-lg bg-yellow-50 p-4">
                                     <div class="flex">
-                                        <svg class="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
-                                        </svg>
+                                        <x-heroicon-o-exclamation-triangle class="h-5 w-5 text-yellow-400" />
                                         <div class="ml-3">
                                             <h3 class="text-sm font-medium text-yellow-800">
                                                 Tidak Ada Transisi Tersedia
@@ -130,10 +125,7 @@
                             <div class="mb-4">
                                 <button wire:click="toggleWorkflowHistory"
                                         class="flex items-center text-sm text-blue-600 hover:text-blue-800">
-                                    <svg class="mr-1 h-4 w-4 transform transition-transform {{ $showWorkflowHistory ? 'rotate-90' : '' }}" 
-                                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                                    </svg>
+                                    <x-heroicon-o-chevron-right :class="'mr-1 h-4 w-4 transform transition-transform ' . ($showWorkflowHistory ? 'rotate-90' : '')" />
                                     {{ $showWorkflowHistory ? 'Sembunyikan' : 'Tampilkan' }} Riwayat Workflow
                                 </button>
                             </div>
@@ -147,10 +139,7 @@
                                             <div class="flex items-start space-x-3">
                                                 <div class="flex-shrink-0">
                                                     <div class="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
-                                                        <svg class="h-4 w-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                                                  d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                                                        </svg>
+                                                        <x-heroicon-o-bolt class="h-4 w-4 text-blue-600" />
                                                     </div>
                                                 </div>
                                                 <div class="flex-1 min-w-0">

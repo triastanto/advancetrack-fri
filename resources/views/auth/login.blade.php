@@ -14,7 +14,7 @@
             <div>
                 <label for="email" class="block text-sm font-medium text-[var(--color-text-main)]">Email</label>
                 <div class="mt-1 relative">
-                    <span class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]">email</span>
+                    <x-heroicon-o-envelope-open class="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] w-5 h-5" />
                     <input id="email" name="email" type="email" value="{{ old('email') }}" required autofocus autocomplete="username"
                            class="appearance-none block w-full pl-10 pr-3 py-2 border border-[var(--color-border)] rounded-md shadow-sm placeholder-[var(--color-text-muted)] focus:outline-none focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] sm:text-sm">
                 </div>
@@ -26,7 +26,7 @@
             <div>
                 <label for="password" class="block text-sm font-medium text-[var(--color-text-main)]">Password</label>
                 <div class="mt-1 relative">
-                    <span class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]">lock</span>
+                    <x-heroicon-o-lock-closed class="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] w-5 h-5" />
                     <input id="password" name="password" type="password" required autocomplete="current-password"
                            class="appearance-none block w-full pl-10 pr-3 py-2 border border-[var(--color-border)] rounded-md shadow-sm placeholder-[var(--color-text-muted)] focus:outline-none focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] sm:text-sm">
                 </div>
@@ -44,7 +44,7 @@
 
                 <div class="text-sm">
                     <a href="{{ route('password.request') }}" class="font-medium text-[var(--color-primary)] hover:text-[var(--color-primary-dark)] flex items-center gap-1">
-                        <span class="material-icons-outlined text-sm">help</span>
+                        <x-heroicon-o-question-mark-circle class="w-5 h-5" />
                         Lupa password?
                     </a>
                 </div>
@@ -53,7 +53,7 @@
             <div>
                 <button type="submit"
                         class="w-full flex justify-center items-center gap-2 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-primary)]">
-                    <span class="material-icons-outlined text-sm">login</span>
+                    <x-heroicon-o-arrow-right-on-rectangle class="w-5 h-5" />
                     Login
                 </button>
             </div>
@@ -63,7 +63,7 @@
             <p class="text-sm text-[var(--color-text-muted)]">
                 Belum punya akun?
                 <a href="{{ route('register') }}" class="font-medium text-[var(--color-primary)] hover:text-[var(--color-primary-dark)] flex items-center gap-1 justify-center">
-                    <span class="material-icons-outlined text-sm">person_add</span>
+                    <x-heroicon-o-user-plus class="w-5 h-5" />
                     Daftar sekarang
                 </a>
             </p>

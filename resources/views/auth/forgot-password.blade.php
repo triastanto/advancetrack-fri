@@ -12,7 +12,7 @@
         @if (session('status'))
             <div class="mb-4 bg-green-100 border-l-4 border-green-500 text-green-700 p-4" role="alert">
                 <div class="flex items-center gap-2">
-                    <span class="material-icons-outlined text-sm">check_circle</span>
+                    <x-heroicon-o-check-circle class="w-5 h-5 text-green-500" />
                     <p>{{ session('status') }}</p>
                 </div>
             </div>
@@ -23,7 +23,7 @@
             <div>
                 <label for="email" class="block text-sm font-medium text-[var(--color-text-main)]">Email</label>
                 <div class="mt-1 relative">
-                    <span class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]">email</span>
+                    <x-heroicon-o-envelope-open class="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] w-5 h-5" />
                     <input id="email" name="email" type="email" value="{{ old('email') }}" required autofocus
                            class="appearance-none block w-full pl-10 pr-3 py-2 border border-[var(--color-border)] rounded-md shadow-sm placeholder-[var(--color-text-muted)] focus:outline-none focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] sm:text-sm">
                 </div>
@@ -35,7 +35,7 @@
             <div>
                 <button type="submit"
                         class="w-full flex justify-center items-center gap-2 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-primary)]">
-                    <span class="material-icons-outlined text-sm">send</span>
+                    <x-heroicon-o-paper-airplane class="w-5 h-5" />
                     Kirim Link Reset Password
                 </button>
             </div>
@@ -45,7 +45,7 @@
             <p class="text-sm text-[var(--color-text-muted)]">
                 Ingat password Anda?
                 <a href="{{ route('login') }}" class="font-medium text-[var(--color-primary)] hover:text-[var(--color-primary-dark)] flex items-center gap-1 justify-center">
-                    <span class="material-icons-outlined text-sm">arrow_back</span>
+                    <x-heroicon-o-arrow-left class="w-5 h-5" />
                     Kembali ke halaman login
                 </a>
             </p>

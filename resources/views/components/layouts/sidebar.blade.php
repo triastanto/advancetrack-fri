@@ -75,14 +75,11 @@
                 @auth
                 @if(Auth::user()->employee && Auth::user()->employee->role === 'lecturer')
                     <x-sidebar.personal-data />
+                @endif
+                <x-sidebar.study-calendar />
+                @if(Auth::user()->employee && Auth::user()->employee->role === 'lecturer')
                     <x-sidebar.documents />
                 @endif
-                @if(!Auth::check() || !Auth::user()->employee)
-                    <x-sidebar.general />
-                @endif
-                @endauth
-                <x-sidebar.study-calendar />
-                @auth
                 @if(Auth::user()->employee && Auth::user()->employee->role !== 'lecturer')
                     <x-sidebar.administration />
                     <x-sidebar.monitoring />

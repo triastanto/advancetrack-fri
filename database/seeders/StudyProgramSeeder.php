@@ -13,21 +13,16 @@ class StudyProgramSeeder extends Seeder
     public function run(): void
     {
         $studyPrograms = [
-            'Matematika',
-            'Fisika',
-            'Kimia',
-            'Biologi',
-            'Statistika',
-            'Ilmu Komputer',
-            'Sistem Informasi',
-            'Teknik Informatika',
-            'Sains Data',
-            'Bioinformatika',
-            'Farmasi',
-            'Teknik Elektro',
-            'Teknik Mesin',
-            'Teknik Sipil',
-            'Aktuaria',
+            'S3 Teknik Industri',
+            'S3 Teknik Elektro',
+            'S3 Ilmu Komputer',
+            'S3 Manajemen',
+            'S3 Ilmu Ekonomi',
+            'S3 Pendidikan',
+            'S3 Ilmu Hukum',
+            'S3 Ilmu Lingkungan',
+            'S3 Ilmu Administrasi Publik',
+            'S3 Teknologi Informasi'
         ];
 
         foreach ($studyPrograms as $programName) {

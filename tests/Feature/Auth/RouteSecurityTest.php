@@ -12,7 +12,7 @@ test('lecturer can access personal routes', function () {
     ]);
 
     $this->actingAs($user)
-         ->get(route('profile.index'))
+         ->get(route('personal-data'))
          ->assertStatus(200);
 
     $this->actingAs($user)
@@ -33,7 +33,7 @@ test('lecturer cannot access administrative routes', function () {
          ->assertStatus(403);
 
     $this->actingAs($user)
-         ->get(route('reports.index'))
+         ->get(route('monitoring.analytics'))
          ->assertStatus(403);
 });
 
@@ -50,7 +50,7 @@ test('hr staff can access administrative routes', function () {
          ->assertStatus(200);
 
     $this->actingAs($user)
-         ->get(route('reports.index'))
+         ->get(route('monitoring.analytics'))
          ->assertStatus(200);
 });
 
@@ -63,7 +63,7 @@ test('hr staff cannot access lecturer routes', function () {
     ]);
 
     $this->actingAs($user)
-         ->get(route('profile.index'))
+         ->get(route('personal-data'))
          ->assertStatus(403);
 
     $this->actingAs($user)
@@ -72,7 +72,7 @@ test('hr staff cannot access lecturer routes', function () {
 });
 
 test('unauthenticated user redirected to login', function () {
-    $this->get(route('profile.index'))
+    $this->get(route('personal-data'))
          ->assertRedirect(route('login'));
 
     $this->get(route('administrations.upload'))
@@ -85,7 +85,7 @@ test('user without employee data gets 403', function () {
     // No employee record created
 
     $this->actingAs($user)
-         ->get(route('profile.index'))
+         ->get(route('personal-data'))
          ->assertStatus(403);
 
     $this->actingAs($user)
@@ -107,11 +107,11 @@ test('vice dean has full access', function () {
          ->assertStatus(200);
 
     $this->actingAs($user)
-         ->get(route('reports.index'))
+         ->get(route('monitoring.analytics'))
          ->assertStatus(200);
 
     // Cannot access lecturer-only routes
     $this->actingAs($user)
-         ->get(route('profile.index'))
+         ->get(route('personal-data'))
          ->assertStatus(403);
 });

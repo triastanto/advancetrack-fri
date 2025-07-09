@@ -18,19 +18,19 @@ class StudyRequirementDocumentSeeder extends Seeder
     {
         // Get study requirement document types
         $studyRequirementTypes = DocumentType::whereIn('name', DocumentTypeConstants::getStudyRequirementNames())->get();
-        
+
         if ($studyRequirementTypes->isEmpty()) {
             $this->command->warn('No study requirement document types found. Run DocumentTypeSeeder first.');
             return;
         }
 
-        // Get one lecturer who has study program assignments
+        // Get the same lecturer seeded by StudyCalendarSeeder (first lecturer with study program assignments)
         $lecturer = Employee::where('role', 'lecturer')
             ->whereHas('studyPrograms')
             ->first();
 
         if (!$lecturer) {
-            $this->command->warn('No lecturers with study program assignments found. Run EmployeeStudyProgramSeeder first.');
+            $this->command->warn('No eligible lecturer found.');
             return;
         }
 
@@ -103,4 +103,4 @@ class StudyRequirementDocumentSeeder extends Seeder
         $timestamp = Carbon::now()->format('Y/m/d');
         return "documents/{$employeeId}/study_requirements/{$timestamp}/{$this->generateFileName($documentTypeName)}";
     }
-} 
+}

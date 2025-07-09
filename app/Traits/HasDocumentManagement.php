@@ -576,7 +576,7 @@ trait HasDocumentManagement
             5 => 'active',
             6 => 'leave',
             7 => 'finished',
-            8 => 'drop_out',
+            8 => 'dropout', // normalize to match Blade
             default => 'unknown'
         };
     }

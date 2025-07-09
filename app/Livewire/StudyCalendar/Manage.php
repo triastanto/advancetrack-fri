@@ -84,7 +84,7 @@ class Manage extends WorkflowComponent
     {
         Log::info("Submitting study calendar {$studyCalendarId} for approval.");
 
-        // Validate requirements before submission
+        // Validate requirements before submission (pre-approval phase: only study requirements needed)
         $requirements = $this->getRequirementsStatus();
 
         if (!$requirements['academic_documents']['complete']) {
@@ -93,10 +93,7 @@ class Manage extends WorkflowComponent
             return;
         }
 
-        if (!$requirements['approval_document']['approved']) {
-            session()->flash('error', 'Tidak dapat mengajukan kalender studi. Dokumen persetujuan harus disetujui terlebih dahulu.');
-            return;
-        }
+        // ApprovalDocument is NOT required at this phase per business process
 
         $this->openWorkflowModal($studyCalendarId, 1); // SUBMIT_STUDY transition
     }
@@ -108,6 +105,21 @@ class Manage extends WorkflowComponent
 
     public function startStudy($studyCalendarId)
     {
+        // START_STUDY: Only allowed if Study Calendar is APPROVED, all AcademicDocuments are VERIFIED, and ApprovalDocument is APPROVED
+        $studyCalendar = StudyCalendar::find($studyCalendarId);
+        if (!$studyCalendar || $studyCalendar->workflow_state !== 3) { // 3 = APPROVED
+            session()->flash('error', 'Kalender studi harus berstatus APPROVED sebelum memulai studi.');
+            return;
+        }
+        $requirements = $this->getRequirementsStatus();
+        if (!$requirements['academic_documents']['complete']) {
+            session()->flash('error', 'Semua dokumen persyaratan harus diverifikasi sebelum memulai studi.');
+            return;
+        }
+        if (!$requirements['approval_document']['approved']) {
+            session()->flash('error', 'Dokumen persetujuan harus disetujui sebelum memulai studi.');
+            return;
+        }
         $this->openWorkflowModal($studyCalendarId, 5); // START_STUDY transition
     }
 
@@ -292,10 +304,16 @@ class Manage extends WorkflowComponent
             $workflowProgress = $this->getWorkflowProgress($studyCalendar);
             $workflowTimeline = $studyCalendar ? $this->getWorkflowTimeline($studyCalendar) : collect();
 
+            // Ensure progress bar gets the actual workflow_state as current_state
+            $workflowProgressWithState = array_merge(
+                $workflowProgress,
+                ['current_state' => $studyCalendar ? $studyCalendar->workflow_state : 1]
+            );
+
             return view('livewire.study-calendar.manage', [
                 'studyCalendar' => $studyCalendar,
                 'requirementsStatus' => $requirementsStatus,
-                'workflowProgress' => $workflowProgress,
+                'workflowProgress' => $workflowProgressWithState,
                 'workflowTimeline' => $workflowTimeline,
                 'canManageWorkflow' => $this->canUserManageWorkflow()
             ]);
@@ -317,7 +335,8 @@ class Manage extends WorkflowComponent
                         ['id' => 2, 'name' => 'Pending Approval', 'status' => 'current', 'has_error' => false],
                         ['id' => 3, 'name' => 'Approved', 'status' => 'pending', 'has_error' => false],
                         ['id' => 4, 'name' => 'Active', 'status' => 'pending', 'has_error' => false]
-                    ]
+                    ],
+                    'current_state' => 1
                 ],
                 'workflowTimeline' => collect(),
                 'canManageWorkflow' => false

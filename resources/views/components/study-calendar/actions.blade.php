@@ -27,12 +27,9 @@
                             $isDisabled = true;
                             $missingCount = $requirementsStatus['academic_documents']['total'] - $requirementsStatus['academic_documents']['verified'];
                             $disabledReason = "Masih ada {$missingCount} dokumen persyaratan yang belum diverifikasi";
-                        } elseif (!$requirementsStatus['approval_document']['approved']) {
-                            $isDisabled = true;
-                            $disabledReason = 'Dokumen persetujuan harus disetujui terlebih dahulu';
                         }
                     } elseif ($transition['name'] === 'START_STUDY') {
-                        if (!$requirementsStatus['all_requirements_met']) {
+                        if (!($requirementsStatus['academic_documents']['complete'] && $requirementsStatus['approval_document']['approved'])) {
                             $isDisabled = true;
                             $disabledReason = 'Semua dokumen persyaratan harus diverifikasi dan dokumen persetujuan harus disetujui';
                         }
@@ -145,23 +142,24 @@
             @endforeach
         </div>
     @else
-        <div class="text-center py-8">
-            <x-heroicon-o-check-circle class="w-16 h-16 mx-auto text-green-300 mb-4" />
-            <h3 class="text-lg font-medium text-gray-900 mb-2">Tidak Ada Aksi Tersedia</h3>
-            <p class="text-gray-600">
+        <div class="flex items-center justify-center py-3 text-sm text-gray-700 bg-gray-50 rounded border border-gray-200">
+            <x-heroicon-o-check-circle class="w-5 h-5 text-green-400 mr-2" />
+            <span class="font-medium">Tidak Ada Aksi Tersedia</span>
+            <span class="mx-2">|</span>
+            <span>
                 @if($currentState === 7)
-                    Studi telah selesai. Tidak ada aksi lebih lanjut yang diperlukan.
+                    Studi selesai
                 @elseif($currentState === 8)
-                    Studi telah dihentikan. Tidak ada aksi lebih lanjut yang diperlukan.
+                    Studi dihentikan
                 @else
-                    Tidak ada transisi yang tersedia untuk status saat ini.
+                    Tidak ada transisi untuk status ini
                 @endif
-            </p>
+            </span>
         </div>
     @endif
 
     {{-- Requirements Warning --}}
-    @if($currentState === 3 && !$requirementsStatus['all_requirements_met'])
+    @if($currentState === 3 && !($requirementsStatus['academic_documents']['complete'] && $requirementsStatus['approval_document']['approved']))
         <div class="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
             <div class="flex items-center">
                 <x-heroicon-o-exclamation-triangle class="w-5 h-5 text-yellow-600 mr-2" />

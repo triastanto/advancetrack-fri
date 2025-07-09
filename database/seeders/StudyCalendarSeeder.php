@@ -24,20 +24,52 @@ class StudyCalendarSeeder extends Seeder
             return;
         }
 
-        foreach ($lecturersWithPrograms as $lecturer) {
-            // Skip if already has study calendar
-            if ($lecturer->studyCalendars()->exists()) {
-                continue;
-            }
+        // Only seed one lecturer with a draft study calendar
+        $lecturer = $lecturersWithPrograms->first();
+        if (!$lecturer) {
+            $this->command->warn('No eligible lecturer found.');
+            return;
+        }
+        // Remove all existing study calendars for this lecturer
+        $lecturer->studyCalendars()->delete();
 
-            $studyCalendarData = $this->generateStudyCalendarData($lecturer);
+        $studyCalendarData = $this->generateStudyCalendarDataForState($lecturer, 1); // 1 = DRAFT
 
-            StudyCalendar::create(array_merge([
-                'employee_id' => $lecturer->id,
-            ], $studyCalendarData));
+        StudyCalendar::create(array_merge([
+            'employee_id' => $lecturer->id,
+        ], $studyCalendarData));
+
+        $this->command->info("Seeded 1 study calendar in draft state for lecturer: {$lecturer->user->name}");
+    }
+
+    /**
+     * Generate study calendar data for a specific workflow_state
+     */
+    function generateStudyCalendarDataForState(Employee $lecturer, int $workflowState): array
+    {
+        $lecturerName = strtolower($lecturer->user->name);
+        $position = strtolower($lecturer->position);
+
+        // Determine study level and duration based on current title
+        $studyLevel = $this->determineStudyLevel($lecturerName, $position);
+        $studyDurationYears = $this->getStudyDuration($studyLevel);
+
+        // Generate realistic dates
+        $studyStart = $this->generateStudyStartDate();
+        $estimatedEnd = $studyStart->copy()->addYears($studyDurationYears);
+
+        $data = [
+            'study_start' => $studyStart,
+            'estimated_study_end' => $estimatedEnd,
+            'workflow_state' => $workflowState,
+        ];
+
+        // Add graduation date if finished
+        if ($workflowState === 7) { // FINISHED state
+            $data['graduation_date'] = $estimatedEnd->copy()->subMonths(rand(0, 6));
         }
 
-        $this->command->info('Study calendars created for ' . $lecturersWithPrograms->count() . ' lecturers.');
+        return $data;
     }
 
     /**

@@ -31,7 +31,7 @@ class StudyCalendarSeeder extends Seeder
             }
 
             $studyCalendarData = $this->generateStudyCalendarData($lecturer);
-            
+
             StudyCalendar::create(array_merge([
                 'employee_id' => $lecturer->id,
             ], $studyCalendarData));
@@ -47,26 +47,26 @@ class StudyCalendarSeeder extends Seeder
     {
         $lecturerName = strtolower($lecturer->user->name);
         $position = strtolower($lecturer->position);
-        
+
         // Determine study level and duration based on current title
         $studyLevel = $this->determineStudyLevel($lecturerName, $position);
         $studyDurationYears = $this->getStudyDuration($studyLevel);
-        
+
         // Generate realistic dates
         $studyStart = $this->generateStudyStartDate();
         $estimatedEnd = $studyStart->copy()->addYears($studyDurationYears);
-        
-        // Determine current status based on timeline
-        $status = $this->determineStudyStatus($studyStart, $estimatedEnd);
-        
+
+        // Determine current workflow state based on timeline
+        $workflowState = $this->determineWorkflowState($studyStart, $estimatedEnd);
+
         $data = [
             'study_start' => $studyStart,
             'estimated_study_end' => $estimatedEnd,
-            'study_status' => $status,
+            'workflow_state' => $workflowState,
         ];
 
         // Add graduation date if finished
-        if ($status === 'finished') {
+        if ($workflowState === 7) { // FINISHED state
             $data['graduation_date'] = $estimatedEnd->copy()->subMonths(rand(0, 6));
         }
 
@@ -82,12 +82,12 @@ class StudyCalendarSeeder extends Seeder
         if (str_contains($name, 'prof.') || str_contains($position, 'prof')) {
             return 'postdoc'; // Post-doctoral research
         }
-        
+
         // Those with Dr. might be pursuing additional specialization or higher degree
         if (str_contains($name, 'dr.') || str_contains($position, 'doktor')) {
             return rand(0, 1) ? 'postdoc' : 'specialist'; // Post-doc or specialization
         }
-        
+
         // Others are likely pursuing doctoral studies
         return 'doctoral';
     }
@@ -113,11 +113,11 @@ class StudyCalendarSeeder extends Seeder
         // Generate dates between 1-4 years ago for realistic timeline
         $yearsAgo = rand(1, 4);
         $monthsAgo = rand(0, 11);
-        
+
         // Prefer academic calendar starts (September, January)
         $preferredMonths = [1, 9]; // January, September
         $month = $preferredMonths[array_rand($preferredMonths)];
-        
+
         return Carbon::create(
             year: date('Y') - $yearsAgo,
             month: $month,
@@ -126,34 +126,35 @@ class StudyCalendarSeeder extends Seeder
     }
 
     /**
-     * Determine study status based on timeline
+     * Determine workflow state based on timeline
+     * Workflow states: 1=DRAFT, 2=PENDING_APPROVAL, 3=APPROVED, 4=REJECTED, 5=ACTIVE, 6=LEAVE, 7=FINISHED, 8=DROP_OUT
      */
-    private function determineStudyStatus(Carbon $startDate, Carbon $estimatedEnd): string
+    private function determineWorkflowState(Carbon $startDate, Carbon $estimatedEnd): int
     {
         $now = Carbon::now();
-        
+
         // If estimated end has passed, 70% chance finished, 30% still active (extended)
         if ($estimatedEnd->isPast()) {
-            return rand(1, 10) <= 7 ? 'finished' : 'active';
+            return rand(1, 10) <= 7 ? 7 : 5; // FINISHED or ACTIVE
         }
-        
+
         // If more than 80% through the program, might be on leave or still active
         $totalDuration = $startDate->diffInDays($estimatedEnd);
         $elapsed = $startDate->diffInDays($now);
         $progress = $elapsed / $totalDuration;
-        
+
         if ($progress > 0.8) {
             // Near completion: 80% active, 15% leave, 5% drop_out
             $rand = rand(1, 100);
-            if ($rand <= 80) return 'active';
-            if ($rand <= 95) return 'leave';
-            return 'drop_out';
+            if ($rand <= 80) return 5; // ACTIVE
+            if ($rand <= 95) return 6; // LEAVE
+            return 8; // DROP_OUT
         }
-        
+
         // Earlier in program: 85% active, 10% leave, 5% drop_out
         $rand = rand(1, 100);
-        if ($rand <= 85) return 'active';
-        if ($rand <= 95) return 'leave';
-        return 'drop_out';
+        if ($rand <= 85) return 5; // ACTIVE
+        if ($rand <= 95) return 6; // LEAVE
+        return 8; // DROP_OUT
     }
 }

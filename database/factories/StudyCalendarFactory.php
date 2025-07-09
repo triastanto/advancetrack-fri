@@ -12,9 +12,8 @@ class StudyCalendarFactory extends Factory
 
     public function definition(): array
     {
-        $statuses = ['active', 'finished', 'leave', 'drop_out'];
-        // Workflow states: 1=DRAFT, 2=PENDING, 3=APPROVED, 4=REJECTED
-        $workflowStates = [1, 2, 3, 4];
+        // Workflow states: 1=DRAFT, 2=PENDING_APPROVAL, 3=APPROVED, 4=REJECTED, 5=ACTIVE, 6=LEAVE, 7=FINISHED, 8=DROP_OUT
+        $workflowStates = [1, 2, 3, 4, 5, 6, 7, 8];
         $start = $this->faker->dateTimeBetween('-5 years', 'now');
         $estimated_end = (clone $start)->modify('+4 years');
         $graduation = $this->faker->boolean(70) ? (clone $estimated_end)->modify('+'.rand(0, 6).' months') : null;
@@ -23,7 +22,6 @@ class StudyCalendarFactory extends Factory
             'study_start' => $start,
             'estimated_study_end' => $estimated_end,
             'graduation_date' => $graduation,
-            'study_status' => $this->faker->randomElement($statuses),
             'workflow_state' => $this->faker->randomElement($workflowStates),
         ];
     }

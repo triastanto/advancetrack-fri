@@ -102,13 +102,13 @@ trait SeederHelpers
         $studyDurationYears = $this->getStudyDuration($studyLevel);
         $studyStart = $this->generateStudyStartDate();
         $estimatedEnd = $studyStart->copy()->addYears($studyDurationYears);
-        $status = $this->determineStudyStatus($studyStart, $estimatedEnd);
+        $workflowState = $this->determineWorkflowState($studyStart, $estimatedEnd);
         $data = [
             'study_start' => $studyStart,
             'estimated_study_end' => $estimatedEnd,
-            'study_status' => $status,
+            'workflow_state' => $workflowState,
         ];
-        if ($status === 'finished') {
+        if ($workflowState === 7) { // FINISHED state
             $data['graduation_date'] = $estimatedEnd->copy()->subMonths(rand(0, 6));
         }
         return $data;
@@ -147,24 +147,24 @@ trait SeederHelpers
         );
     }
 
-    public function determineStudyStatus($studyStart, $estimatedEnd): string
+    public function determineWorkflowState($studyStart, $estimatedEnd): int
     {
         $now = \Carbon\Carbon::now();
         if ($estimatedEnd->isPast()) {
-            return rand(1, 10) <= 7 ? 'finished' : 'active';
+            return rand(1, 10) <= 7 ? 7 : 5; // FINISHED or ACTIVE
         }
         $totalDuration = $studyStart->diffInDays($estimatedEnd);
         $elapsed = $studyStart->diffInDays($now);
         $progress = $elapsed / $totalDuration;
         if ($progress > 0.8) {
             $rand = rand(1, 100);
-            if ($rand <= 80) return 'active';
-            if ($rand <= 95) return 'leave';
-            return 'drop_out';
+            if ($rand <= 80) return 5; // ACTIVE
+            if ($rand <= 95) return 6; // LEAVE
+            return 8; // DROP_OUT
         }
         $rand = rand(1, 100);
-        if ($rand <= 85) return 'active';
-        if ($rand <= 95) return 'leave';
-        return 'drop_out';
+        if ($rand <= 85) return 5; // ACTIVE
+        if ($rand <= 95) return 6; // LEAVE
+        return 8; // DROP_OUT
     }
-} 
+}

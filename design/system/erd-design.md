@@ -35,7 +35,6 @@
 | study_start               | awal studi                    |
 | estimated_study_end       | estimasi akhir studi          |
 | graduation_date           | tanggal kelulusan             |
-| study_status              | status studi                  |
 | workflow_state            | status alur kerja             |
 | study_details             | detail studi lanjut           |
 | study_address             | alamat selama studi           |
@@ -153,8 +152,15 @@
 - study_start
 - estimated_study_end
 - graduation_date (nullable)
-- study_status (enum: active, finished, leave, drop_out; default 'active')
-- workflow_state (default 1)
+- workflow_state (default 1) - manages study status through workflow states:
+  - 1: DRAFT - initial calendar creation
+  - 2: PENDING_APPROVAL - submitted for approval
+  - 3: APPROVED - calendar approved, ready to start
+  - 4: REJECTED - calendar rejected, needs revision
+  - 5: ACTIVE - currently studying
+  - 6: LEAVE - on official leave
+  - 7: FINISHED - study completed
+  - 8: DROP_OUT - study discontinued
 - created_at
 - updated_at
 

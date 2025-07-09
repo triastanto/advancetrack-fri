@@ -30,6 +30,24 @@ class StudyCalendar extends Model
     }
 
     /**
+     * Get study status from workflow state for backward compatibility
+     */
+    public function getStudyStatusAttribute(): string
+    {
+        return match($this->workflow_state) {
+            1 => 'draft',
+            2 => 'pending',
+            3 => 'approved',
+            4 => 'rejected',
+            5 => 'active',
+            6 => 'leave',
+            7 => 'finished',
+            8 => 'drop_out',
+            default => 'unknown'
+        };
+    }
+
+    /**
      * Get the workflow name for this model
      */
     public function getWorkflowName(): string

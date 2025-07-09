@@ -363,7 +363,7 @@ class SemesterReports extends WorkflowComponent
             $employee = $this->getEmployee();
 
             $activeStudy = $employee->studyCalendars()
-                ->where('study_status', 'active')
+                ->where('workflow_state', 5) // ACTIVE state
                 ->latest()
                 ->first();
 

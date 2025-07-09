@@ -220,7 +220,7 @@ trait HasDocumentManagement
     {
         try {
             $activeStudy = $employee->studyCalendars()
-                ->where('study_status', 'active')
+                ->where('workflow_state', 5) // ACTIVE state
                 ->latest()
                 ->first();
 
@@ -244,7 +244,7 @@ trait HasDocumentManagement
 
             return [
                 'program' => $programName,
-                'status' => $activeStudy->study_status,
+                'status' => $this->getStudyStatusFromWorkflowState($activeStudy->workflow_state),
                 'start_date' => $startDate->format('F Y'),
                 'estimated_end' => Carbon::parse($activeStudy->estimated_study_end)->format('F Y'),
                 'current_semester' => $currentSemester,
@@ -536,7 +536,7 @@ trait HasDocumentManagement
     {
         try {
             $activeStudy = $employee->studyCalendars()
-                ->where('study_status', 'active')
+                ->where('workflow_state', 5) // ACTIVE state
                 ->latest()
                 ->first();
 
@@ -561,6 +561,24 @@ trait HasDocumentManagement
             ]);
             return 1;
         }
+    }
+
+    /**
+     * Convert workflow state to readable study status
+     */
+    protected function getStudyStatusFromWorkflowState(int $workflowState): string
+    {
+        return match($workflowState) {
+            1 => 'draft',
+            2 => 'pending',
+            3 => 'approved',
+            4 => 'rejected',
+            5 => 'active',
+            6 => 'leave',
+            7 => 'finished',
+            8 => 'drop_out',
+            default => 'unknown'
+        };
     }
 }
 

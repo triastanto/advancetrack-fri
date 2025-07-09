@@ -205,7 +205,7 @@ trait HasCommonValidation
                     // Check if transition exists
                     $workflowName = $document->getWorkflowName();
                     $transition = \App\Services\Workflow\WorkflowDefinition::getTransition($transitionId, $workflowName);
-                    
+
                     if (empty($transition)) {
                         $errors[] = 'ID transisi tidak valid.';
                     } elseif (!$document->canTransition($transitionId)) {
@@ -265,7 +265,7 @@ trait HasCommonValidation
         }
 
         $method = "isIn{$requiredState}State";
-        
+
         if (method_exists($document, $method)) {
             return $document->$method();
         }
@@ -273,12 +273,12 @@ trait HasCommonValidation
         // Fallback to direct state comparison
         $currentState = $document->getCurrentState();
         $requiredStateId = $this->getStateIdByName($requiredState);
-        
+
         // If the required state is invalid (not found in state map), return false
         if ($requiredStateId === null) {
             return false;
         }
-        
+
         return $currentState === $requiredStateId;
     }
 
@@ -312,7 +312,7 @@ trait HasCommonValidation
         // File type validation
         $allowedMimes = $options['mimes'] ?? self::ALLOWED_MIME_TYPES;
         $fileExtension = strtolower($file->getClientOriginalExtension());
-        
+
         if (!in_array($fileExtension, $allowedMimes)) {
             $mimesList = implode(', ', array_map('strtoupper', $allowedMimes));
             $errors[] = "File harus berformat {$mimesList}.";
@@ -367,8 +367,8 @@ trait HasCommonValidation
         }
 
         // Check if comment is required
-        if (method_exists($document, 'transitionRequiresComment') && 
-            $document->transitionRequiresComment($transitionId) && 
+        if (method_exists($document, 'transitionRequiresComment') &&
+            $document->transitionRequiresComment($transitionId) &&
             empty($comment)) {
             $errors[] = 'Komentar wajib diisi untuk transisi ini.';
         }
@@ -387,7 +387,7 @@ trait HasCommonValidation
     public function mergeValidationRules(array ...$ruleSets): array
     {
         $cacheKey = $this->generateValidationRulesCacheKey($ruleSets);
-        
+
         return Cache::remember($cacheKey, now()->addMinutes(self::CACHE_TTL_MINUTES), function () use ($ruleSets) {
             return array_merge(...$ruleSets);
         });
@@ -408,7 +408,7 @@ trait HasCommonValidation
     public function mergeValidationMessages(array ...$messageSets): array
     {
         $cacheKey = $this->generateValidationMessagesCacheKey($messageSets);
-        
+
         return Cache::remember($cacheKey, now()->addMinutes(self::CACHE_TTL_MINUTES), function () use ($messageSets) {
             return array_merge(...$messageSets);
         });
@@ -510,7 +510,7 @@ trait HasCommonValidation
     {
         try {
             $activeStudy = $employee->studyCalendars()
-                ->where('study_status', 'active')
+                ->where('workflow_state', 5) // ACTIVE state
                 ->latest()
                 ->first();
 
@@ -521,7 +521,7 @@ trait HasCommonValidation
             $startDate = \Carbon\Carbon::parse($activeStudy->study_start);
             $now = \Carbon\Carbon::now();
             $monthsDiff = $startDate->diffInMonths($now);
-            
+
             return max(1, floor($monthsDiff / 6) + 1);
         } catch (\Exception $e) {
             Log::error('Error calculating current semester: ' . $e->getMessage(), [

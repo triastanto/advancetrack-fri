@@ -245,7 +245,7 @@ test('it gets active study info with caching', function () {
 
     $studyCalendar = createStudyCalendar([
         'employee_id' => $this->employee->id,
-        'study_status' => 'active',
+        'workflow_state' => 5, // ACTIVE state
         'study_start' => Carbon::now()->subMonths(6),
         'estimated_study_end' => Carbon::now()->addMonths(18)
     ]);
@@ -276,7 +276,7 @@ test('it calculates current semester correctly', function () {
 
     $studyCalendar = createStudyCalendar([
         'employee_id' => $this->employee->id,
-        'study_status' => 'active',
+        'workflow_state' => 5, // ACTIVE state
         'study_start' => Carbon::now()->subMonths(6),
         'estimated_study_end' => Carbon::now()->addMonths(18)
     ]);

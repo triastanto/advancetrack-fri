@@ -18,7 +18,7 @@ return new class extends Migration
             $table->text('university_address');
             $table->string('university_email');
             $table->string('university_phone');
-            $table->string('study_program_name');
+            $table->foreignId('study_program_id')->constrained('study_programs')->onDelete('cascade');
             $table->text('study_address');
             $table->string('study_level');
             $table->string('scholarship')->nullable();

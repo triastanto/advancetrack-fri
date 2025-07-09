@@ -73,39 +73,6 @@ class StudyCalendarSeeder extends Seeder
     }
 
     /**
-     * Generate study calendar data based on lecturer profile
-     */
-    private function generateStudyCalendarData(Employee $lecturer): array
-    {
-        $lecturerName = strtolower($lecturer->user->name);
-        $position = strtolower($lecturer->position);
-
-        // Determine study level and duration based on current title
-        $studyLevel = $this->determineStudyLevel($lecturerName, $position);
-        $studyDurationYears = $this->getStudyDuration($studyLevel);
-
-        // Generate realistic dates
-        $studyStart = $this->generateStudyStartDate();
-        $estimatedEnd = $studyStart->copy()->addYears($studyDurationYears);
-
-        // Determine current workflow state based on timeline
-        $workflowState = $this->determineWorkflowState($studyStart, $estimatedEnd);
-
-        $data = [
-            'study_start' => $studyStart,
-            'estimated_study_end' => $estimatedEnd,
-            'workflow_state' => $workflowState,
-        ];
-
-        // Add graduation date if finished
-        if ($workflowState === 7) { // FINISHED state
-            $data['graduation_date'] = $estimatedEnd->copy()->subMonths(rand(0, 6));
-        }
-
-        return $data;
-    }
-
-    /**
      * Determine study level based on current academic title
      */
     private function determineStudyLevel(string $name, string $position): string
@@ -155,38 +122,5 @@ class StudyCalendarSeeder extends Seeder
             month: $month,
             day: 1
         );
-    }
-
-    /**
-     * Determine workflow state based on timeline
-     * Workflow states: 1=DRAFT, 2=PENDING_APPROVAL, 3=APPROVED, 4=REJECTED, 5=ACTIVE, 6=LEAVE, 7=FINISHED, 8=DROP_OUT
-     */
-    private function determineWorkflowState(Carbon $startDate, Carbon $estimatedEnd): int
-    {
-        $now = Carbon::now();
-
-        // If estimated end has passed, 70% chance finished, 30% still active (extended)
-        if ($estimatedEnd->isPast()) {
-            return rand(1, 10) <= 7 ? 7 : 5; // FINISHED or ACTIVE
-        }
-
-        // If more than 80% through the program, might be on leave or still active
-        $totalDuration = $startDate->diffInDays($estimatedEnd);
-        $elapsed = $startDate->diffInDays($now);
-        $progress = $elapsed / $totalDuration;
-
-        if ($progress > 0.8) {
-            // Near completion: 80% active, 15% leave, 5% drop_out
-            $rand = rand(1, 100);
-            if ($rand <= 80) return 5; // ACTIVE
-            if ($rand <= 95) return 6; // LEAVE
-            return 8; // DROP_OUT
-        }
-
-        // Earlier in program: 85% active, 10% leave, 5% drop_out
-        $rand = rand(1, 100);
-        if ($rand <= 85) return 5; // ACTIVE
-        if ($rand <= 95) return 6; // LEAVE
-        return 8; // DROP_OUT
     }
 }

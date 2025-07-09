@@ -36,12 +36,12 @@ describe('StudyCalendar Create Validation', function () {
             ->set('end_date', '2024-12-31') // Valid date
             ->set('university_name', '') // Invalid - required
             ->set('university_address', '') // Invalid - required
-            ->set('study_program_name', '') // Invalid - required
+            ->set('study_program_id', '') // Invalid - required
             ->set('study_level', '') // Invalid - required
             ->set('funding_source', '') // Invalid - required
             ->set('study_address', '') // Invalid - required
             ->call('submit')
-            ->assertHasErrors(['university_name', 'university_address', 'study_program_name', 'study_level', 'funding_source', 'study_address'])
+            ->assertHasErrors(['university_name', 'university_address', 'study_program_id', 'study_level', 'funding_source', 'study_address'])
             ->assertSet('step', 2); // Should redirect to step 2
     });
 
@@ -53,7 +53,7 @@ describe('StudyCalendar Create Validation', function () {
             ->set('end_date', '2024-12-31') // Valid date
             ->set('university_name', 'Test University') // Valid
             ->set('university_address', 'Test Address') // Valid
-            ->set('study_program_name', 'Test Program') // Valid
+            ->set('study_program_id', 1) // Valid
             ->set('study_level', 'S3') // Valid
             ->set('funding_source', 'LPDP') // Valid
             ->set('study_address', 'Test Study Address') // Valid
@@ -73,7 +73,7 @@ describe('StudyCalendar Create Validation', function () {
 
         // Access the method directly on the component instance
         $progressData = $component->instance()->getProgressBarData();
-        
+
         // Step 1 should have error
         expect($progressData['phases'][0]['has_error'])->toBe(true);
         // Step 2 should not have error
@@ -149,7 +149,7 @@ describe('StudyCalendar Create Validation', function () {
             ->set('end_date', '2024-12-31')
             ->set('university_name', 'Test University')
             ->set('university_address', 'Test Address')
-            ->set('study_program_name', 'Test Program')
+            ->set('study_program_id', 1)
             ->set('study_level', 'S3')
             ->set('funding_source', 'LPDP')
             ->set('study_address', 'Test Study Address')
@@ -157,4 +157,4 @@ describe('StudyCalendar Create Validation', function () {
             ->call('submit')
             ->assertHasNoErrors();
     });
-}); 
+});

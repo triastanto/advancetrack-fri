@@ -1,6 +1,7 @@
 <x-ui.page-container title="Kelola Kalender Studi Lanjut">
     <x-ui.card class="max-w-2xl mx-auto shadow-lg">
-        <x-study-calendar.progress-bar :progress="$this->getProgressBarData()" />
+        <x-study-calendar.create-progress-bar :progress="$this->getProgressBarData()" />
+        {{-- <x-study-calendar.progress.bar :progress="$this->getProgressBarData()" /> --}}
 
         {{-- Validation Error Summary --}}
         @if($this->getErrorStep() && $this->getErrorStep() !== $step)
@@ -75,9 +76,14 @@
                         @error('university_address') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                     </div>
                     <div class="mb-4">
-                        <label for="study_program_name" class="block font-medium mb-1">Nama Program Studi <span class="text-red-500">*</span></label>
-                        <input type="text" id="study_program_name" wire:model.defer="study_program_name" class="form-input w-full @error('study_program_name') border-red-500 @enderror" />
-                        @error('study_program_name') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                        <label for="study_program_id" class="block font-medium mb-1">Nama Program Studi <span class="text-red-500">*</span></label>
+                        <select id="study_program_id" wire:model.defer="study_program_id" class="form-select w-full @error('study_program_id') border-red-500 @enderror">
+                            <option value="">Pilih Program Studi</option>
+                            @foreach($availableStudyPrograms as $id => $name)
+                                <option value="{{ $id }}">{{ $name }}</option>
+                            @endforeach
+                        </select>
+                        @error('study_program_id') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                     </div>
                     <div class="mb-4">
                         <label for="study_level" class="block font-medium mb-1">Tingkat Studi <span class="text-red-500">*</span></label>
@@ -123,7 +129,7 @@
                             <li><strong>Tanggal Selesai:</strong> {{ $end_date }}</li>
                             <li><strong>Universitas:</strong> {{ $university_name }}</li>
                             <li><strong>Alamat Universitas:</strong> {{ $university_address }}</li>
-                            <li><strong>Program Studi:</strong> {{ $study_program_name }}</li>
+                            <li><strong>Program Studi:</strong> {{ $availableStudyPrograms[$study_program_id] ?? '-' }}</li>
                             <li><strong>Tingkat Studi:</strong> {{ $studyLevels[$study_level] ?? $study_level }}</li>
                             <li><strong>Beasiswa:</strong> {{ $scholarship ?: '-' }}</li>
                             <li><strong>Sumber Pendanaan:</strong> {{ $fundingSources[$funding_source] ?? $funding_source }}</li>

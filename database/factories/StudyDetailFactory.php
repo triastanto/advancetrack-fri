@@ -27,16 +27,7 @@ class StudyDetailFactory extends Factory
             'university_address' => $this->faker->address(),
             'university_email' => $this->faker->email(),
             'university_phone' => $this->faker->phoneNumber(),
-            'study_program_name' => $this->faker->randomElement([
-                'Doktor Matematika',
-                'Doktor Fisika',
-                'Doktor Kimia',
-                'Doktor Biologi',
-                'Magister Matematika',
-                'Magister Fisika',
-                'Magister Kimia',
-                'Magister Biologi'
-            ]),
+            'study_program_id' => \App\Models\StudyProgram::inRandomOrder()->first()?->id ?? 1,
             'study_address' => $this->faker->address(),
             'study_level' => $this->faker->randomElement(['S2', 'S3']),
             'scholarship' => $this->faker->optional(0.6)->randomElement([
@@ -65,12 +56,12 @@ class StudyDetailFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'study_level' => 'S3',
-            'study_program_name' => $this->faker->randomElement([
+            'study_program_id' => \App\Models\StudyProgram::whereIn('name', [
                 'Doktor Matematika',
                 'Doktor Fisika',
                 'Doktor Kimia',
                 'Doktor Biologi'
-            ]),
+            ])->inRandomOrder()->first()?->id ?? 1,
         ]);
     }
 
@@ -81,12 +72,12 @@ class StudyDetailFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'study_level' => 'S2',
-            'study_program_name' => $this->faker->randomElement([
+            'study_program_id' => \App\Models\StudyProgram::whereIn('name', [
                 'Magister Matematika',
                 'Magister Fisika',
                 'Magister Kimia',
                 'Magister Biologi'
-            ]),
+            ])->inRandomOrder()->first()?->id ?? 1,
         ]);
     }
 }

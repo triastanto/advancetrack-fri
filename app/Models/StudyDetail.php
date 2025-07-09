@@ -17,7 +17,7 @@ class StudyDetail extends Model
         'university_address',
         'university_email',
         'university_phone',
-        'study_program_name',
+        'study_program_id',
         'study_address',
         'study_level',
         'scholarship',
@@ -55,5 +55,13 @@ class StudyDetail extends Model
     public function secondaryPromotors(): HasMany
     {
         return $this->hasMany(StudyPromotor::class)->where('is_primary', false);
+    }
+
+    /**
+     * Get the study program for the study detail.
+     */
+    public function studyProgram(): BelongsTo
+    {
+        return $this->belongsTo(StudyProgram::class);
     }
 }

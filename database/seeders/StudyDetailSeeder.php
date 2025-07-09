@@ -22,7 +22,7 @@ class StudyDetailSeeder extends Seeder
                 'university_address' => $this->getUniversityAddress($calendar->id),
                 'university_email' => $this->getUniversityEmail($calendar->id),
                 'university_phone' => $this->getUniversityPhone(),
-                'study_program_name' => $this->getRandomStudyProgram(),
+                'study_program_id' => \App\Models\StudyProgram::inRandomOrder()->first()?->id ?? 1,
                 'study_address' => $this->getRandomStudyAddress(),
                 'study_level' => $this->getRandomStudyLevel(),
                 'scholarship' => $this->getRandomScholarship(),

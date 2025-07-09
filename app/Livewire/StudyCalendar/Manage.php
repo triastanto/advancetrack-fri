@@ -83,6 +83,21 @@ class Manage extends WorkflowComponent
     public function submitForApproval($studyCalendarId)
     {
         Log::info("Submitting study calendar {$studyCalendarId} for approval.");
+
+        // Validate requirements before submission
+        $requirements = $this->getRequirementsStatus();
+
+        if (!$requirements['academic_documents']['complete']) {
+            $missingCount = $requirements['academic_documents']['total'] - $requirements['academic_documents']['verified'];
+            session()->flash('error', "Tidak dapat mengajukan kalender studi. Masih ada {$missingCount} dokumen persyaratan yang belum diverifikasi.");
+            return;
+        }
+
+        if (!$requirements['approval_document']['approved']) {
+            session()->flash('error', 'Tidak dapat mengajukan kalender studi. Dokumen persetujuan harus disetujui terlebih dahulu.');
+            return;
+        }
+
         $this->openWorkflowModal($studyCalendarId, 1); // SUBMIT_STUDY transition
     }
 

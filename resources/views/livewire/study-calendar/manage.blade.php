@@ -11,9 +11,6 @@
                     Kelola status dan progress studi lanjut Anda melalui workflow yang telah ditetapkan.
                 </p>
             </div>
-            @if($studyCalendar)
-                <x-workflow.workflow-status :model="$studyCalendar" />
-            @endif
         </div>
 
         {{-- Study Calendar Status & Progress --}}

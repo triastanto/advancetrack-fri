@@ -6,9 +6,6 @@
             <x-heroicon-o-chart-bar class="w-5 h-5 mr-2 text-blue-600" />
             Progress Studi Lanjut
         </h3>
-        <span class="text-sm text-gray-600">
-            Tahap {{ $progress['current_phase'] }} dari {{ $progress['total_phases'] }}
-        </span>
     </div>
 
     <div class="relative">
@@ -30,6 +27,8 @@
                             @endif">
                             @if(isset($phase['has_error']) && $phase['has_error'])
                                 <x-heroicon-s-exclamation-triangle class="w-4 h-4" />
+                            @elseif($phase['name'] === 'Pending Approval' || str_contains(strtolower($phase['name']), 'pending'))
+                                <x-heroicon-s-clock class="w-4 h-4" />
                             @elseif($phase['status'] === 'completed')
                                 <x-heroicon-s-check class="w-4 h-4" />
                             @else

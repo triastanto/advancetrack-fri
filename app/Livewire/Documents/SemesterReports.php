@@ -104,7 +104,7 @@ class SemesterReports extends WorkflowComponent
             $document = AcademicDocument::findOrFail($documentId);
             $employee = $this->getEmployee();
 
-            if ($document->employee_id !== $employee->id) {
+            if ((int) $document->employee_id !== (int) $employee->id) {
                 session()->flash('error', 'Anda tidak memiliki akses untuk dokumen ini.');
                 return;
             }
@@ -178,7 +178,7 @@ class SemesterReports extends WorkflowComponent
             $document = AcademicDocument::findOrFail($documentId);
             $employee = $this->getEmployee();
 
-            if ($document->employee_id !== $employee->id) {
+            if ((int) $document->employee_id !== (int) $employee->id) {
                 session()->flash('error', 'Anda tidak memiliki akses untuk dokumen ini.');
                 return;
             }

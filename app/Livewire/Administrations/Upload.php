@@ -174,7 +174,7 @@ class Upload extends WorkflowComponent
             $document = ApprovalDocument::findOrFail($documentId);
             $employee = $this->getEmployeeForDocuments();
 
-            if ($document->employee_id !== $employee->id) {
+            if ((int) $document->employee_id !== (int) $employee->id) {
                 session()->flash('error', 'Anda tidak memiliki akses untuk dokumen ini.');
                 return;
             }
@@ -302,7 +302,7 @@ class Upload extends WorkflowComponent
             }
 
             $employee = $this->getEmployeeForDocuments();
-            if ($document->employee_id !== $employee->id) {
+            if ((int) $document->employee_id !== (int) $employee->id) {
                 session()->flash('error', 'Anda tidak memiliki akses untuk mengunduh dokumen ini.');
                 return;
             }

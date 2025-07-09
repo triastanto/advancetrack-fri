@@ -21,13 +21,37 @@
         </div>
     </div>
 
+    {{-- Overall Status --}}
+    <div class="mt-6 mb-4 p-4 rounded-lg
+        @if($requirementsStatus['all_requirements_met']) bg-green-50 border border-green-200 @else bg-yellow-50 border border-yellow-200 @endif">
+        <div class="flex items-center">
+            @if($requirementsStatus['all_requirements_met'])
+                <x-heroicon-o-check-circle class="w-5 h-5 text-green-600 mr-2" />
+                <div>
+                    <h4 class="text-sm font-medium text-green-800">Siap Memulai Studi</h4>
+                    <p class="text-sm text-green-700 mt-1">
+                        Semua persyaratan telah terpenuhi. Anda dapat memulai program studi.
+                    </p>
+                </div>
+            @else
+                <x-heroicon-o-exclamation-triangle class="w-5 h-5 text-yellow-600 mr-2" />
+                <div>
+                    <h4 class="text-sm font-medium text-yellow-800">Persyaratan Belum Lengkap</h4>
+                    <p class="text-sm text-yellow-700 mt-1">
+                        Beberapa persyaratan belum terpenuhi. Silakan lengkapi dokumen yang diperlukan sebelum memulai studi.
+                    </p>
+                </div>
+            @endif
+        </div>
+    </div>
+
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         {{-- Academic Documents Section --}}
         <div class="border border-gray-200 rounded-lg p-4">
             <div class="flex items-center justify-between mb-3">
                 <h4 class="text-md font-medium text-gray-900 flex items-center">
                     <x-heroicon-o-document-text class="w-4 h-4 mr-2 text-blue-600" />
-                    Dokumen Akademik
+                    Persyaratan Studi Lanjut
                 </h4>
                 <a href="{{ route('documents.study-requirements') }}" class="text-sm text-blue-600 hover:text-blue-800">
                     Kelola →
@@ -55,8 +79,8 @@
 
                 <div class="w-full bg-gray-200 rounded-full h-2">
                     @php
-                        $percentage = $requirementsStatus['academic_documents']['total'] > 0 
-                            ? ($requirementsStatus['academic_documents']['verified'] / $requirementsStatus['academic_documents']['total']) * 100 
+                        $percentage = $requirementsStatus['academic_documents']['total'] > 0
+                            ? ($requirementsStatus['academic_documents']['verified'] / $requirementsStatus['academic_documents']['total']) * 100
                             : 0;
                     @endphp
                     <div class="h-2 rounded-full transition-all duration-300
@@ -125,47 +149,4 @@
             </div>
         </div>
     </div>
-
-    {{-- Overall Status --}}
-    <div class="mt-6 p-4 rounded-lg
-        @if($requirementsStatus['all_requirements_met']) bg-green-50 border border-green-200 @else bg-yellow-50 border border-yellow-200 @endif">
-        <div class="flex items-center">
-            @if($requirementsStatus['all_requirements_met'])
-                <x-heroicon-o-check-circle class="w-5 h-5 text-green-600 mr-2" />
-                <div>
-                    <h4 class="text-sm font-medium text-green-800">Siap Memulai Studi</h4>
-                    <p class="text-sm text-green-700 mt-1">
-                        Semua persyaratan telah terpenuhi. Anda dapat memulai program studi.
-                    </p>
-                </div>
-            @else
-                <x-heroicon-o-exclamation-triangle class="w-5 h-5 text-yellow-600 mr-2" />
-                <div>
-                    <h4 class="text-sm font-medium text-yellow-800">Persyaratan Belum Lengkap</h4>
-                    <p class="text-sm text-yellow-700 mt-1">
-                        Beberapa persyaratan belum terpenuhi. Silakan lengkapi dokumen yang diperlukan sebelum memulai studi.
-                    </p>
-                </div>
-            @endif
-        </div>
-    </div>
-
-    {{-- Quick Actions --}}
-    <div class="mt-4 flex flex-wrap gap-2">
-        <a href="{{ route('documents.study-requirements') }}" 
-           class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-            <x-heroicon-o-document-text class="w-4 h-4 mr-2" />
-            Dokumen Persyaratan
-        </a>
-        <a href="{{ route('documents.study-approvals') }}" 
-           class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-            <x-heroicon-o-document-check class="w-4 h-4 mr-2" />
-            Dokumen Persetujuan
-        </a>
-        <a href="{{ route('documents.semester-reports') }}" 
-           class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-            <x-heroicon-o-document-chart-bar class="w-4 h-4 mr-2" />
-            Laporan Semester
-        </a>
-    </div>
-</div> 
+</div>

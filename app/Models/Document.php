@@ -14,6 +14,11 @@ abstract class Document extends Model
 
     protected $casts = [
         'workflow_state' => 'integer',
+        'employee_id' => 'integer',
+        'document_type_id' => 'integer',
+        'semester' => 'integer',
+        'year' => 'integer',
+        'upload_date' => 'date',
     ];
 
     public function employee()

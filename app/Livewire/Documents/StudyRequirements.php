@@ -103,7 +103,36 @@ class StudyRequirements extends WorkflowComponent
             $document = AcademicDocument::findOrFail($documentId);
             $employee = $this->getEmployee();
 
+            // Enhanced debug logging
+            Log::info('Document submit attempt', [
+                'document_id' => $document->id,
+                'document_employee_id' => $document->employee_id,
+                'current_employee_id' => $employee->id,
+                'current_user_id' => Auth::id(),
+                'current_user_name' => Auth::user()->name,
+                'current_user_email' => Auth::user()->email,
+                'document_file_name' => $document->file_name,
+                'document_state' => $document->workflow_state,
+                'document_owner_user_id' => $document->employee->user_id ?? null,
+                'document_owner_name' => $document->employee->user->name ?? 'Unknown',
+                'current_employee_user_id' => $employee->user_id ?? null,
+                'current_employee_nidn' => $employee->nidn ?? null,
+                'document_employee_nidn' => $document->employee->nidn ?? null,
+            ]);
+
+            // Check document ownership
             if ($document->employee_id !== $employee->id) {
+                Log::warning('Document access denied - ownership mismatch', [
+                    'document_id' => $document->id,
+                    'document_employee_id' => $document->employee_id,
+                    'current_employee_id' => $employee->id,
+                    'document_owner_user_id' => $document->employee->user_id ?? null,
+                    'current_user_id' => Auth::id(),
+                    'document_owner_name' => $document->employee->user->name ?? 'Unknown',
+                    'current_user_name' => $employee->user->name ?? 'Unknown',
+                    'document_owner_nidn' => $document->employee->nidn ?? 'Unknown',
+                    'current_employee_nidn' => $employee->nidn ?? 'Unknown',
+                ]);
                 session()->flash('error', 'Anda tidak memiliki akses untuk dokumen ini.');
                 return;
             }
@@ -168,6 +197,7 @@ class StudyRequirements extends WorkflowComponent
             $document = AcademicDocument::findOrFail($documentId);
             $employee = $this->getEmployee();
 
+            // Check document ownership
             if ($document->employee_id !== $employee->id) {
                 session()->flash('error', 'Anda tidak memiliki akses untuk dokumen ini.');
                 return;
@@ -255,7 +285,7 @@ class StudyRequirements extends WorkflowComponent
             }
 
             $employee = $this->getEmployee();
-            if ($document->employee_id !== $employee->id) {
+            if ((int) $document->employee_id !== (int) $employee->id) {
                 session()->flash('error', 'Anda tidak memiliki akses untuk mengunduh dokumen ini.');
                 return;
             }
@@ -310,6 +340,37 @@ class StudyRequirements extends WorkflowComponent
     protected function getSuccessFlashKey(): string
     {
         return 'message';
+    }
+
+    /**
+     * Debug method to check user and employee relationship integrity
+     */
+    public function debugUserEmployeeRelationship()
+    {
+        try {
+            $user = Auth::user();
+            $employee = $this->getEmployee();
+
+            Log::info('User-Employee relationship debug', [
+                'user_id' => $user->id,
+                'user_name' => $user->name,
+                'user_email' => $user->email,
+                'employee_id' => $employee->id,
+                'employee_user_id' => $employee->user_id,
+                'employee_nidn' => $employee->nidn,
+                'employee_role' => $employee->role,
+                'relationship_valid' => $employee->user_id === $user->id,
+            ]);
+
+            return [
+                'user' => $user,
+                'employee' => $employee,
+                'relationship_valid' => $employee->user_id === $user->id,
+            ];
+        } catch (\Exception $e) {
+            Log::error('Error debugging user-employee relationship: ' . $e->getMessage());
+            return null;
+        }
     }
 
     public function render()

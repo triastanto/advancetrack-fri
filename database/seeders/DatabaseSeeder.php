@@ -58,6 +58,9 @@ class DatabaseSeeder extends Seeder
         // Create verified study requirement documents for one lecturer
         $this->call(StudyRequirementDocumentSeeder::class);
 
+        // Add this after other seeders
+        $this->call(EducationSeeder::class);
+
         // Additional development data can be added here as needed
 
         $this->command->info('✅ Development data seeded successfully');

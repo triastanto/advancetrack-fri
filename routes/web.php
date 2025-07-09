@@ -21,6 +21,7 @@ Route::middleware('auth')->group(function () {
     Route::view('dashboard', 'pages.dashboard.dashboard')->name('dashboard');
     Route::middleware('lecturer.only')->group(function () {
         Route::view('personal-data', 'pages.personal-data.personal-data')->name('personal-data');
+        Route::view('personal-data/education', 'pages.personal-data.education')->name('personal-data.education');
     });
 });
 

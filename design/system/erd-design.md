@@ -82,7 +82,7 @@
 
 ### 2. employees
 - id (PK)
-- user_id (FK, cascade)
+- user_id (FK → users.id, cascade)
 - nidn (unique, indexed) // NIDN (Nomor Induk Dosen Nasional)
 - position
 - role (enum: lecturer, hr_finance_staff, head_of_hr_finance, fri_vice_dean, head_of_study_program, head_of_research_group; indexed)
@@ -93,14 +93,15 @@
 - origin_address (nullable)
 - contact_phone (nullable)
 - contact_email (nullable)
-- research_lab_id (FK → research_labs.id, nullable)
-- is_lab_head (boolean, default: false)
+- research_lab_id (FK → research_labs.id, nullable, set null)
+- is_lab_head (boolean, default: false, indexed)
 - created_at
 - updated_at
+- INDEX: role, nidn, research_lab_id, is_lab_head
 
 ### 3. employee_study_program
-- employee_id (FK, cascade)
-- study_program_id (FK, cascade)
+- employee_id (FK → employees.id, cascade)
+- study_program_id (FK → study_programs.id, cascade)
 - created_at
 - updated_at
 - PRIMARY: [employee_id, study_program_id]
@@ -121,14 +122,14 @@
 
 ### 6. documents
 - id (PK)
-- employee_id (FK, cascade)
-- document_type_id (FK, restrict)
+- employee_id (FK → employees.id, cascade)
+- document_type_id (FK → document_types.id, restrict)
 - file_name
 - file_path
-- workflow_state (default 1)
-- semester (nullable)
-- year (nullable)
-- upload_date (nullable)
+- workflow_state (unsignedBigInteger, default 1)
+- semester (integer, nullable)
+- year (year, nullable)
+- upload_date (date, nullable)
 - created_at
 - updated_at
 
@@ -137,90 +138,93 @@
 - workflowable_type
 - workflowable_id
 - workflow_name
-- from_state (nullable)
-- to_state
-- transition (nullable)
+- from_state (unsignedBigInteger, nullable)
+- to_state (unsignedBigInteger)
+- transition (unsignedBigInteger, nullable)
 - context (json, nullable)
-- user_id (FK, nullable)
+- user_id (FK → users.id, nullable, set null)
 - created_at
 - updated_at
 - INDEX: workflowable_type + workflowable_id
 
 ### 8. study_calendars
 - id (PK)
-- employee_id (FK, cascade)
-- study_start
-- estimated_study_end
-- graduation_date (nullable)
-- workflow_state (default 1) - manages study status through workflow states:
-  - 1: DRAFT - initial calendar creation
-  - 2: PENDING_APPROVAL - submitted for approval
-  - 3: APPROVED - calendar approved, ready to start
-  - 4: REJECTED - calendar rejected, needs revision
-  - 5: ACTIVE - currently studying
-  - 6: LEAVE - on official leave
-  - 7: FINISHED - study completed
-  - 8: DROP_OUT - study discontinued
+- employee_id (FK → employees.id, cascade)
+- study_start (date)
+- estimated_study_end (date)
+- graduation_date (date, nullable)
+- workflow_state (unsignedBigInteger, default 1)
 - created_at
 - updated_at
 
 ### 9. study_details
 - id (PK)
-- study_calendar_id (FK → study_calendars.id)
+- study_calendar_id (FK → study_calendars.id, cascade)
 - university_name
-- university_address
+- university_address (text)
 - university_email
 - university_phone
-- study_program_name
-- study_address
+- study_program_id (FK → study_programs.id, cascade)
+- study_address (text)
 - study_level
 - scholarship (nullable)
 - funding_source (nullable)
-- study_regulation_notes (nullable)
+- study_regulation_notes (text, nullable)
 - created_at
 - updated_at
 
 ### 10. study_promotors
 - id (PK)
-- study_detail_id (FK)
+- study_detail_id (FK → study_details.id, cascade)
 - name
 - email
-- is_primary (default: false)
+- is_primary (boolean, default: false)
 - created_at
 - updated_at
 
 ### 11. supervisor_assignments
 - id (PK)
-- employee_id (FK)
-- supervisor_id (FK, self-reference)
-- start_date
-- end_date (nullable)
+- employee_id (FK → employees.id, cascade)
+- supervisor_id (FK → employees.id, cascade, self-reference)
+- start_date (date)
+- end_date (date, nullable)
 - created_at
 - updated_at
 
 ### 12. course_responsibilities
 - id (PK)
-- employee_id (FK)
+- employee_id (FK → employees.id, cascade)
 - course_name
-- semester (nullable)
-- academic_year (nullable)
+- semester (integer, nullable)
+- academic_year (string, nullable)
 - created_at
 - updated_at
 
 ### 13. research_groups
 - id (PK)
-- name
+- name (indexed)
 - description (nullable)
-- head_employee_id (FK → employees.id, nullable) // Ketua Kelompok Keilmuan
+- head_employee_id (FK → employees.id, nullable, set null, indexed) // Ketua Kelompok Keilmuan
 - created_at
 - updated_at
 
 ### 14. research_labs
 - id (PK)
-- name
+- name (indexed)
 - alias_name (nullable)
 - description (nullable)
-- research_group_id (FK → research_groups.id)
+- research_group_id (FK → research_groups.id, cascade, indexed)
+- created_at
+- updated_at
+
+### 15. educations
+- id (PK)
+- employee_id (FK → employees.id, cascade)
+- degree
+- major
+- institution
+- graduation_year (nullable)
+- gpa (nullable)
 - created_at
 - updated_at
 
@@ -237,12 +241,14 @@
 - employees (1) --- (N) study_calendars (employee_id)
 - study_calendars (1) --- (1) study_details (study_calendar_id)
 - study_details (1) --- (N) study_promotors (study_detail_id)
+- study_details (N) --- (1) study_programs (study_program_id)
 - documents (1) --- (N) workflow_histories (workflowable_type/id)
 - study_calendars (1) --- (N) workflow_histories (workflowable_type/id)
 - users (1) --- (N) workflow_histories (user_id)
 - employees (1) --- (N) supervisor_assignments (as supervisee)
 - employees (1) --- (N) supervisor_assignments (as supervisor)
 - employees (1) --- (N) course_responsibilities
+- employees (1) --- (N) educations (employee_id)
 
 ## Diagram (Text)
 
@@ -262,25 +268,10 @@
          (N)             |       research_groups
           |              |           |
      study_programs     (1)         (1)
-                        users        |
-                                 employees (head)
-                                     |
-                                    (N)
-                                     |
-                              study_calendars
-                                     |
-                                    (1)
-                                     |
-                               study_details
-                                     |
-                                     |
-                               study_promotors
-                                     |
-                                    (N)
-                                     |
-                             supervisor_assignments
-                                     |
-                              (self-reference to employees)
+                    |   |
+                    | educations
+                    |
+                users
 
 Legend:
 - (1) = One-to-one relationship

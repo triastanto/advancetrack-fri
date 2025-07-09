@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Education;
 
 class Employee extends Model
 {
@@ -168,5 +169,10 @@ class Employee extends Model
     public function getEmployeeNumberAttribute()
     {
         return $this->nidn;
+    }
+
+    public function educations()
+    {
+        return $this->hasMany(Education::class);
     }
 }

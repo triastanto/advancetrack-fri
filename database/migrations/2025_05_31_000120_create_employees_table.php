@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('position');
             $table->enum('role', [
                 'lecturer',
-                'hr_finance_staff', 
+                'hr_finance_staff',
                 'head_of_hr_finance',
                 'fri_vice_dean',
                 'head_of_study_program',
@@ -34,7 +34,7 @@ return new class extends Migration
             $table->foreignId('research_lab_id')->nullable()->constrained('research_labs')->onDelete('set null');
             $table->boolean('is_lab_head')->default(false);
             $table->timestamps();
-            
+
             // Add indexes for better query performance
             $table->index('role');
             $table->index('nidn');

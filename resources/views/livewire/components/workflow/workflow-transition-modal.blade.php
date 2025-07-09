@@ -1,19 +1,8 @@
 <div>
     @if($isOpen)
         <div class="fixed inset-0 z-50 overflow-y-auto"
-             x-data="{ show: @entangle('isOpen') }"
+             x-data="{ show: @entangle('isOpen'), selectedTransition: @entangle('selectedTransition') }"
              x-show="show">
-            <!-- Overlay -->
-            <div class="fixed inset-0 bg-gray-500 bg-opacity-30 backdrop-blur-sm"
-                 wire:click="close"
-                 x-show="show"
-                 x-transition:enter="transition ease-out duration-300"
-                 x-transition:enter-start="opacity-0"
-                 x-transition:enter-end="opacity-100"
-                 x-transition:leave="transition ease-in duration-200"
-                 x-transition:leave-start="opacity-100"
-                 x-transition:leave-end="opacity-0"></div>
-
             <!-- Modal -->
             <div class="flex min-h-screen items-center justify-center p-4">
                 <div class="w-full max-w-2xl transform rounded-lg bg-white shadow-xl"
@@ -40,37 +29,75 @@
                     @if($document)
                         <!-- Content -->
                         <div class="px-6 py-4">
-                            <!-- Document Info -->
+                            <!-- Model Info -->
                             <div class="mb-6 rounded-lg bg-gray-50 p-4">
-                                <h4 class="mb-2 font-medium text-gray-900">Informasi Dokumen</h4>
+                                <h4 class="mb-2 font-medium text-gray-900">
+                                    @if($document instanceof \App\Models\StudyCalendar)
+                                        Informasi Kalender Studi
+                                    @else
+                                        Informasi Dokumen
+                                    @endif
+                                </h4>
                                 <div class="grid grid-cols-1 gap-2 text-sm md:grid-cols-2">
-                                    <div>
-                                        <span class="font-medium">Nama:</span>
-                                        {{ $document->file_name }}
-                                    </div>
-                                    <div>
-                                        <span class="font-medium">Jenis:</span>
-                                        {{ $document->documentType->display_name ?? 'N/A' }}
-                                    </div>
-                                    <div>
-                                        <span class="font-medium">Status Saat Ini:</span>
-                                        <span class="inline-flex rounded-full px-2 py-1 text-xs font-semibold
-                                            @if($document->getCurrentState() === 1) bg-yellow-100 text-yellow-800
-                                            @elseif($document->getCurrentState() === 2) bg-blue-100 text-blue-800
-                                            @elseif($document->getCurrentState() === 3) bg-green-100 text-green-800
-                                            @else bg-red-100 text-red-800 @endif">
-                                            {{ $document->getCurrentStateName() }}
-                                        </span>
-                                    </div>
-                                    <div>
-                                        <span class="font-medium">Diunggah:</span>
-                                        {{ $document->created_at->format('d M Y H:i') }}
-                                    </div>
+                                    @if($document instanceof \App\Models\StudyCalendar)
+                                        <!-- Study Calendar specific fields -->
+                                        <div>
+                                            <span class="font-medium">Semester:</span>
+                                            {{ $document->semester ?? 'N/A' }}
+                                        </div>
+                                        <div>
+                                            <span class="font-medium">Periode:</span>
+                                            {{ $document->study_period ?? 'N/A' }}
+                                        </div>
+                                        <div>
+                                            <span class="font-medium">Status Saat Ini:</span>
+                                            <span class="inline-flex rounded-full px-2 py-1 text-xs font-semibold
+                                                @if($document->getCurrentState() === 1) bg-yellow-100 text-yellow-800
+                                                @elseif($document->getCurrentState() === 2) bg-blue-100 text-blue-800
+                                                @elseif($document->getCurrentState() === 3) bg-green-100 text-green-800
+                                                @elseif($document->getCurrentState() === 4) bg-red-100 text-red-800
+                                                @elseif($document->getCurrentState() === 5) bg-green-100 text-green-800
+                                                @else bg-gray-100 text-gray-800 @endif">
+                                                {{ $document->getCurrentStateName() }}
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <span class="font-medium">Dibuat:</span>
+                                            {{ $document->created_at->format('d M Y H:i') }}
+                                        </div>
+                                    @else
+                                        <!-- Document specific fields -->
+                                        <div>
+                                            <span class="font-medium">Nama:</span>
+                                            {{ $document->file_name ?? 'N/A' }}
+                                        </div>
+                                        <div>
+                                            <span class="font-medium">Jenis:</span>
+                                            {{ $document->documentType->display_name ?? 'N/A' }}
+                                        </div>
+                                        <div>
+                                            <span class="font-medium">Status Saat Ini:</span>
+                                            <span class="inline-flex rounded-full px-2 py-1 text-xs font-semibold
+                                                @if($document->getCurrentState() === 1) bg-yellow-100 text-yellow-800
+                                                @elseif($document->getCurrentState() === 2) bg-blue-100 text-blue-800
+                                                @elseif($document->getCurrentState() === 3) bg-green-100 text-green-800
+                                                @else bg-red-100 text-red-800 @endif">
+                                                {{ $document->getCurrentStateName() }}
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <span class="font-medium">Diunggah:</span>
+                                            {{ $document->created_at->format('d M Y H:i') }}
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
 
                             <!-- Available Transitions -->
-                            @if($availableTransitions && count($availableTransitions) > 0)
+                            @php
+                                $formattedTransitions = $document ? $document->getFormattedTransitions() : [];
+                            @endphp
+                            @if($formattedTransitions && count($formattedTransitions) > 0)
                                 <div class="mb-6">
                                     <label class="block text-sm font-medium text-gray-700">
                                         Pilih Transisi
@@ -78,7 +105,7 @@
                                     <select wire:model="selectedTransition"
                                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
                                         <option value="">Pilih transisi...</option>
-                                        @foreach($availableTransitions as $transition)
+                                        @foreach($formattedTransitions as $transition)
                                             <option value="{{ $transition['id'] }}">
                                                 {{ $transition['label'] }}
                                             </option>
@@ -177,9 +204,9 @@
                                         class="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200">
                                     Batal
                                 </button>
-                                @if($availableTransitions && count($availableTransitions) > 0)
+                                @if($this->availableTransitions && count($this->availableTransitions) > 0)
                                     <button wire:click="applyTransition"
-                                            :disabled="!$selectedTransition"
+                                            :disabled="!selectedTransition"
                                             class="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200">
                                         <span wire:loading.remove wire:target="applyTransition">
                                             Terapkan Transisi
@@ -190,6 +217,11 @@
                                     </button>
                                 @endif
                             </div>
+                        </div>
+                    @else
+                        <div class="p-8 text-center text-red-600 text-lg">
+                            Model tidak ditemukan atau tidak dapat dimuat.<br>
+                            <button wire:click="close" class="mt-4 px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">Tutup</button>
                         </div>
                     @endif
                 </div>

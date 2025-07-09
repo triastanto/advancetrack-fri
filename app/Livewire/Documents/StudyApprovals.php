@@ -96,7 +96,8 @@ class StudyApprovals extends WorkflowComponent
     {
         $this->dispatch('workflow-transition-modal:open', [
             'documentId' => $documentId,
-            'transitionId' => $transitionId
+            'transitionId' => $transitionId,
+            'modelType' => 'approval_document'
         ]);
     }
 

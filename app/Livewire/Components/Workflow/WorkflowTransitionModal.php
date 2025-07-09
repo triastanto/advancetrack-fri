@@ -3,6 +3,9 @@
 namespace App\Livewire\Components\Workflow;
 
 use App\Models\Document;
+use App\Models\StudyCalendar;
+use App\Models\AcademicDocument;
+use App\Models\ApprovalDocument;
 use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -10,13 +13,14 @@ use Illuminate\Support\Facades\Log;
 class WorkflowTransitionModal extends Component
 {
     public $isOpen = false;
-    public $document = null;
+    public $document = null; // Generic model with HasWorkflow trait
     public $selectedTransition = null;
     public $comment = '';
     public $showWorkflowHistory = false;
 
     protected $listeners = [
         'openWorkflowModal' => 'open',
+        'workflow-transition-modal:open' => 'openWithArray',
         'closeWorkflowModal' => 'close'
     ];
 
@@ -28,19 +32,106 @@ class WorkflowTransitionModal extends Component
         'comment.max' => 'Komentar maksimal 1000 karakter.'
     ];
 
-    public function open($documentId, $transitionId)
+    public function open($documentId, $transitionId, $modelType = null)
     {
-        $this->document = Document::with([
-            'employee.user', 
-            'employee.studyPrograms', 
-            'documentType',
-            'workflowHistory.user'
-        ])->findOrFail($documentId);
-        
+        // Determine model type and load the appropriate model
+        $this->document = $this->loadModel($documentId, $modelType);
+
+        if (!$this->document) {
+            $this->addError('transition', 'Model tidak ditemukan.');
+            return;
+        }
+
         $this->selectedTransition = $transitionId;
         $this->comment = '';
         $this->isOpen = true;
         $this->showWorkflowHistory = false;
+    }
+
+    /**
+     * Load the appropriate model based on context or model type
+     */
+    protected function loadModel($id, $modelType = null)
+    {
+        // If model type is explicitly provided
+        if ($modelType) {
+            return $this->loadModelByType($id, $modelType);
+        }
+
+        // Try to determine model type by context
+        // First try StudyCalendar (most common in study calendar management)
+        try {
+            $studyCalendar = StudyCalendar::with([
+                'employee.user',
+                'workflowHistory.user'
+            ])->find($id);
+
+            if ($studyCalendar) {
+                return $studyCalendar;
+            }
+        } catch (\Exception $e) {
+            // Continue to try other models
+        }
+
+        // Try Document models (AcademicDocument, ApprovalDocument)
+        try {
+            $document = Document::with([
+                'employee.user',
+                'employee.studyPrograms',
+                'documentType',
+                'workflowHistory.user'
+            ])->find($id);
+
+            if ($document) {
+                return $document;
+            }
+        } catch (\Exception $e) {
+            // Continue
+        }
+
+        return null;
+    }
+
+    /**
+     * Load model by specific type
+     */
+    protected function loadModelByType($id, $modelType)
+    {
+        switch ($modelType) {
+            case 'study_calendar':
+            case 'StudyCalendar':
+                return StudyCalendar::with([
+                    'employee.user',
+                    'workflowHistory.user'
+                ])->find($id);
+
+            case 'academic_document':
+            case 'AcademicDocument':
+                return AcademicDocument::with([
+                    'employee.user',
+                    'employee.studyPrograms',
+                    'documentType',
+                    'workflowHistory.user'
+                ])->find($id);
+
+            case 'approval_document':
+            case 'ApprovalDocument':
+                return ApprovalDocument::with([
+                    'employee.user',
+                    'employee.studyPrograms',
+                    'documentType',
+                    'workflowHistory.user'
+                ])->find($id);
+
+            default:
+                // Fallback to Document
+                return Document::with([
+                    'employee.user',
+                    'employee.studyPrograms',
+                    'documentType',
+                    'workflowHistory.user'
+                ])->find($id);
+        }
     }
 
     public function close()
@@ -98,16 +189,19 @@ class WorkflowTransitionModal extends Component
 
             $this->document->applyTransition($this->selectedTransition, $context);
 
+            // Prepare success message before closing (resetting) the document
+            $successMessage = $this->getSuccessMessage();
+
             $this->close();
-            
+
             // Emit success event globally so parent components can catch it
             $this->dispatch('workflow:transition-applied', [
                 'document' => $this->document,
                 'transition' => $this->selectedTransition,
-                'message' => $this->getSuccessMessage()
+                'message' => $successMessage
             ]);
 
-            session()->flash('success', $this->getSuccessMessage());
+            session()->flash('success', $successMessage);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
             throw $e;
@@ -126,21 +220,50 @@ class WorkflowTransitionModal extends Component
     protected function getSuccessMessage(): string
     {
         $transition = $this->document->getAvailableTransitions()[$this->selectedTransition] ?? null;
-        
+
         if ($transition) {
-            return "Dokumen berhasil " . strtolower($transition['label']) . ".";
+            // Determine what type of model we're working with
+            $modelName = 'Item';
+            if ($this->document instanceof StudyCalendar) {
+                $modelName = 'Kalender studi';
+            } elseif ($this->document instanceof Document) {
+                $modelName = 'Dokumen';
+            }
+
+            return $modelName . " berhasil " . strtolower($transition['label']) . ".";
         }
 
         return 'Transisi berhasil diterapkan.';
     }
 
+    public function transitionRequiresComment()
+    {
+        if (!$this->selectedTransition || !$this->document) {
+            return false;
+        }
+
+        $transition = $this->document->getAvailableTransitions()[$this->selectedTransition] ?? null;
+        return $transition && ($transition['requires_comment'] ?? false);
+    }
+
     public function getAvailableTransitionsProperty()
     {
-        return $this->document ? $this->document->getFormattedTransitions() : [];
+        return $this->document ? $this->document->getAvailableTransitions() : [];
     }
 
     public function render()
     {
         return view('livewire.components.workflow.workflow-transition-modal');
+    }
+
+    public function openWithArray($data)
+    {
+        $documentId = $data['documentId'] ?? null;
+        $transitionId = $data['transitionId'] ?? null;
+        $modelType = $data['modelType'] ?? null;
+
+        if ($documentId && $transitionId) {
+            $this->open($documentId, $transitionId, $modelType);
+        }
     }
 }

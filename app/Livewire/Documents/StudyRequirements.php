@@ -228,7 +228,8 @@ class StudyRequirements extends WorkflowComponent
     {
         $this->dispatch('workflow-transition-modal:open', [
             'documentId' => $documentId,
-            'transitionId' => $transitionId
+            'transitionId' => $transitionId,
+            'modelType' => 'academic_document'
         ]);
     }
 

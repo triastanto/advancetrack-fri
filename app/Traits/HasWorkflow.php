@@ -269,4 +269,13 @@ trait HasWorkflow
     {
         return $this->getWorkflowEngine()->getConfiguration()->getInitialState();
     }
+
+    /**
+     * Get the current state name
+     */
+    public function getCurrentStateName(): string
+    {
+        $stateInfo = $this->getWorkflowStateInfo();
+        return $stateInfo['label'] ?? 'Unknown';
+    }
 }

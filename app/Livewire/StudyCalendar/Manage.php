@@ -8,6 +8,7 @@ use App\Models\ApprovalDocument;
 use App\Livewire\Base\WorkflowComponent;
 use App\Traits\HasDocumentManagement;
 use App\Traits\HasCommonValidation;
+use App\Constants\DocumentTypeConstants;
 use Livewire\WithPagination;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -53,12 +54,27 @@ class Manage extends WorkflowComponent
     public function openWorkflowModal($studyCalendarId, $transitionId)
     {
         try {
+            Log::info("Opening workflow modal", [
+                'study_calendar_id' => $studyCalendarId,
+                'transition_id' => $transitionId,
+                'user_id' => Auth::id()
+            ]);
+
+            // Dispatch with model type to ensure correct model is loaded
             $this->dispatch('workflow-transition-modal:open', [
                 'documentId' => $studyCalendarId,
                 'transitionId' => $transitionId,
-                'workflowType' => 'study_calendar'
+                'modelType' => 'study_calendar'
             ]);
+
+            Log::info("Workflow modal event dispatched successfully");
         } catch (\Exception $e) {
+            Log::error("Error opening workflow modal", [
+                'study_calendar_id' => $studyCalendarId,
+                'transition_id' => $transitionId,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
             session()->flash('error', $e->getMessage());
         }
     }
@@ -66,6 +82,7 @@ class Manage extends WorkflowComponent
     // Study Calendar Operations
     public function submitForApproval($studyCalendarId)
     {
+        Log::info("Submitting study calendar {$studyCalendarId} for approval.");
         $this->openWorkflowModal($studyCalendarId, 1); // SUBMIT_STUDY transition
     }
 
@@ -104,11 +121,14 @@ class Manage extends WorkflowComponent
     {
         try {
             $employee = $this->getEmployee();
-            
+
+            // Get study requirement document type names from constants
+            $studyRequirementNames = DocumentTypeConstants::getStudyRequirementNames();
+
             // Check Academic Documents (Study Requirements)
             $academicDocuments = AcademicDocument::where('employee_id', $employee->id)
-                ->whereHas('documentType', function($query) {
-                    $query->where('category', 'study_requirements');
+                ->whereHas('documentType', function($query) use ($studyRequirementNames) {
+                    $query->whereIn('name', $studyRequirementNames);
                 })
                 ->get();
 
@@ -129,8 +149,8 @@ class Manage extends WorkflowComponent
                     'exists' => $approvalDocument !== null,
                     'approved' => $approvalDocumentApproved
                 ],
-                'all_requirements_met' => $verifiedAcademicDocs === $totalAcademicDocs && 
-                                        $totalAcademicDocs > 0 && 
+                'all_requirements_met' => $verifiedAcademicDocs === $totalAcademicDocs &&
+                                        $totalAcademicDocs > 0 &&
                                         $approvalDocumentApproved
             ];
         } catch (\Exception $e) {
@@ -310,4 +330,4 @@ class Manage extends WorkflowComponent
     {
         return 'selectedTransition';
     }
-} 
+}

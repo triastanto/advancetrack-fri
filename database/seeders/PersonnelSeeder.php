@@ -16,7 +16,7 @@ class PersonnelSeeder extends Seeder
 
     /**
      * Run the database seeds.
-     * 
+     *
      * Creates users and employees for development/testing.
      * Should NOT be run in production environment.
      */
@@ -32,18 +32,18 @@ class PersonnelSeeder extends Seeder
         try {
             // Create personnel for research structure
             $this->createResearchPersonnel();
-            
+
             // Create study program leadership
             $this->createStudyProgramLeadership();
-            
+
             // Create administrative staff
             $this->createAdministrativeStaff();
-            
+
             // Create senior leadership
             $this->createSeniorLeadership();
-            
+
             Log::info('Personnel Seeder completed successfully');
-            
+
         } catch (\Exception $e) {
             Log::error('Personnel Seeder failed: ' . $e->getMessage());
             throw $e;
@@ -66,11 +66,11 @@ class PersonnelSeeder extends Seeder
             // Create research group head
             if (isset($groupData['head'])) {
                 $headEmployee = $this->createUserEmployee(
-                    $groupData['head'], 
-                    'head_of_research_group', 
+                    $groupData['head'],
+                    'head_of_research_group',
                     'Ketua Kelompok Keilmuan'
                 );
-                
+
                 // Assign as group head
                 $researchGroup->update(['head_employee_id' => $headEmployee->id]);
             }
@@ -93,7 +93,7 @@ class PersonnelSeeder extends Seeder
         $researchLab = ResearchLab::where('alias_name', $labData['lab_alias'])
             ->where('research_group_id', $researchGroup->id)
             ->first();
-            
+
         if (!$researchLab) {
             $this->command->warn("Research lab '{$labData['lab_alias']}' not found in group '{$researchGroup->name}'");
             return;
@@ -102,8 +102,8 @@ class PersonnelSeeder extends Seeder
         // Create lab head
         if (isset($labData['head'])) {
             $labHeadEmployee = $this->createUserEmployee(
-                $labData['head'], 
-                'lecturer', 
+                $labData['head'],
+                'lecturer',
                 'Ketua Laboratorium Riset',
                 ['is_lab_head' => true, 'research_lab_id' => $researchLab->id]
             );
@@ -113,8 +113,8 @@ class PersonnelSeeder extends Seeder
         if (isset($labData['members'])) {
             foreach ($labData['members'] as $memberData) {
                 $this->createUserEmployee(
-                    $memberData, 
-                    'lecturer', 
+                    $memberData,
+                    'lecturer',
                     $memberData['position'],
                     ['research_lab_id' => $researchLab->id]
                 );
@@ -147,7 +147,7 @@ class PersonnelSeeder extends Seeder
                 'position' => 'Ketua Program Studi S1 Sistem Informasi'
             ]
         ];
-        
+
         foreach ($headsData as $headData) {
             $this->createUserEmployee($headData, 'head_of_study_program', $headData['position']);
         }
@@ -178,7 +178,7 @@ class PersonnelSeeder extends Seeder
                 'position' => 'Staf SDM & Keuangan'
             ]
         ];
-        
+
         foreach ($staffData as $staff) {
             $this->createUserEmployee($staff, 'hr_finance_staff', $staff['position']);
         }
@@ -195,7 +195,7 @@ class PersonnelSeeder extends Seeder
             // NIDN will be generated dynamically,
             'position' => 'Wakil Dekan II FRI'
         ];
-        
+
         $this->createUserEmployee($viceDeanData, 'fri_vice_dean', $viceDeanData['position']);
     }
 
@@ -229,6 +229,7 @@ class PersonnelSeeder extends Seeder
             'origin_address' => $this->randomAddress(),
             'contact_phone' => $this->randomPhone(),
             'contact_email' => $userData['email'],
+            'photo' => $this->getRandomPhotoPath($userData),
         ], $additionalEmployeeData);
 
         return Employee::firstOrCreate(
@@ -249,7 +250,7 @@ class PersonnelSeeder extends Seeder
             'lecturer' => [1970, 1990],
             'hr_finance_staff' => [1980, 1995],
         ];
-        
+
         $range = $ranges[$role] ?? [1975, 1985];
         return $this->randomBirthDate($range[0], $range[1]);
     }
@@ -261,7 +262,7 @@ class PersonnelSeeder extends Seeder
     {
         if (str_contains($name, 'Prof.')) return 'Profesor';
         if (str_contains($name, 'Dr.')) return 'Lektor Kepala';
-        
+
         return match($role) {
             'fri_vice_dean', 'head_of_research_group', 'head_of_study_program' => 'Lektor Kepala',
             'lecturer' => 'Lektor',
@@ -537,5 +538,19 @@ class PersonnelSeeder extends Seeder
                 ]
             ]
         ];
+    }
+
+    /**
+     * Get a random or default photo path for seeded employees
+     */
+    private function getRandomPhotoPath($userData)
+    {
+        // Use randomuser.me for realistic random photos
+        $genders = ['men', 'women'];
+        $email = isset($userData['email']) && !empty($userData['email']) ? $userData['email'] : uniqid('user');
+        $genderIndex = abs(crc32($email)) % 2;
+        $gender = $genders[$genderIndex];
+        $photoId = (abs(crc32($email)) % 99) + 1; // randomuser.me has 1-99
+        return "https://randomuser.me/api/portraits/{$gender}/{$photoId}.jpg";
     }
 }

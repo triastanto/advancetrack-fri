@@ -3,11 +3,14 @@
 namespace App\Livewire\PersonalData;
 
 use Livewire\Component;
+use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Employee;
 
 class PersonalData extends Component
 {
+    use WithFileUploads;
+
     public $name;
     public $nidn;
     public $position;
@@ -20,6 +23,8 @@ class PersonalData extends Component
     public $contact_phone;
     public $contact_email;
     public $employee;
+    public $photo;
+    public $photo_preview;
 
     public function mount()
     {
@@ -37,7 +42,16 @@ class PersonalData extends Component
             $this->origin_address = $this->employee->origin_address;
             $this->contact_phone = $this->employee->contact_phone;
             $this->contact_email = $this->employee->contact_email;
+            $this->photo_preview = $this->employee->photo ?? null;
         }
+    }
+
+    public function updatedPhoto()
+    {
+        $this->validate([
+            'photo' => 'nullable|image|max:2048', // 2MB Max
+        ]);
+        $this->photo_preview = $this->photo->temporaryUrl();
     }
 
     public function save()
@@ -54,6 +68,7 @@ class PersonalData extends Component
             'origin_address' => 'nullable|string|max:255',
             'contact_phone' => 'nullable|string|max:50',
             'contact_email' => 'nullable|email|max:255',
+            'photo' => 'nullable|image|max:2048',
         ]);
 
         $user = Auth::user();
@@ -71,6 +86,10 @@ class PersonalData extends Component
             $this->employee->origin_address = $this->origin_address;
             $this->employee->contact_phone = $this->contact_phone;
             $this->employee->contact_email = $this->contact_email;
+            if ($this->photo) {
+                $path = $this->photo->store('photos', 'public');
+                $this->employee->photo = $path;
+            }
             $this->employee->save();
         }
 

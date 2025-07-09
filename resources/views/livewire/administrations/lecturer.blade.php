@@ -1,51 +1,71 @@
 <x-ui.page-container>
-    <!-- Study Program Filter -->
-    <div class="flex flex-wrap gap-4 justify-start md:justify-between items-center mb-8">
-        <div class="flex gap-3">
-            <button wire:click="$set('studyProgram', null)"
-                class="flex items-center gap-2 px-6 py-3 rounded-xl border-2 transition font-semibold text-lg
-                    {{ is_null($studyProgram) ? 'bg-[#009444] text-white border-[#009444]' : 'bg-white text-[#009444] border-[#009444]' }}">
-                <x-heroicon-o-users class="w-6 h-6" />
-                Semua Program Studi
+    <!-- Header -->
+    <header class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <!-- Research Group Filter -->
+        <nav aria-label="Filter by Research Group" class="flex flex-wrap gap-1">
+            <button wire:click="$set('researchGroup', null)"
+                class="flex items-center gap-1 px-3 py-1.5 rounded-md border text-sm font-medium transition
+                    {{ is_null($researchGroup) ? 'bg-[#009444] text-white border-[#009444]' : 'bg-white text-[#009444] border-[#009444]' }}
+                    hover:bg-[#009444]/90 hover:text-white focus:outline-none focus:ring-2 focus:ring-[#009444]">
+                <x-heroicon-o-users class="w-4 h-4" />
+                Semua
             </button>
-            @foreach ($studyPrograms as $program)
-                <button wire:click="$set('studyProgram', {{ $program->id }})"
-                    class="flex items-center gap-2 px-6 py-3 rounded-xl border-2 transition font-semibold text-lg
-                        {{ $studyProgram == $program->id ? 'bg-[#009444] text-white border-[#009444]' : 'bg-white text-[#009444] border-[#009444]' }}">
-                    <x-heroicon-o-users class="w-6 h-6" />
-                    {{ $program->name }}
+            @foreach ($researchGroups as $group)
+                <button wire:click="$set('researchGroup', {{ $group->id }})"
+                    class="flex items-center gap-1 px-3 py-1.5 rounded-md border text-sm font-medium transition
+                        {{ $researchGroup == $group->id ? 'bg-[#009444] text-white border-[#009444]' : 'bg-white text-[#009444] border-[#009444]' }}
+                        hover:bg-[#009444]/90 hover:text-white focus:outline-none focus:ring-2 focus:ring-[#009444]">
+                    <x-heroicon-o-users class="w-4 h-4" />
+                    {{ $group->name }}
                 </button>
             @endforeach
-        </div>
+        </nav>
         <!-- Search Bar -->
-        <div class="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-2 shadow-sm">
-            <x-heroicon-o-magnifying-glass class="w-5 h-5 text-[#009444]" />
-            <input wire:model.debounce.300ms="search" type="text" placeholder="Cari Dosen..." class="outline-none border-none bg-transparent text-base w-40 md:w-64" />
+        <div class="flex items-center w-full md:w-auto">
+            <div class="relative w-full md:w-64">
+                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <x-heroicon-o-magnifying-glass class="w-5 h-5 text-gray-400" />
+                </span>
+                <input
+                    wire:model.live="searchTerm"
+                    type="text"
+                    placeholder="Cari dosen..."
+                    class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-[#009444] focus:border-[#009444] sm:text-sm"
+                />
+            </div>
         </div>
-    </div>
+    </header>
 
     <!-- Lecturer Card Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         @forelse($lecturers as $lecturer)
-            <x-ui.card variant="primary" padding="p-8" class="flex flex-col items-center">
-                <div class="w-20 h-20 rounded-full bg-white flex items-center justify-center mb-4 shadow-md">
-                    <span class="text-3xl font-bold text-[#009444]">{{ strtoupper(Str::substr($lecturer->user->name, 0, 1)) }}</span>
+            <article class="group bg-white rounded-xl shadow-md p-8 flex flex-col items-center border border-gray-100 hover:shadow-lg transition">
+                <div class="w-20 h-20 rounded-full bg-[#f3f3f3] flex items-center justify-center mb-4 shadow-inner overflow-hidden">
+                    @if (!empty($lecturer->photo))
+                        <img src="{{ $lecturer->photo }}" alt="Foto {{ $lecturer->user->name }}" class="w-20 h-20 rounded-full object-cover" />
+                    @else
+                        <span class="text-3xl font-bold text-[#009444]">{{ strtoupper(Str::substr($lecturer->user->name, 0, 1)) }}</span>
+                    @endif
                 </div>
-                <div class="text-xl font-semibold text-center">{{ $lecturer->user->name }}</div>
-                <div class="text-base text-center opacity-80">NIP: {{ $lecturer->user->email }}</div>
-            </x-ui.card>
+                <h2 class="text-lg font-semibold text-center mb-1">{{ $lecturer->user->name }}</h2>
+                <div class="text-sm text-center text-gray-500 mb-1">NIDN: {{ $lecturer->nidn ?? $lecturer->user->email }}</div>
+                @if (!empty($lecturer->researchLab?->name))
+                    <div class="text-xs text-center text-gray-400 mb-1">{{ $lecturer->researchLab->name }}</div>
+                @endif
+                {{-- Removed Kelompok: line as requested --}}
+            </article>
         @empty
-            <div class="col-span-3 text-center text-gray-400 py-12">Tidak ada dosen ditemukan.</div>
+            <div class="col-span-full text-center text-gray-400 py-12">Tidak ada dosen ditemukan.</div>
         @endforelse
-    </div>
+    </section>
 
     <!-- Pagination & Summary -->
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mt-8">
+    <footer class="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mt-8">
         <div class="text-gray-600 text-sm">
             Menampilkan {{ $lecturers->firstItem() ?? 0 }} - {{ $lecturers->lastItem() ?? 0 }} dari {{ $lecturers->total() }} dosen
         </div>
         <div>
             {{ $lecturers->links() }}
         </div>
-    </div>
-</x-page-container>
+    </footer>
+</x-ui.page-container>

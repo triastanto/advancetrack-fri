@@ -20,7 +20,7 @@ SELECT
     sc.workflow_state,
     -- Study Details (if exists)
     sd.university_name,
-    sd.study_program_name,
+    sd.study_program_id,
     sd.study_level,
     -- Research Organization
     rl.name AS research_lab_name,

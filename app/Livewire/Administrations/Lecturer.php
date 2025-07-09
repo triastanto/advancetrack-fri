@@ -3,7 +3,8 @@
 namespace App\Livewire\Administrations;
 
 use App\Models\Employee;
-use App\Models\StudyProgram;
+use App\Models\ResearchGroup;
+use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -11,41 +12,76 @@ class Lecturer extends Component
 {
     use WithPagination;
 
-    public $studyProgram = null;
-    public $search = '';
+    public $researchGroup = null;
+    public $searchTerm = '';
 
-    public function updatingSearch()
+    protected $queryString = [
+        'searchTerm' => ['except' => ''],
+        'researchGroup' => ['except' => null],
+        'page' => ['except' => 1],
+    ];
+
+    public function updatingResearchGroup()
     {
         $this->resetPage();
     }
 
-    public function updatingStudyProgram()
+    public function updatingSearchTerm()
     {
         $this->resetPage();
     }
 
     public function render()
     {
-        $query = Employee::with('user', 'studyPrograms');
+        Log::debug('Livewire render', [
+            'filter_researchGroup' => $this->researchGroup,
+            'searchTerm' => $this->searchTerm,
+            'request' => request()->all(),
+            'component' => static::class,
+        ]);
+        $query = Employee::with(['user', 'researchLab.researchGroup']);
 
-        if ($this->studyProgram) {
-            $query->whereHas('studyPrograms', function ($q) {
-                $q->where('id', $this->studyProgram);
+        if ($this->researchGroup) {
+            $query->whereHas('researchLab.researchGroup', function ($q) {
+                $q->where('id', $this->researchGroup);
             });
         }
 
-        if ($this->search) {
-            $query->whereHas('user', function ($q) {
-                $q->where('name', 'like', "%{$this->search}%");
+        if ($this->searchTerm) {
+            $search = $this->searchTerm;
+            $query->where(function ($q) use ($search) {
+                $q->where('nidn', 'like', "%$search%")
+                  ->orWhereHas('user', function ($userQuery) use ($search) {
+                      $userQuery->where('name', 'like', "%$search%")
+                                ->orWhere('email', 'like', "%$search%") ;
+                  })
+                  ->orWhereHas('researchLab', function ($labQuery) use ($search) {
+                      $labQuery->where('name', 'like', "%$search%") ;
+                  });
             });
         }
+
+        Log::debug('Lecturer query', [
+            'sql' => $query->toSql(),
+            'bindings' => $query->getBindings(),
+            'filter_researchGroup' => $this->researchGroup,
+            'component' => static::class,
+            'request' => request()->all(),
+        ]);
 
         $lecturers = $query->paginate(9);
-        $studyPrograms = StudyProgram::orderBy('name')->get();
+        Log::debug('Lecturer search results', [
+            'searchTerm' => $this->searchTerm,
+            'count' => $lecturers->total(),
+            'current_page' => $lecturers->currentPage(),
+            'per_page' => $lecturers->perPage(),
+        ]);
+        $researchGroups = ResearchGroup::orderBy('name')->get();
 
         return view('livewire.administrations.lecturer', [
             'lecturers' => $lecturers,
-            'studyPrograms' => $studyPrograms
+            'researchGroups' => $researchGroups,
+            'researchGroup' => $this->researchGroup,
         ]);
     }
 }

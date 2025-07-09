@@ -9,7 +9,6 @@
 
 ├── 👤 Data Pribadi (Dosen)
 │   ├── Profil Dosen
-│   ├── Riwayat Pendidikan
 │   └── Riwayat Pendidikan
 
 ├── 📅 Kalender Studi Lanjut (Workflow Utama)

@@ -428,9 +428,8 @@ class NotifyStakeholders
     private function sendNotificationToUser(User $user, string $type, array $data): void
     {
         try {
-            // Here you would implement your notification system
-            // For example, using Laravel's notification system:
-            // $user->notify(new WorkflowNotification($type, $data));
+            // Use Laravel's notification system
+            $user->notify(new \App\Notifications\WorkflowNotification($type, $data));
 
             Log::info('In-app notification sent', [
                 'user_id' => $user->id,

@@ -31,6 +31,7 @@ return new class extends Migration
             $table->text('origin_address')->nullable();
             $table->string('contact_phone')->nullable();
             $table->string('contact_email')->nullable();
+            $table->string('photo')->nullable();
             $table->foreignId('research_lab_id')->nullable()->constrained('research_labs')->onDelete('set null');
             $table->boolean('is_lab_head')->default(false);
             $table->timestamps();

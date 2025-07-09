@@ -65,6 +65,26 @@
                     </form>
                 </div>
             </div>
+            @auth
+            @php
+                $role = Auth::user()->employee->role ?? null;
+                $position = Auth::user()->employee->position ?? null;
+                $roleLabel = [
+                    'lecturer' => 'Dosen Studi Lanjut',
+                    'hr_finance_staff' => 'Staf SDM & Keuangan',
+                    'head_of_hr_finance' => 'Kepala Urusan SDM & Keuangan',
+                    'fri_vice_dean' => 'Wakil Dekan II FRI',
+                    'head_of_study_program' => 'Ketua Program Studi',
+                    'head_of_research_group' => 'Ketua Kelompok Keilmuan',
+                ][$role] ?? ucfirst($role);
+            @endphp
+            <div class="mt-3 bg-[var(--color-primary-bg)] rounded-lg px-3 py-2 text-xs text-[var(--color-text-main)]">
+                <div class="font-semibold">Peran: <span class="font-normal">{{ $roleLabel ?? '-' }}</span></div>
+                @if($position)
+                <div class="font-semibold">Jabatan: <span class="font-normal">{{ $position }}</span></div>
+                @endif
+            </div>
+            @endauth
         </div>
 
         <!-- Navigation Links -->

@@ -2,9 +2,14 @@
     <x-ui.alert-message />
 
     {{-- Form Section --}}
-    <x-ui.card class="mb-8">
-        <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Tambah / Edit Riwayat Pendidikan</h3>
-        <form wire:submit.prevent="save">
+    <div class="bg-white rounded-lg shadow-md overflow-hidden mb-8">
+        <div class="px-6 py-4 border-b border-[var(--color-border)]">
+            <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                <x-heroicon-o-academic-cap class="w-5 h-5 mr-2 text-blue-600" />
+                Tambah / Edit Riwayat Pendidikan
+            </h3>
+        </div>
+        <form wire:submit.prevent="save" class="px-6 py-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Gelar/Degree</label>
@@ -40,7 +45,7 @@
                 <button type="button" wire:click="resetForm" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">Reset</button>
             </div>
         </form>
-    </x-ui.card>
+    </div>
 
     {{-- Table Section --}}
     <div class="bg-white rounded-lg shadow-md overflow-hidden">

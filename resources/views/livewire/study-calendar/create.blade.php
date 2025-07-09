@@ -45,13 +45,13 @@
                         Informasi Dasar Studi
                     </h2>
                     <div class="mb-4">
-                        <label for="start_date" class="block font-medium mb-1">Tanggal Mulai Studi <span class="text-red-500">*</span></label>
-                        <input type="date" id="start_date" wire:model.defer="start_date" class="form-input w-full @error('start_date') border-red-500 @enderror" autocomplete="off" />
+                        <label for="start_date" class="block text-sm font-medium text-gray-700 mb-2">Tanggal Mulai Studi <span class="text-red-500">*</span></label>
+                        <input type="date" id="start_date" wire:model.defer="start_date" class="mt-1 py-3 px-3 focus:ring-green-500 focus:border-green-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md @error('start_date') border-red-500 @enderror" autocomplete="off" />
                         @error('start_date') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                     </div>
                     <div class="mb-4">
-                        <label for="end_date" class="block font-medium mb-1">Perkiraan Tanggal Selesai Studi <span class="text-red-500">*</span></label>
-                        <input type="date" id="end_date" wire:model.defer="end_date" class="form-input w-full @error('end_date') border-red-500 @enderror" autocomplete="off" />
+                        <label for="end_date" class="block text-sm font-medium text-gray-700 mb-2">Perkiraan Tanggal Selesai Studi <span class="text-red-500">*</span></label>
+                        <input type="date" id="end_date" wire:model.defer="end_date" class="mt-1 py-3 px-3 focus:ring-green-500 focus:border-green-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md @error('end_date') border-red-500 @enderror" autocomplete="off" />
                         @error('end_date') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                     </div>
                     <div class="mb-4 p-3 bg-blue-50 rounded text-blue-700 text-sm">
@@ -66,18 +66,18 @@
                         Detail Studi Lanjut
                     </h2>
                     <div class="mb-4">
-                        <label for="university_name" class="block font-medium mb-1">Nama Universitas <span class="text-red-500">*</span></label>
-                        <input type="text" id="university_name" wire:model.defer="university_name" class="form-input w-full @error('university_name') border-red-500 @enderror" />
+                        <label for="university_name" class="block text-sm font-medium text-gray-700 mb-2">Nama Universitas <span class="text-red-500">*</span></label>
+                        <input type="text" id="university_name" wire:model.defer="university_name" class="mt-1 py-3 px-3 focus:ring-green-500 focus:border-green-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md @error('university_name') border-red-500 @enderror" />
                         @error('university_name') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                     </div>
                     <div class="mb-4">
-                        <label for="university_address" class="block font-medium mb-1">Alamat Universitas <span class="text-red-500">*</span></label>
-                        <input type="text" id="university_address" wire:model.defer="university_address" class="form-input w-full @error('university_address') border-red-500 @enderror" />
+                        <label for="university_address" class="block text-sm font-medium text-gray-700 mb-2">Alamat Universitas <span class="text-red-500">*</span></label>
+                        <input type="text" id="university_address" wire:model.defer="university_address" class="mt-1 py-3 px-3 focus:ring-green-500 focus:border-green-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md @error('university_address') border-red-500 @enderror" />
                         @error('university_address') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                     </div>
                     <div class="mb-4">
-                        <label for="study_program_id" class="block font-medium mb-1">Nama Program Studi <span class="text-red-500">*</span></label>
-                        <select id="study_program_id" wire:model.defer="study_program_id" class="form-select w-full @error('study_program_id') border-red-500 @enderror">
+                        <label for="study_program_id" class="block text-sm font-medium text-gray-700 mb-2">Nama Program Studi <span class="text-red-500">*</span></label>
+                        <select id="study_program_id" wire:model.defer="study_program_id" class="mt-1 py-3 px-3 focus:ring-green-500 focus:border-green-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md @error('study_program_id') border-red-500 @enderror">
                             <option value="">Pilih Program Studi</option>
                             @foreach($availableStudyPrograms as $id => $name)
                                 <option value="{{ $id }}">{{ $name }}</option>
@@ -86,8 +86,8 @@
                         @error('study_program_id') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                     </div>
                     <div class="mb-4">
-                        <label for="study_level" class="block font-medium mb-1">Tingkat Studi <span class="text-red-500">*</span></label>
-                        <select id="study_level" wire:model.defer="study_level" class="form-select w-full @error('study_level') border-red-500 @enderror">
+                        <label for="study_level" class="block text-sm font-medium text-gray-700 mb-2">Tingkat Studi <span class="text-red-500">*</span></label>
+                        <select id="study_level" wire:model.defer="study_level" class="mt-1 py-3 px-3 focus:ring-green-500 focus:border-green-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md @error('study_level') border-red-500 @enderror">
                             <option value="">Pilih Tingkat Studi</option>
                             @foreach($this->studyLevels as $key => $label)
                                 <option value="{{ $key }}">{{ $label }}</option>
@@ -96,13 +96,13 @@
                         @error('study_level') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                     </div>
                     <div class="mb-4">
-                        <label for="scholarship" class="block font-medium mb-1">Beasiswa (Opsional)</label>
-                        <input type="text" id="scholarship" wire:model.defer="scholarship" class="form-input w-full @error('scholarship') border-red-500 @enderror" />
+                        <label for="scholarship" class="block text-sm font-medium text-gray-700 mb-2">Beasiswa (Opsional)</label>
+                        <input type="text" id="scholarship" wire:model.defer="scholarship" class="mt-1 py-3 px-3 focus:ring-green-500 focus:border-green-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md @error('scholarship') border-red-500 @enderror" />
                         @error('scholarship') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                     </div>
                     <div class="mb-4">
-                        <label for="funding_source" class="block font-medium mb-1">Sumber Pendanaan <span class="text-red-500">*</span></label>
-                        <select id="funding_source" wire:model.defer="funding_source" class="form-select w-full @error('funding_source') border-red-500 @enderror">
+                        <label for="funding_source" class="block text-sm font-medium text-gray-700 mb-2">Sumber Pendanaan <span class="text-red-500">*</span></label>
+                        <select id="funding_source" wire:model.defer="funding_source" class="mt-1 py-3 px-3 focus:ring-green-500 focus:border-green-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md @error('funding_source') border-red-500 @enderror">
                             <option value="">Pilih Sumber Pendanaan</option>
                             @foreach($this->fundingSources as $key => $label)
                                 <option value="{{ $key }}">{{ $label }}</option>
@@ -111,8 +111,8 @@
                         @error('funding_source') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                     </div>
                     <div class="mb-4">
-                        <label for="study_address" class="block font-medium mb-1">Alamat Selama Studi <span class="text-red-500">*</span></label>
-                        <input type="text" id="study_address" wire:model.defer="study_address" class="form-input w-full @error('study_address') border-red-500 @enderror" />
+                        <label for="study_address" class="block text-sm font-medium text-gray-700 mb-2">Alamat Selama Studi <span class="text-red-500">*</span></label>
+                        <input type="text" id="study_address" wire:model.defer="study_address" class="mt-1 py-3 px-3 focus:ring-green-500 focus:border-green-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md @error('study_address') border-red-500 @enderror" />
                         @error('study_address') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                     </div>
                 </div>
@@ -148,36 +148,61 @@
                 </div>
             @endif
 
-            <div class="flex justify-between mt-8">
+            <div class="relative bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse mt-8">
                 @if ($step > 1)
-                    <x-ui.button type="button" variant="secondary" wire:click="previousStep" :loading="$isLoading">
-                        <x-heroicon-o-arrow-left class="w-4 h-4 mr-1" /> Sebelumnya
-                    </x-ui.button>
-                @else
-                    <span></span>
-                @endif
-
-                @if ($step < 3)
                     <div class="flex space-x-2">
+                        {{-- Sebelumnya button --}}
+                        <button type="button" wire:click="previousStep" class="w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                            <x-heroicon-o-arrow-left class="w-4 h-4 mr-1" /> Sebelumnya
+                        </button>
+                        {{-- Perbaiki Kesalahan button (if any) --}}
                         @if($this->hasErrorsOnOtherSteps())
-                            <x-ui.button type="button" variant="danger" wire:click="goToErrorStep" :loading="$isLoading">
+                            <button type="button" wire:click="goToErrorStep" class="w-full inline-flex justify-center rounded-md border border-red-300 shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all duration-200 sm:ml-3 sm:w-auto sm:text-sm">
                                 <x-heroicon-o-exclamation-triangle class="w-4 h-4 mr-1" /> Perbaiki Kesalahan
-                            </x-ui.button>
+                            </button>
                         @endif
-                        <x-ui.button type="button" variant="primary" wire:click="nextStep" :loading="$isLoading">
-                            Selanjutnya <x-heroicon-o-arrow-right class="w-4 h-4 ml-1" />
-                        </x-ui.button>
+                        {{-- Selanjutnya/Submit button --}}
+                        @if ($step < 3)
+                            <button type="button" wire:click="nextStep" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200 sm:ml-3 sm:w-auto sm:text-sm"
+                                wire:loading.attr="disabled"
+                                wire:loading.class="opacity-50 cursor-not-allowed"
+                                wire:target="nextStep">
+                                Selanjutnya <x-heroicon-o-arrow-right class="w-4 h-4 ml-1" />
+                            </button>
+                        @else
+                            <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200 sm:ml-3 sm:w-auto sm:text-sm"
+                                wire:loading.attr="disabled"
+                                wire:loading.class="opacity-50 cursor-not-allowed"
+                                wire:target="submit">
+                                <x-heroicon-o-check class="w-4 h-4 mr-1" /> <span wire:loading.remove wire:target="submit">Submit</span>
+                                <span wire:loading wire:target="submit">Menyimpan...</span>
+                            </button>
+                        @endif
                     </div>
                 @else
                     <div class="flex space-x-2">
+                        {{-- Only show Perbaiki Kesalahan if needed --}}
                         @if($this->hasErrorsOnOtherSteps())
-                            <x-ui.button type="button" variant="danger" wire:click="goToErrorStep" :loading="$isLoading">
+                            <button type="button" wire:click="goToErrorStep" class="w-full inline-flex justify-center rounded-md border border-red-300 shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all duration-200 sm:ml-3 sm:w-auto sm:text-sm">
                                 <x-heroicon-o-exclamation-triangle class="w-4 h-4 mr-1" /> Perbaiki Kesalahan
-                            </x-ui.button>
+                            </button>
                         @endif
-                        <x-ui.button type="submit" variant="primary" :loading="$isLoading" loading-text="Menyimpan...">
-                            <x-heroicon-o-check class="w-4 h-4 mr-1" /> Submit
-                        </x-ui.button>
+                        @if ($step < 3)
+                            <button type="button" wire:click="nextStep" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200 sm:ml-3 sm:w-auto sm:text-sm"
+                                wire:loading.attr="disabled"
+                                wire:loading.class="opacity-50 cursor-not-allowed"
+                                wire:target="nextStep">
+                                Selanjutnya <x-heroicon-o-arrow-right class="w-4 h-4 ml-1" />
+                            </button>
+                        @else
+                            <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200 sm:ml-3 sm:w-auto sm:text-sm"
+                                wire:loading.attr="disabled"
+                                wire:loading.class="opacity-50 cursor-not-allowed"
+                                wire:target="submit">
+                                <x-heroicon-o-check class="w-4 h-4 mr-1" /> <span wire:loading.remove wire:target="submit">Submit</span>
+                                <span wire:loading wire:target="submit">Menyimpan...</span>
+                            </button>
+                        @endif
                     </div>
                 @endif
             </div>

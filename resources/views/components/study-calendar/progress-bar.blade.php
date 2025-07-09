@@ -1,21 +1,25 @@
 @props(['progress'])
 
 @php
-    // State machine definition (from study-calendar-state-machine.md)
-    $states = [
+    $baseStates = [
         ['id' => 1, 'name' => 'Draft', 'label' => 'DRAFT', 'icon' => 'pencil', 'color' => 'secondary', 'terminal' => false],
         ['id' => 2, 'name' => 'Menunggu Persetujuan', 'label' => 'PENDING_APPROVAL', 'icon' => 'clock', 'color' => 'warning', 'terminal' => false],
         ['id' => 4, 'name' => 'Ditolak', 'label' => 'REJECTED', 'icon' => 'x-circle', 'color' => 'danger', 'terminal' => false],
         ['id' => 3, 'name' => 'Disetujui', 'label' => 'APPROVED', 'icon' => 'check-circle', 'color' => 'info', 'terminal' => false],
         ['id' => 5, 'name' => 'Aktif Studi', 'label' => 'ACTIVE', 'icon' => 'book-open', 'color' => 'success', 'terminal' => false],
-        ['id' => 6, 'name' => 'Cuti', 'label' => 'LEAVE', 'icon' => 'pause-circle', 'color' => 'warning', 'terminal' => false],
         ['id' => 7, 'name' => 'Selesai', 'label' => 'FINISHED', 'icon' => 'award', 'color' => 'success', 'terminal' => true],
-        ['id' => 8, 'name' => 'Drop Out', 'label' => 'DROP_OUT', 'icon' => 'x-circle', 'color' => 'danger', 'terminal' => true],
     ];
+    $leaveState = ['id' => 6, 'name' => 'Cuti', 'label' => 'LEAVE', 'icon' => 'pause-circle', 'color' => 'warning', 'terminal' => false];
+    $dropoutState = ['id' => 8, 'name' => 'Drop Out', 'label' => 'DROP_OUT', 'icon' => 'x-circle', 'color' => 'danger', 'terminal' => true];
     $currentState = $progress['current_state'] ?? 1;
-    // Find current state object
+    $states = $baseStates;
+    if ($currentState == 6 || $currentState > 6) {
+        array_splice($states, 5, 0, [$leaveState]);
+    }
+    if ($currentState == 8) {
+        $states[] = $dropoutState;
+    }
     $current = collect($states)->firstWhere('id', $currentState) ?? $states[0];
-    // Helper for state status
     function stateStatus($stateId, $currentState) {
         if ($currentState > $stateId) return 'completed';
         if ($currentState == $stateId) return 'current';
@@ -34,9 +38,10 @@
     <div class="relative">
         {{-- DEBUG: Inspect current_state value --}}
         <div class="mb-2 text-xs text-gray-400">DEBUG: current_state = {{ $currentState }}</div>
-        <div class="flex items-center justify-between min-w-max">
+        <div class="relative flex items-center min-w-max">
+            <div class="absolute left-0 right-0 top-1/2 transform -translate-y-1/2 h-1 bg-gray-300 z-0"></div>
             @foreach($states as $index => $state)
-                <div class="flex flex-col items-center flex-1 min-w-[90px]">
+                <div class="flex flex-col items-center flex-1 min-w-[90px] z-10">
                     {{-- State Circle --}}
                     <div class="relative">
                         <div class="w-9 h-9 rounded-full flex items-center justify-center text-sm font-medium border-2
@@ -91,19 +96,6 @@
                             </span>
                         </div>
                     </div>
-                    {{-- Connector --}}
-                    @if($index < count($states) - 1)
-                        <div class="w-full h-1 mt-2 mb-2 flex items-center">
-                            <div class="flex-1 h-1
-                                @if(stateStatus($states[$index+1]['id'], $currentState) === 'completed')
-                                    bg-green-500
-                                @elseif(stateStatus($states[$index]['id'], $currentState) === 'completed')
-                                    bg-blue-400
-                                @else
-                                    bg-gray-300
-                                @endif"></div>
-                        </div>
-                    @endif
                 </div>
             @endforeach
         </div>

@@ -14,7 +14,7 @@
                     {{ $phase['id'] }}
                 </div>
                 @if(!$loop->last)
-                    <div class="absolute left-full top-1/2 transform -translate-y-1/2 w-12 h-1
+                    <div class="absolute left-full top-1/2 transform -translate-y-1/2 w-50 h-1
                         @if($phase['status'] === 'completed') bg-blue-500
                         @else bg-gray-300
                         @endif"></div>

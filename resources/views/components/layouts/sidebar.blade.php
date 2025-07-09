@@ -9,7 +9,7 @@
     <aside id="sidebar" x-data="{ userMenuOpen: false }" :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'" class="flex flex-col h-screen w-72 bg-[var(--color-bg)] border-r border-[var(--color-border)] fixed top-0 left-0 z-40 transform lg:translate-x-0 transition-transform duration-200 ease-in-out lg:static lg:flex">
         <!-- Sidebar Header / Logo -->
         <div class="flex items-center gap-3 px-10 py-7">
-            <img src="/build/logo.png" alt="AdvanceTrack FRI Logo" class="h-10" />
+            <img src="/logo.png" alt="AdvanceTrack FRI Logo" class="h-10" />
             <span class="text-[var(--color-primary)] font-bold text-lg">AdvanceTrack FRI</span>
         </div>
 

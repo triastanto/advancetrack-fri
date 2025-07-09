@@ -4,7 +4,7 @@
 <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-[var(--color-bg)]">
     <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg">
         <div class="mb-6 text-center">
-            <img src="/build/logo.png" alt="AdvanceTrack FRI Logo" class="h-12 mx-auto" />
+            <img src="/logo.png" alt="AdvanceTrack FRI Logo" class="h-12 mx-auto" />
             <h2 class="text-2xl font-bold text-[var(--color-text-main)]">Login</h2>
             <p class="mt-2 text-sm text-[var(--color-text-muted)]">Masuk ke akun AdvanceTrack FRI Anda</p>
         </div>

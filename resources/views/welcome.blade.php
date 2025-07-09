@@ -3,7 +3,7 @@
 @section('content')
 <div class="p-10">
     <div class="flex items-center gap-4 mb-6">
-        <img src="/build/logo.png" alt="AdvanceTrack FRI Logo" class="h-12" />
+        <img src="/logo.png" alt="AdvanceTrack FRI Logo" class="h-12" />
         <h1 class="text-3xl font-bold text-[#009444]">Selamat Datang di AdvanceTrack FRI</h1>
     </div>
 

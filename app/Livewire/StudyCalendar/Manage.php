@@ -202,20 +202,20 @@ class Manage extends WorkflowComponent
                 'current_phase' => 1,
                 'total_phases' => 4,
                 'phases' => [
-                    ['id' => 1, 'name' => 'Draft', 'status' => 'completed'],
-                    ['id' => 2, 'name' => 'Pending Approval', 'status' => 'current'],
-                    ['id' => 3, 'name' => 'Approved', 'status' => 'pending'],
-                    ['id' => 4, 'name' => 'Active', 'status' => 'pending']
+                    ['id' => 1, 'name' => 'Draft', 'status' => 'completed', 'has_error' => false],
+                    ['id' => 2, 'name' => 'Pending Approval', 'status' => 'current', 'has_error' => false],
+                    ['id' => 3, 'name' => 'Approved', 'status' => 'pending', 'has_error' => false],
+                    ['id' => 4, 'name' => 'Active', 'status' => 'pending', 'has_error' => false]
                 ]
             ];
         }
 
         $currentState = $studyCalendar->workflow_state;
         $phases = [
-            ['id' => 1, 'name' => 'Draft', 'status' => 'completed'],
-            ['id' => 2, 'name' => 'Pending Approval', 'status' => 'pending'],
-            ['id' => 3, 'name' => 'Approved', 'status' => 'pending'],
-            ['id' => 4, 'name' => 'Active', 'status' => 'pending']
+            ['id' => 1, 'name' => 'Draft', 'status' => 'completed', 'has_error' => false],
+            ['id' => 2, 'name' => 'Pending Approval', 'status' => 'pending', 'has_error' => false],
+            ['id' => 3, 'name' => 'Approved', 'status' => 'pending', 'has_error' => false],
+            ['id' => 4, 'name' => 'Active', 'status' => 'pending', 'has_error' => false]
         ];
 
         // Update phase status based on current state
@@ -278,10 +278,10 @@ class Manage extends WorkflowComponent
                     'current_phase' => 1,
                     'total_phases' => 4,
                     'phases' => [
-                        ['id' => 1, 'name' => 'Draft', 'status' => 'completed'],
-                        ['id' => 2, 'name' => 'Pending Approval', 'status' => 'current'],
-                        ['id' => 3, 'name' => 'Approved', 'status' => 'pending'],
-                        ['id' => 4, 'name' => 'Active', 'status' => 'pending']
+                        ['id' => 1, 'name' => 'Draft', 'status' => 'completed', 'has_error' => false],
+                        ['id' => 2, 'name' => 'Pending Approval', 'status' => 'current', 'has_error' => false],
+                        ['id' => 3, 'name' => 'Approved', 'status' => 'pending', 'has_error' => false],
+                        ['id' => 4, 'name' => 'Active', 'status' => 'pending', 'has_error' => false]
                     ]
                 ],
                 'workflowTimeline' => collect(),

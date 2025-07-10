@@ -15,4 +15,9 @@ class StudyProgram extends Model
     {
         return $this->belongsToMany(Employee::class)->withTimestamps();
     }
+
+    public function studyDetails()
+    {
+        return $this->hasMany(StudyDetail::class);
+    }
 }

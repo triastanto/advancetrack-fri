@@ -13,6 +13,7 @@ use Livewire\WithPagination;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Pagination\LengthAwarePaginator;
+use App\Services\Workflow\WorkflowDefinition;
 
 class Approval extends WorkflowComponent
 {
@@ -28,7 +29,9 @@ class Approval extends WorkflowComponent
     // Filter properties
     public $searchTerm = '';
     public $statusFilter = '';
-    public $employeeFilter = '';
+    protected $queryString = ['searchTerm', 'statusFilter'];
+
+    public $workflowStates = [];
 
     protected $listeners = [
         'workflow:transition-applied' => 'handleTransitionApplied',
@@ -41,6 +44,7 @@ class Approval extends WorkflowComponent
     public function mount(...$parameters)
     {
         parent::mount(...$parameters);
+        $this->workflowStates = WorkflowDefinition::getAllStates('study_calendar');
     }
 
     // Event Handlers
@@ -188,12 +192,6 @@ class Approval extends WorkflowComponent
                 $query->where('workflow_state', $this->statusFilter);
             }
 
-            if (!empty($this->employeeFilter)) {
-                $query->whereHas('employee', function($q) {
-                    $q->where('role', $this->employeeFilter);
-                });
-            }
-
             return $query->orderBy('created_at', 'desc')->paginate(10);
         } catch (\Exception $e) {
             Log::error('Error getting pending study calendars: ' . $e->getMessage());
@@ -216,12 +214,6 @@ class Approval extends WorkflowComponent
 
             if (!empty($this->statusFilter)) {
                 $query->where('workflow_state', $this->statusFilter);
-            }
-
-            if (!empty($this->employeeFilter)) {
-                $query->whereHas('employee', function($q) {
-                    $q->where('role', $this->employeeFilter);
-                });
             }
 
             return $query->orderBy('created_at', 'desc')->paginate(10);
@@ -313,14 +305,9 @@ class Approval extends WorkflowComponent
         $this->resetPage();
     }
 
-    public function updatedEmployeeFilter()
-    {
-        $this->resetPage();
-    }
-
     public function clearFilters()
     {
-        $this->reset(['searchTerm', 'statusFilter', 'employeeFilter']);
+        $this->reset(['searchTerm', 'statusFilter']);
         $this->resetPage();
     }
 
@@ -339,26 +326,19 @@ class Approval extends WorkflowComponent
     {
         try {
             $studyCalendars = $this->getAllStudyCalendars();
-            $pendingCount = StudyCalendar::where('workflow_state', 2)->count();
-            $approvedCount = StudyCalendar::where('workflow_state', 3)->count();
-            $rejectedCount = StudyCalendar::where('workflow_state', 4)->count();
 
             return view('livewire.study-calendar.approval', [
                 'studyCalendars' => $studyCalendars,
-                'pendingCount' => $pendingCount,
-                'approvedCount' => $approvedCount,
-                'rejectedCount' => $rejectedCount,
-                'canManageWorkflow' => $this->canUserManageWorkflow()
+                'canManageWorkflow' => $this->canUserManageWorkflow(),
+                'workflowStates' => $this->workflowStates,
             ]);
         } catch (\Exception $e) {
             session()->flash('error', 'Terjadi kesalahan: ' . $e->getMessage());
 
             return view('livewire.study-calendar.approval', [
                 'studyCalendars' => new LengthAwarePaginator([], 0, 10),
-                'pendingCount' => 0,
-                'approvedCount' => 0,
-                'rejectedCount' => 0,
-                'canManageWorkflow' => false
+                'canManageWorkflow' => false,
+                'workflowStates' => $this->workflowStates,
             ]);
         }
     }

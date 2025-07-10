@@ -9,9 +9,10 @@ use App\Traits\HasModal;
 use Livewire\WithPagination;
 use App\Models\AcademicDocument;
 use App\Models\DocumentType;
-use App\Models\StudyProgram;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use App\Constants\DocumentTypeConstants;
+use App\Services\Workflow\WorkflowDefinition;
 
 class Verification extends WorkflowComponent
 {
@@ -20,7 +21,7 @@ class Verification extends WorkflowComponent
     // Search and Filter Properties
     public $search = '';
     public $documentType = '';
-    public $studyProgram = '';
+    public $statusFilter = '';
 
     // Verification Modal Properties
     public $selectedDocument = null;
@@ -37,11 +38,13 @@ class Verification extends WorkflowComponent
     public $transitionComment = '';
 
     protected $paginationTheme = 'tailwind';
-    protected $queryString = ['search', 'documentType', 'studyProgram'];
+    protected $queryString = ['search', 'documentType', 'statusFilter'];
 
     // Add a property to track if we should open the modal
     public $shouldOpenDocumentModal = false;
     public $documentIdToOpen = null;
+
+    public $workflowStates = [];
 
     protected $listeners = [
         'document-verified' => 'handleDocumentVerified',
@@ -55,8 +58,35 @@ class Verification extends WorkflowComponent
     {
         try {
             $documents = $this->getFilteredDocuments();
-            $documentTypes = DocumentType::orderBy('display_name')->get();
-            $studyPrograms = StudyProgram::all();
+            // Only show document types from allowed categories
+            $allowedTypeNames = array_merge(
+                DocumentTypeConstants::getStudyRequirementNames(),
+                DocumentTypeConstants::getSemesterDocumentNames(),
+                DocumentTypeConstants::getFinalDocumentNames(),
+                ['additional']
+            );
+            $documentTypes = DocumentType::whereIn('name', $allowedTypeNames)
+                ->orderBy('display_name')->get();
+
+            // Group document types by category for the select
+            $categoryLabels = [
+                'study_requirements' => 'Persyaratan Studi Lanjut',
+                'semester_documents' => 'Laporan Per Semester',
+                'final_documents' => 'Laporan Akhir & Kelulusan',
+                'additional_documents' => 'Dokumen Tambahan',
+            ];
+            $groupedDocumentTypes = [];
+            foreach ($categoryLabels as $catKey => $catLabel) {
+                $names = [];
+                if ($catKey === 'study_requirements') $names = DocumentTypeConstants::getStudyRequirementNames();
+                if ($catKey === 'semester_documents') $names = DocumentTypeConstants::getSemesterDocumentNames();
+                if ($catKey === 'final_documents') $names = DocumentTypeConstants::getFinalDocumentNames();
+                if ($catKey === 'additional_documents') $names = ['additional'];
+                $grouped = $documentTypes->whereIn('name', $names);
+                if ($grouped->isNotEmpty()) {
+                    $groupedDocumentTypes[$catLabel] = $grouped;
+                }
+            }
 
             // Check if we should open the modal after rendering
             if ($this->shouldOpenDocumentModal && $this->documentIdToOpen) {
@@ -72,9 +102,10 @@ class Verification extends WorkflowComponent
             return view('livewire.administrations.verification', [
                 'documents' => $documents,
                 'documentTypes' => $documentTypes,
-                'studyPrograms' => $studyPrograms,
+                'groupedDocumentTypes' => $groupedDocumentTypes,
                 'canManageWorkflow' => $this->canUserManageWorkflow(),
                 'userRoles' => Auth::user()->roles,
+                'workflowStates' => $this->workflowStates,
             ]);
         } catch (\Exception $e) {
             Log::error('Error in Verification render: ' . $e->getMessage());
@@ -83,8 +114,9 @@ class Verification extends WorkflowComponent
             return view('livewire.administrations.verification', [
                 'documents' => collect(),
                 'documentTypes' => collect(),
-                'studyPrograms' => collect(),
+                'groupedDocumentTypes' => [],
                 'canManageWorkflow' => false,
+                'workflowStates' => $this->workflowStates,
             ]);
         }
     }
@@ -94,11 +126,7 @@ class Verification extends WorkflowComponent
      */
     protected function getFilteredDocuments()
     {
-        $query = AcademicDocument::with(['employee.user', 'employee.studyPrograms', 'workflowHistory.user', 'documentType'])
-            ->where(function($q) {
-                $q->where('workflow_state', 2) // PENDING
-                  ->orWhere('workflow_state', 4); // REJECTED (for resubmission)
-            });
+        $query = AcademicDocument::with(['employee.user', 'employee.studyPrograms', 'workflowHistory.user', 'documentType']);
 
         // Apply search filters using trait validation
         if ($this->search && strlen($this->search) >= 2) {
@@ -111,10 +139,8 @@ class Verification extends WorkflowComponent
             $query->where('document_type_id', $this->documentType);
         }
 
-        if ($this->studyProgram) {
-            $query->whereHas('employee.studyPrograms', function ($q) {
-                $q->where('study_programs.id', $this->studyProgram);
-            });
+        if ($this->statusFilter) {
+            $query->where('workflow_state', $this->statusFilter);
         }
 
         return $query->orderBy('created_at', 'desc')->paginate(10);
@@ -343,5 +369,12 @@ class Verification extends WorkflowComponent
                 session()->flash('success', 'Dokumen dari notifikasi email telah dipilih untuk verifikasi.');
             }
         }
+        $this->workflowStates = WorkflowDefinition::getAllStates('verification_by_staff');
+    }
+
+    public function clearFilters()
+    {
+        $this->reset(['search', 'documentType', 'statusFilter']);
+        $this->resetPage();
     }
 }

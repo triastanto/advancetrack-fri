@@ -1,9 +1,10 @@
 # Document & Report Verification State Machine
 
 This state machine applies to:
-- documents
-- semester_reports
-- service_bond_agreements
+- Dokumen Persyaratan Studi Lanjut (Dosen) (`study_requirements`)
+- Dokumen Laporan Per Semester (Dosen) (`semester_documents`)
+- Dokumen Laporan Akhir dan Kelulusan (Dosen) (`final_documents`)
+- Dokumen Tambahan (Opsional) (`additional_documents`)
 
 ## States
 

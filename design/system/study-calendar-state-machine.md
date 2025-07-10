@@ -1,7 +1,7 @@
 # Study Calendar State Machine
 
 This state machine applies to:
-- study_calendars
+- Kalender Studi Lanjut Dosen (`study_calendars`)
 
 ## States
 

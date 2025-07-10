@@ -15,26 +15,12 @@ if (!$employee) {
 }
 
 $user = $employee->user;
-$studyCalendar = StudyCalendar::where('employee_id', $employee->id)->first();
+$studyCalendar = StudyCalendar::where('employee_id', $employee->id)->with('studyDetail.studyProgram')->first();
 
-// Get study program via study_calendar or employee_study_program
+// Get study program from study_calendar -> studyDetail -> studyProgram
 $studyProgram = null;
-if ($studyCalendar && property_exists($studyCalendar, 'study_program_id') && $studyCalendar->study_program_id) {
-    $studyProgram = \App\Models\StudyProgram::find($studyCalendar->study_program_id);
-}
-if (!$studyProgram) {
-    // Fallback: get from employee_study_program (latest)
-    if (!class_exists('Illuminate\\Support\\Facades\\DB')) {
-        require_once base_path('vendor/autoload.php');
-        class_alias('Illuminate\\Support\\Facades\\DB', 'DB');
-    }
-    $esp = Illuminate\Support\Facades\DB::table('employee_study_program')
-        ->where('employee_id', $employee->id)
-        ->orderByDesc('created_at')
-        ->first();
-    if ($esp) {
-        $studyProgram = \App\Models\StudyProgram::find($esp->study_program_id);
-    }
+if ($studyCalendar && $studyCalendar->studyDetail && $studyCalendar->studyDetail->studyProgram) {
+    $studyProgram = $studyCalendar->studyDetail->studyProgram;
 }
 
 // Compact output

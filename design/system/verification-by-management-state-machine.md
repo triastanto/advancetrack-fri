@@ -1,7 +1,8 @@
 # Management Multi-Level Approval State Machine
 
 This state machine applies to:
-- management-level documents (e.g., service bond agreements, study approval, etc.)
+- Dokumen Persetujuan Studi Lanjut (Approval Documents) (`approval_documents`)
+- Dokumen Perjanjian Ikatan Dinas (PID) (`approval_documents`)
 
 ## States
 

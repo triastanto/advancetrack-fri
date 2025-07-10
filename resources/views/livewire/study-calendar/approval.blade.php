@@ -2,51 +2,6 @@
     {{-- Success message --}}
     <x-ui.alert-message />
 
-    {{-- Header & Context --}}
-    <div class="bg-white p-4 rounded-lg shadow-md mb-4">
-        <div class="flex items-center justify-between mb-4">
-            <div>
-                <h1 class="text-2xl font-bold text-gray-900">Persetujuan Kalender Studi Lanjut</h1>
-                <p class="text-gray-600 mt-1">
-                    Kelola persetujuan kalender studi lanjut yang diajukan oleh dosen.
-                </p>
-            </div>
-        </div>
-
-        {{-- Statistics Cards --}}
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div class="bg-yellow-50 rounded-lg p-4">
-                <div class="flex items-center">
-                    <x-heroicon-o-clock class="w-8 h-8 text-yellow-600 mr-3" />
-                    <div>
-                        <p class="text-sm font-medium text-yellow-900">Menunggu Persetujuan</p>
-                        <p class="text-lg font-semibold text-yellow-700">{{ $pendingCount }}</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-green-50 rounded-lg p-4">
-                <div class="flex items-center">
-                    <x-heroicon-o-check-circle class="w-8 h-8 text-green-600 mr-3" />
-                    <div>
-                        <p class="text-sm font-medium text-green-900">Disetujui</p>
-                        <p class="text-lg font-semibold text-green-700">{{ $approvedCount }}</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-red-50 rounded-lg p-4">
-                <div class="flex items-center">
-                    <x-heroicon-o-x-circle class="w-8 h-8 text-red-600 mr-3" />
-                    <div>
-                        <p class="text-sm font-medium text-red-900">Ditolak</p>
-                        <p class="text-lg font-semibold text-red-700">{{ $rejectedCount }}</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     {{-- Filters --}}
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
         <div class="flex items-center justify-between mb-4">
@@ -84,29 +39,9 @@
                     class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                     <option value="">Semua Status</option>
-                    <option value="1">Draft</option>
-                    <option value="2">Menunggu Persetujuan</option>
-                    <option value="3">Disetujui</option>
-                    <option value="4">Ditolak</option>
-                    <option value="5">Aktif Studi</option>
-                    <option value="6">Cuti</option>
-                    <option value="7">Selesai</option>
-                    <option value="8">Drop Out</option>
-                </select>
-            </div>
-
-            {{-- Employee Role Filter --}}
-            <div>
-                <label for="employee" class="block text-sm font-medium text-gray-700 mb-2">Peran Dosen</label>
-                <select
-                    id="employee"
-                    wire:model.live="employeeFilter"
-                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                    <option value="">Semua Peran</option>
-                    <option value="lecturer">Dosen</option>
-                    <option value="head_of_study_program">Kepala Program Studi</option>
-                    <option value="head_of_research_group">Kepala Kelompok Riset</option>
+                    @foreach($workflowStates as $stateId => $state)
+                        <option value="{{ $stateId }}">{{ $state['label'] }}</option>
+                    @endforeach
                 </select>
             </div>
         </div>
@@ -130,10 +65,7 @@
                                 Dosen
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Tanggal Mulai
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Estimasi Selesai
+                                Program Studi
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Status
@@ -157,9 +89,17 @@
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex items-center">
                                         <div class="flex-shrink-0 h-10 w-10">
-                                            <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                                                <x-heroicon-o-user class="w-6 h-6 text-blue-600" />
-                                            </div>
+                                            @php
+                                                $avatar = $studyCalendar->employee->photo ?? null;
+                                                $name = $studyCalendar->employee->user->name ?? '-';
+                                            @endphp
+                                            @if($avatar)
+                                                <img class="h-10 w-10 rounded-full object-cover" src="{{ $avatar }}" alt="{{ $name }}">
+                                            @else
+                                                <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                                                    <span class="text-blue-600 font-bold text-lg">{{ mb_substr($name, 0, 1) }}</span>
+                                                </div>
+                                            @endif
                                         </div>
                                         <div class="ml-4">
                                             <div class="text-sm font-medium text-gray-900">
@@ -168,34 +108,29 @@
                                             <div class="text-sm text-gray-500">
                                                 {{ $studyCalendar->employee->user->email ?? 'N/A' }}
                                             </div>
-                                            <div class="text-xs text-gray-400">
-                                                {{ ucfirst($studyCalendar->employee->role ?? 'N/A') }}
-                                            </div>
                                         </div>
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {{ $studyCalendar->study_start ? \Carbon\Carbon::parse($studyCalendar->study_start)->format('d M Y') : 'Belum ditentukan' }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {{ $studyCalendar->estimated_study_end ? \Carbon\Carbon::parse($studyCalendar->estimated_study_end)->format('d M Y') : 'Belum ditentukan' }}
+                                    {{ $studyCalendar->studyDetail->studyProgram->name ?? 'N/A' }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     @php
+                                        $state = $workflowStates[$studyCalendar->workflow_state] ?? null;
                                         $statusConfig = match($studyCalendar->workflow_state) {
-                                            1 => ['label' => 'Draft', 'color' => 'gray', 'bg' => 'bg-gray-100', 'text' => 'text-gray-800'],
-                                            2 => ['label' => 'Menunggu Persetujuan', 'color' => 'yellow', 'bg' => 'bg-yellow-100', 'text' => 'text-yellow-800'],
-                                            3 => ['label' => 'Disetujui', 'color' => 'green', 'bg' => 'bg-green-100', 'text' => 'text-green-800'],
-                                            4 => ['label' => 'Ditolak', 'color' => 'red', 'bg' => 'bg-red-100', 'text' => 'text-red-800'],
-                                            5 => ['label' => 'Aktif Studi', 'color' => 'blue', 'bg' => 'bg-blue-100', 'text' => 'text-blue-800'],
-                                            6 => ['label' => 'Cuti', 'color' => 'orange', 'bg' => 'bg-orange-100', 'text' => 'text-orange-800'],
-                                            7 => ['label' => 'Selesai', 'color' => 'green', 'bg' => 'bg-green-100', 'text' => 'text-green-800'],
-                                            8 => ['label' => 'Drop Out', 'color' => 'red', 'bg' => 'bg-red-100', 'text' => 'text-red-800'],
-                                            default => ['label' => 'Unknown', 'color' => 'gray', 'bg' => 'bg-gray-100', 'text' => 'text-gray-800']
+                                            1 => ['bg' => 'bg-gray-100', 'text' => 'text-gray-800'],
+                                            2 => ['bg' => 'bg-yellow-100', 'text' => 'text-yellow-800'],
+                                            3 => ['bg' => 'bg-green-100', 'text' => 'text-green-800'],
+                                            4 => ['bg' => 'bg-red-100', 'text' => 'text-red-800'],
+                                            5 => ['bg' => 'bg-blue-100', 'text' => 'text-blue-800'],
+                                            6 => ['bg' => 'bg-orange-100', 'text' => 'text-orange-800'],
+                                            7 => ['bg' => 'bg-green-100', 'text' => 'text-green-800'],
+                                            8 => ['bg' => 'bg-red-100', 'text' => 'text-red-800'],
+                                            default => ['bg' => 'bg-gray-100', 'text' => 'text-gray-800']
                                         };
                                     @endphp
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statusConfig['bg'] }} {{ $statusConfig['text'] }}">
-                                        {{ $statusConfig['label'] }}
+                                        {{ $state['label'] ?? 'Unknown' }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">

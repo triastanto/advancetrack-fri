@@ -423,7 +423,7 @@ return [
                     'to_state' => 3,   // APPROVED
                     'icon' => 'check-circle',
                     'color' => 'success',
-                    'required_roles' => ['head_of_study_program', 'fri_vice_dean'],
+                    'required_roles' => ['head_of_study_program', 'fri_vice_dean', 'hr_finance_staff'],
                     'requires_comment' => true,
                 ],
                 3 => [
@@ -433,7 +433,7 @@ return [
                     'to_state' => 4,   // REJECTED
                     'icon' => 'x-circle',
                     'color' => 'danger',
-                    'required_roles' => ['head_of_study_program', 'fri_vice_dean'],
+                    'required_roles' => ['head_of_study_program', 'fri_vice_dean', 'hr_finance_staff'],
                     'requires_comment' => true,
                 ],
                 4 => [
@@ -531,7 +531,7 @@ return [
                     9 => ['student', 'supervisors', 'admin'], // DROP_OUT_ACTIVE - notify student, supervisors, and admin
                     10 => ['student', 'supervisors', 'admin'], // DROP_OUT_LEAVE - notify student, supervisors, and admin
                 ],
-                'approver_roles' => ['head_of_study_program', 'fri_vice_dean'],
+                'approver_roles' => ['head_of_study_program', 'fri_vice_dean', 'hr_finance_staff'],
                 'supervisor_roles' => ['head_of_study_program', 'fri_vice_dean'],
                 'admin_roles' => ['head_of_hr_finance', 'hr_finance_staff'],
                 'email_templates' => [

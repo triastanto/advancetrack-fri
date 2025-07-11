@@ -211,7 +211,11 @@ class FinalReports extends WorkflowComponent
 
     public function openViewModal($documentId)
     {
-        $this->dispatch('document-view-modal:open', ['documentId' => $documentId]);
+        $this->dispatch('document-view-modal:open', [
+            'documentId' => $documentId,
+            'documentModel' => 'AcademicDocument',
+            'category' => 'final-reports'
+        ]);
     }
 
     public function showDocument($documentId)

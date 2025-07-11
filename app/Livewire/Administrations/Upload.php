@@ -260,7 +260,11 @@ class Upload extends WorkflowComponent
 
     public function openViewModal($documentId)
     {
-        $this->dispatch('document-view-modal:open', ['documentId' => $documentId]);
+        $this->dispatch('document-view-modal:open', [
+            'documentId' => $documentId,
+            'category' => 'approvals',
+            'documentModel' => 'ApprovalDocument'
+        ]);
     }
 
     /**

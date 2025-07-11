@@ -84,7 +84,11 @@ class StudyApprovals extends WorkflowComponent
     // Modal Methods - Dispatch to modular components
     public function openViewModal($documentId)
     {
-        $this->dispatch('document-view-modal:open', ['documentId' => $documentId]);
+        $this->dispatch('document-view-modal:open', [
+            'documentId' => $documentId,
+            'documentModel' => 'ApprovalDocument',
+            'category' => 'approvals'
+        ]);
     }
 
     public function showDocument($documentId)

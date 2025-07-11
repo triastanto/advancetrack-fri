@@ -246,7 +246,11 @@ class StudyRequirements extends WorkflowComponent
 
     public function openViewModal($documentId)
     {
-        $this->dispatch('document-view-modal:open', ['documentId' => $documentId]);
+        $this->dispatch('document-view-modal:open', [
+            'documentId' => $documentId,
+            'documentModel' => 'AcademicDocument',
+            'category' => 'study-requirements'
+        ]);
     }
 
     public function showDocument($documentId)

@@ -227,7 +227,11 @@ class SemesterReports extends WorkflowComponent
 
     public function openViewModal($documentId)
     {
-        $this->dispatch('document-view-modal:open', ['documentId' => $documentId]);
+        $this->dispatch('document-view-modal:open', [
+            'documentId' => $documentId,
+            'documentModel' => 'AcademicDocument',
+            'category' => 'semester-reports'
+        ]);
     }
 
     public function showDocument($documentId)

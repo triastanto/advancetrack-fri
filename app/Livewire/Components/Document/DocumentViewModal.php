@@ -22,11 +22,8 @@ class DocumentViewModal extends Component
 
     public function open($data)
     {
-        \Illuminate\Support\Facades\Log::info('DocumentViewModal::open called with data:', $data);
-        
         $documentId = $data['documentId'] ?? null;
         if (!$documentId) {
-            \Illuminate\Support\Facades\Log::warning('DocumentViewModal::open - No documentId provided');
             return;
         }
 
@@ -38,22 +35,14 @@ class DocumentViewModal extends Component
             $this->document = $this->loadDocument($documentId, $this->documentModel);
             
             if (!$this->document) {
-                \Illuminate\Support\Facades\Log::warning('DocumentViewModal::open - Document not found');
                 return;
             }
             
-            \Illuminate\Support\Facades\Log::info('DocumentViewModal::open - Document loaded:', [
-                'document_id' => $this->document->id, 
-                'file_name' => $this->document->file_name,
-                'model_used' => $this->documentModel
-            ]);
-            
             $this->isOpen = true;
             $this->showWorkflowHistory = false;
-            
-            \Illuminate\Support\Facades\Log::info('DocumentViewModal::open - Modal opened successfully');
+        
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('DocumentViewModal::open - Error loading document:', ['error' => $e->getMessage()]);
+            // Handle error silently or log if needed
         }
     }
 
@@ -110,16 +99,17 @@ class DocumentViewModal extends Component
                 $modelClass = AcademicDocument::class;
             }
             
-            return $modelClass::with([
+            $document = $modelClass::with([
                 'employee.user', 
                 'employee.studyPrograms', 
                 'documentType',
                 'workflowHistory.user'
             ])->findOrFail($documentId);
+            
+            return $document;
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             // If the specified model doesn't find the document, try AcademicDocument as fallback
             if ($modelClass !== AcademicDocument::class) {
-                \Illuminate\Support\Facades\Log::info('DocumentViewModal::loadDocument - Document not found in specified model, trying AcademicDocument as fallback');
                 return $this->loadDocument($documentId, AcademicDocument::class);
             }
             return null;

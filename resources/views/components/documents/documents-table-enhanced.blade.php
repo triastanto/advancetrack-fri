@@ -40,7 +40,6 @@
                             @endif
                         @else
                             <th class="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-secondary)] uppercase tracking-wider">No</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-secondary)] uppercase tracking-wider">Nama Dokumen</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-secondary)] uppercase tracking-wider">Jenis Dokumen</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-secondary)] uppercase tracking-wider">Tanggal Unggah</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-secondary)] uppercase tracking-wider">Status</th>
@@ -92,11 +91,6 @@
                             @else
                                 {{-- Default mode columns --}}
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-[var(--color-text-main)]">{{ $index + 1 }}</td>
-                                <td class="px-6 py-4 text-sm text-[var(--color-text-main)]">
-                                    <div class="max-w-xs truncate" title="{{ $document->file_name }}">
-                                        {{ $document->file_name }}
-                                    </div>
-                                </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
                                         {{ $document->documentType->display_name }}

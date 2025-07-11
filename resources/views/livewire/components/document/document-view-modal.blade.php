@@ -1,8 +1,7 @@
 <div>
     @if($isOpen && $document)
     <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true"
-         x-data="{ show: false }"
-         x-init="$nextTick(() => { if (@js($isOpen)) { show = true; } })"
+         x-data="{ show: true }"
          x-show="show"
          @keydown.escape.window="show = false; setTimeout(() => $wire.close(), 200)"
          style="display: none;"

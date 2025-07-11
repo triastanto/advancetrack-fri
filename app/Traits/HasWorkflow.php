@@ -278,4 +278,14 @@ trait HasWorkflow
         $stateInfo = $this->getWorkflowStateInfo();
         return $stateInfo['label'] ?? 'Unknown';
     }
+
+    /**
+     * Get the workflow state label
+     */
+    public function getWorkflowStateLabel(): string
+    {
+        $workflowName = $this->getWorkflowName();
+        $currentState = $this->getCurrentState();
+        return WorkflowDefinition::getStateLabel($currentState, $workflowName);
+    }
 }

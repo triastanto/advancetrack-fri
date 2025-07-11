@@ -37,7 +37,7 @@ trait HasWorkflowManagement
         // Use the abstract method to get the model class
         $modelClass = $this->getWorkflowModelClass();
         $document = $modelClass::with(['employee.user', 'employee.studyPrograms', 'documentType'])->findOrFail($documentId);
-        
+
         $this->setWorkflowDocument($document);
         $this->setWorkflowTransitionId($transitionId);
         $this->setWorkflowComment('');
@@ -109,7 +109,7 @@ trait HasWorkflowManagement
 
             // Apply the transition
             $document->applyTransition($transitionId, $context);
-            
+
             $this->closeWorkflowModal();
             session()->flash($this->getSuccessFlashKey(), $this->getSuccessMessage());
 
@@ -127,7 +127,7 @@ trait HasWorkflowManagement
     public function canUserManageWorkflow($document = null): bool
     {
         // Define roles that can manage workflows
-        $managerRoles = ['head_of_hr_finance', 'fri_vice_dean', 'hr_finance_staff'];
+        $managerRoles = ['head_of_hr_finance', 'fri_vice_dean', 'hr_finance_staff', 'head_of_study_program'];
 
         return $this->hasAnyRole($managerRoles);
     }
@@ -159,7 +159,7 @@ trait HasWorkflowManagement
 
         // Use workflow name from model
         $workflowName = $this->getWorkflowModelClass()::getWorkflowName();
-        
+
         $stateColor = \App\Services\Workflow\WorkflowDefinition::getStateColor($stateId, $workflowName);
         return match($stateColor) {
             'warning' => 'bg-yellow-100 text-yellow-800',

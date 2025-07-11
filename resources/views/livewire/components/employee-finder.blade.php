@@ -5,9 +5,23 @@
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-3">
                     <div class="flex-shrink-0">
-                        <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-medium text-sm">
-                            {{ $selectedEmployee->user->initials() }}
-                        </div>
+                        @php
+                            $avatar = $selectedEmployee->photo ?? null;
+                            $name = $selectedEmployee->user->name ?? 'Unknown';
+                        @endphp
+                        @if($avatar)
+                            <img class="w-10 h-10 rounded-full object-cover border-2 border-gray-200" 
+                                 src="{{ Str::startsWith($avatar, 'http') ? $avatar : Storage::url($avatar) }}" 
+                                 alt="{{ $name }}"
+                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-medium text-sm hidden">
+                                {{ $selectedEmployee->user->initials() }}
+                            </div>
+                        @else
+                            <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-medium text-sm">
+                                {{ $selectedEmployee->user->initials() }}
+                            </div>
+                        @endif
                     </div>
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center space-x-2 mb-1">
@@ -17,7 +31,7 @@
                             </span>
                         </div>
                         <div class="text-xs text-gray-600 space-y-0.5">
-                            <p><span class="font-medium">NIP:</span> {{ $selectedEmployee->nidn }} • <span class="font-medium">Jabatan:</span> {{ $selectedEmployee->position }}</p>
+                            <p><span class="font-medium">NIDN:</span> {{ $selectedEmployee->nidn }} • <span class="font-medium">Jabatan:</span> {{ $selectedEmployee->position }}</p>
                             @if($selectedEmployee->studyPrograms->count() > 0)
                                 <p class="text-blue-600">
                                     <span class="font-medium">Program Studi:</span> {{ $selectedEmployee->studyPrograms->pluck('name')->join(', ') }}
@@ -107,9 +121,23 @@
                                              wire:click="selectEmployee({{ $employee->id }})">
                                             <div class="flex items-center space-x-3">
                                                 <div class="flex-shrink-0">
-                                                    <div class="w-10 h-10 bg-gray-500 rounded-full flex items-center justify-center text-white font-medium">
-                                                        {{ $employee->user->initials() }}
-                                                    </div>
+                                                    @php
+                                                        $avatar = $employee->photo ?? null;
+                                                        $name = $employee->user->name ?? 'Unknown';
+                                                    @endphp
+                                                    @if($avatar)
+                                                        <img class="w-10 h-10 rounded-full object-cover border-2 border-gray-200" 
+                                                             src="{{ Str::startsWith($avatar, 'http') ? $avatar : Storage::url($avatar) }}" 
+                                                             alt="{{ $name }}"
+                                                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                                        <div class="w-10 h-10 bg-gray-500 rounded-full flex items-center justify-center text-white font-medium hidden">
+                                                            {{ $employee->user->initials() }}
+                                                        </div>
+                                                    @else
+                                                        <div class="w-10 h-10 bg-gray-500 rounded-full flex items-center justify-center text-white font-medium">
+                                                            {{ $employee->user->initials() }}
+                                                        </div>
+                                                    @endif
                                                 </div>
                                                 <div class="flex-1 min-w-0">
                                                     <p class="text-sm font-medium text-gray-900">

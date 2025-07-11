@@ -40,6 +40,13 @@ Route::prefix('administrations')->name('administrations.')->middleware(['auth', 
     Route::view('verification', 'pages.administrations.verification')->name('verification');
 });
 
+// Administration Routes - Management roles
+Route::prefix('administration')->name('administration.')->middleware(['auth', 'non.lecturer.only'])->group(function () {
+    Route::view('approval', 'pages.administration.approval')
+        ->name('approval')
+        ->middleware('role:head_of_study_program,head_of_research_group,fri_vice_dean,hr_finance_staff');
+});
+
 // Monitoring & Laporan Routes - Non-Lecturer Only
 Route::prefix('monitoring')->name('monitoring.')->middleware(['auth', 'non.lecturer.only'])->group(function () {
     Route::view('analytics', 'pages.monitoring.analytics')->name('analytics');

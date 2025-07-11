@@ -922,18 +922,6 @@ Log::error('Workflow transition failed: Business rule violation', [
 
 ## Performance Considerations
 
-### Caching
-
-The system implements caching for workflow configurations:
-
-```php
-// config/workflows.php
-'global' => [
-    'cache_workflow_instances' => true,
-    'max_history_entries' => 1000,
-]
-```
-
 ### Database Indexing
 
 Proper indexing is crucial for performance:

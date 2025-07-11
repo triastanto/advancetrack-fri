@@ -4,7 +4,6 @@
     $baseStates = [
         ['id' => 1, 'name' => 'Draft', 'label' => 'DRAFT', 'icon' => 'pencil', 'color' => 'secondary', 'terminal' => false],
         ['id' => 2, 'name' => 'Menunggu Persetujuan', 'label' => 'PENDING_APPROVAL', 'icon' => 'clock', 'color' => 'warning', 'terminal' => false],
-        ['id' => 4, 'name' => 'Ditolak', 'label' => 'REJECTED', 'icon' => 'x-circle', 'color' => 'danger', 'terminal' => false],
         ['id' => 3, 'name' => 'Disetujui', 'label' => 'APPROVED', 'icon' => 'check-circle', 'color' => 'info', 'terminal' => false],
         ['id' => 5, 'name' => 'Aktif Studi', 'label' => 'ACTIVE', 'icon' => 'book-open', 'color' => 'success', 'terminal' => false],
         ['id' => 7, 'name' => 'Selesai', 'label' => 'FINISHED', 'icon' => 'award', 'color' => 'success', 'terminal' => true],
@@ -14,7 +13,7 @@
     $currentState = $progress['current_state'] ?? 1;
     $states = $baseStates;
     if ($currentState == 6 || $currentState > 6) {
-        array_splice($states, 5, 0, [$leaveState]);
+        array_splice($states, 4, 0, [$leaveState]);
     }
     if ($currentState == 8) {
         $states[] = $dropoutState;
@@ -76,8 +75,6 @@
     @endif
 
     <div class="relative">
-        {{-- DEBUG: Inspect current_state value --}}
-        <div class="mb-2 text-xs text-gray-400">DEBUG: current_state = {{ $currentState }}</div>
         <div class="relative flex items-center min-w-max">
             <div class="absolute left-0 right-0 top-1/2 transform -translate-y-1/2 h-1 bg-gray-300 z-0"></div>
             @foreach($states as $index => $state)

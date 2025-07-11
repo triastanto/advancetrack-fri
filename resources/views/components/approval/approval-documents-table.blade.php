@@ -27,7 +27,6 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider h-12 align-middle">Jenis Dokumen</th>
                         @endif
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider h-12 align-middle">Status</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider h-12 align-middle">Level</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider h-12 align-middle">Tanggal Diajukan</th>
                         @if($showActions)
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider h-12 align-middle">Aksi</th>
@@ -103,22 +102,6 @@
                                 $canReject = $canRejectL1 || $canRejectL2;
                             }
 
-                            // Determine approval level based on workflow state
-                            $approvalLevel = match($document->workflow_state) {
-                                2 => 'Level 1',
-                                3 => 'Level 2',
-                                4 => 'Disetujui',
-                                5 => 'Ditolak',
-                                default => 'Draft'
-                            };
-
-                            $levelColor = match($document->workflow_state) {
-                                2 => 'bg-blue-100 text-blue-800',
-                                3 => 'bg-purple-100 text-purple-800',
-                                4 => 'bg-green-100 text-green-800',
-                                5 => 'bg-red-100 text-red-800',
-                                default => 'bg-gray-100 text-gray-800'
-                            };
                         @endphp
                         <tr class="hover:bg-gray-50">
                             <td class="px-6 py-4 whitespace-nowrap">
@@ -169,11 +152,6 @@
                                     {{ $label }}
                                 </span>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $levelColor }}">
-                                    {{ $approvalLevel }}
-                                </span>
-                            </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                 {{ $document->created_at ? $document->created_at->format('d M Y H:i') : '-' }}
                             </td>
@@ -190,29 +168,6 @@
                                                 Detail
                                             </button>
                                         </div>
-                                        {{-- Debug Information --}}
-                                        @if(config('app.debug'))
-                                            <div class="mt-2 p-2 bg-gray-100 rounded text-xs font-mono space-y-1">
-                                                <div>User Role: {{ $userRole }}</div>
-                                                <div>Document State: {{ $document->workflow_state }}</div>
-                                                <div>Can Manage Workflow: {{ $canManageWorkflow ? 'Yes' : 'No' }}</div>
-                                                <div>Available Transitions:</div>
-                                                <div class="pl-2">
-                                                    @foreach($availableTransitions as $transition)
-                                                        <div>- {{ $transition['name'] ?? 'N/A' }} (ID: {{ $transition['id'] ?? 'N/A' }})</div>
-                                                    @endforeach
-                                                </div>
-                                                <div class="mt-1">Permissions:</div>
-                                                <div class="pl-2">
-                                                    <div>Can Submit: {{ $canSubmit ? 'Yes' : 'No' }}</div>
-                                                    <div>Can Approve L1: {{ $canApproveL1 ? 'Yes' : 'No' }}</div>
-                                                    <div>Can Approve L2: {{ $canApproveL2 ? 'Yes' : 'No' }}</div>
-                                                    <div>Can Reject L1: {{ $canRejectL1 ? 'Yes' : 'No' }}</div>
-                                                    <div>Can Reject L2: {{ $canRejectL2 ? 'Yes' : 'No' }}</div>
-                                                    <div>Can Revise: {{ $canRevise ? 'Yes' : 'No' }}</div>
-                                                </div>
-                                            </div>
-                                        @endif
                                     </div>
                                 </td>
                             @endif

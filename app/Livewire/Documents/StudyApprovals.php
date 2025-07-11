@@ -144,6 +144,18 @@ class StudyApprovals extends WorkflowComponent
         return 'message';
     }
 
+    public function deleteDocument($documentId)
+    {
+        try {
+            $document = ApprovalDocument::findOrFail($documentId);
+            $document->delete();
+            session()->flash('message', 'Dokumen berhasil dihapus.');
+            $this->refreshData();
+        } catch (\Exception $e) {
+            session()->flash('error', 'Gagal menghapus dokumen: ' . $e->getMessage());
+        }
+    }
+
     public function render()
     {
         try {

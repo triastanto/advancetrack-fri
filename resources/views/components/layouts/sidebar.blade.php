@@ -20,9 +20,16 @@
                 <button id="user-menu-toggle" @click="userMenuOpen = !userMenuOpen" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[var(--color-primary-bg)] focus:outline-none">
                     @auth
                     <div class="flex-shrink-0">
-                        <div class="w-10 h-10 rounded-full bg-[var(--color-primary)] flex items-center justify-center text-white font-medium text-sm">
-                            {{ Auth::user()->initials() ?? substr(Auth::user()->name ?? 'U', 0, 1) }}
-                        </div>
+                        @php
+                            $employeePhoto = Auth::user()->employee->photo ?? null;
+                        @endphp
+                        @if($employeePhoto)
+                            <img src="{{$employeePhoto}}" alt="Employee Photo" class="w-10 h-10 rounded-full object-cover border border-[var(--color-border)]" />
+                        @else
+                            <div class="w-10 h-10 rounded-full bg-[var(--color-primary)] flex items-center justify-center text-white font-medium text-sm">
+                                {{ Auth::user()->initials() ?? substr(Auth::user()->name ?? 'U', 0, 1) }}
+                            </div>
+                        @endif
                     </div>
                     <div class="flex-1 min-w-0 text-left">
                         <div class="font-semibold text-[var(--color-text-main)] truncate">{{ Auth::user()->name ?? 'User' }}</div>

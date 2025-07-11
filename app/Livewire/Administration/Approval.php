@@ -418,6 +418,30 @@ class Approval extends WorkflowComponent
 
         // Set user role
         $this->userRole = Auth::user()->employee->role ?? '';
+        $allStates = WorkflowDefinition::getAllStates('verification_by_management');
+
+        // Map roles to allowed state IDs
+        $roleStateMap = [
+            'hr_finance_staff' => [1, 5], // DRAFT, REJECTED
+            'head_of_study_program' => [2, 5], // PENDING_L1, REJECTED
+            'head_of_research_group' => [3, 5], // PENDING_L2, REJECTED
+            'fri_vice_dean' => [2, 3, 5], // PENDING_L1, PENDING_L2, REJECTED
+        ];
+
+        $defaultStateMap = [
+            'hr_finance_staff' => 1,
+            'head_of_study_program' => 2,
+            'head_of_research_group' => 3,
+            'fri_vice_dean' => 2,
+        ];
+
+        $allowedStates = $roleStateMap[$this->userRole] ?? array_keys($allStates);
+        $this->workflowStates = array_filter($allStates, fn($v, $k) => in_array($k, $allowedStates), ARRAY_FILTER_USE_BOTH);
+
+        // Set default status filter if not set
+        if (empty($this->statusFilter) && isset($defaultStateMap[$this->userRole])) {
+            $this->statusFilter = $defaultStateMap[$this->userRole];
+        }
 
         // Check if document_id is in the request and select the document if present
         if (request()->has('document_id')) {
@@ -433,7 +457,6 @@ class Approval extends WorkflowComponent
                 session()->flash('success', 'Dokumen dari notifikasi email telah dipilih untuk persetujuan.');
             }
         }
-        $this->workflowStates = WorkflowDefinition::getAllStates('verification_by_management');
     }
 
     public function clearFilters()

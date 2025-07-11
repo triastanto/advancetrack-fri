@@ -8,7 +8,7 @@
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 flex items-center">
                     <x-heroicon-o-shield-check class="w-8 h-8 mr-3 text-blue-600" />
-                    Persetujuan Manajemen
+                    Persetujuan Studi Lanjut
                 </h1>
                 <p class="text-gray-600 mt-1">
                     @switch($userRole)
@@ -73,63 +73,6 @@
         </div>
     </div>
 
-
-    {{-- Statistics Cards --}}
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <x-heroicon-o-clock class="w-8 h-8 text-yellow-500" />
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-500">Pending Level 1</p>
-                    <p class="text-2xl font-semibold text-gray-900">
-                        {{ $documents->where('workflow_state', 2)->count() }}
-                    </p>
-                </div>
-            </div>
-        </div>
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <x-heroicon-o-shield-check class="w-8 h-8 text-purple-500" />
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-500">Pending Level 2</p>
-                    <p class="text-2xl font-semibold text-gray-900">
-                        {{ $documents->where('workflow_state', 3)->count() }}
-                    </p>
-                </div>
-            </div>
-        </div>
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <x-heroicon-o-check-circle class="w-8 h-8 text-green-500" />
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-500">Disetujui</p>
-                    <p class="text-2xl font-semibold text-gray-900">
-                        {{ $documents->where('workflow_state', 4)->count() }}
-                    </p>
-                </div>
-            </div>
-        </div>
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <x-heroicon-o-x-circle class="w-8 h-8 text-red-500" />
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-500">Ditolak</p>
-                    <p class="text-2xl font-semibold text-gray-900">
-                        {{ $documents->where('workflow_state', 5)->count() }}
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
-
     {{-- Filters --}}
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
         <div class="flex items-center justify-between mb-4">
@@ -178,7 +121,6 @@
                     wire:model.live="statusFilter"
                     class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
-                    <option value="">Semua Status</option>
                     @foreach($workflowStates as $stateId => $state)
                         <option value="{{ $stateId }}">{{ $state['label'] }}</option>
                     @endforeach

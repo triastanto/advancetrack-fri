@@ -10,8 +10,8 @@
                             $name = $selectedEmployee->user->name ?? 'Unknown';
                         @endphp
                         @if($avatar)
-                            <img class="w-10 h-10 rounded-full object-cover border-2 border-gray-200" 
-                                 src="{{ Str::startsWith($avatar, 'http') ? $avatar : Storage::url($avatar) }}" 
+                            <img class="w-10 h-10 rounded-full object-cover border-2 border-gray-200"
+                                 src="{{ Str::startsWith($avatar, 'http') ? $avatar : Storage::url($avatar) }}"
                                  alt="{{ $name }}"
                                  onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                             <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-medium text-sm hidden">
@@ -26,9 +26,6 @@
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center space-x-2 mb-1">
                             <h3 class="text-sm font-semibold text-gray-900">{{ $selectedEmployee->user->name }}</h3>
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                Terpilih
-                            </span>
                         </div>
                         <div class="text-xs text-gray-600 space-y-0.5">
                             <p><span class="font-medium">NIDN:</span> {{ $selectedEmployee->nidn }} • <span class="font-medium">Jabatan:</span> {{ $selectedEmployee->position }}</p>
@@ -126,8 +123,8 @@
                                                         $name = $employee->user->name ?? 'Unknown';
                                                     @endphp
                                                     @if($avatar)
-                                                        <img class="w-10 h-10 rounded-full object-cover border-2 border-gray-200" 
-                                                             src="{{ Str::startsWith($avatar, 'http') ? $avatar : Storage::url($avatar) }}" 
+                                                        <img class="w-10 h-10 rounded-full object-cover border-2 border-gray-200"
+                                                             src="{{ Str::startsWith($avatar, 'http') ? $avatar : Storage::url($avatar) }}"
                                                              alt="{{ $name }}"
                                                              onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                                         <div class="w-10 h-10 bg-gray-500 rounded-full flex items-center justify-center text-white font-medium hidden">
@@ -144,7 +141,7 @@
                                                         {{ $employee->user->name }}
                                                     </p>
                                                     <p class="text-sm text-gray-500">
-                                                        {{ $employee->nidn }} - {{ $employee->position }}
+                                                        <span class="text-sm font-medium">NIDN:</span> {{ $employee->nidn }} • <span class="text-sm font-medium">Jabatan:</span> {{ $employee->position }}
                                                     </p>
                                                     <p class="text-xs text-gray-400">
                                                         {{ $employee->user->email }}

@@ -28,7 +28,11 @@
 
                         <div class="flex items-center gap-3 mb-2">
                             <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-xl">
-                                {{ strtoupper(substr($document->employee->user->name, 0, 1)) }}
+                                @if($document->employee->photo)
+                                    <img src="{{ $document->employee->photo }}" alt="Employee Photo" class="w-full h-full object-cover rounded-full">
+                                @else
+                                    {{ strtoupper(substr($document->employee->user->name, 0, 1)) }}
+                                @endif
                             </div>
                             <div>
                                 <div class="font-semibold text-lg">{{ $document->employee->user->name }}</div>
@@ -75,7 +79,7 @@
                         </button>
                         <button
                             wire:click="approveDocument"
-                            class="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition">
+                            class="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition">
                             Setujui
                         </button>
                     </div>

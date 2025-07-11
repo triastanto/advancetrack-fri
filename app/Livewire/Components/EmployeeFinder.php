@@ -87,6 +87,7 @@ class EmployeeFinder extends Component
     {
         return Employee::with(['user', 'studyPrograms'])
             ->where('role', 'lecturer') // Only show lecturers for approval documents
+            ->whereHas('studyCalendar') // Only those with a study calendar record
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
                     $q->where('nidn', 'like', '%' . $this->search . '%')

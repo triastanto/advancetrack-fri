@@ -4,7 +4,7 @@
     <div class="flex items-center justify-between mb-4">
         <h3 class="text-lg font-semibold text-gray-900 flex items-center">
             <x-heroicon-o-clipboard-document-list class="w-5 h-5 mr-2 text-blue-600" />
-            Ringkasan Persyaratan
+            Ringkasan Persyaratan dan Persetujuan
         </h3>
         <div class="flex items-center space-x-2">
             @if($requirementsStatus['all_requirements_met'])
@@ -60,7 +60,7 @@
 
             <div class="space-y-3">
                 <div class="flex items-center justify-between">
-                    <span class="text-sm text-gray-600">Status Verifikasi:</span>
+                    <span class="text-sm text-gray-600">Status Persyaratan:</span>
                     <div class="flex items-center space-x-2">
                         <span class="text-sm font-medium text-gray-900">
                             {{ $requirementsStatus['academic_documents']['verified'] }}/{{ $requirementsStatus['academic_documents']['total'] }}
@@ -103,7 +103,7 @@
             <div class="flex items-center justify-between mb-3">
                 <h4 class="text-md font-medium text-gray-900 flex items-center">
                     <x-heroicon-o-document-check class="w-4 h-4 mr-2 text-green-600" />
-                    Dokumen Persetujuan
+                    Persetujuan Studi Lanjut
                 </h4>
                 <a href="{{ route('documents.study-approvals') }}" class="text-sm text-blue-600 hover:text-blue-800">
                     Kelola →
@@ -114,36 +114,37 @@
                 <div class="flex items-center justify-between">
                     <span class="text-sm text-gray-600">Status Persetujuan:</span>
                     <div class="flex items-center space-x-2">
-                        @if($requirementsStatus['approval_document']['exists'])
-                            @if($requirementsStatus['approval_document']['approved'])
-                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                    <x-heroicon-s-check-circle class="w-3 h-3 mr-1" />
-                                    Disetujui
-                                </span>
-                            @else
-                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                    <x-heroicon-s-clock class="w-3 h-3 mr-1" />
-                                    Menunggu Persetujuan
-                                </span>
-                            @endif
+                        <span class="text-sm font-medium text-gray-900">
+                            {{ $requirementsStatus['approval_document']['approved_count'] ?? ($requirementsStatus['approval_document']['approved'] ? 1 : 0) }}/{{ $requirementsStatus['approval_document']['total'] ?? ($requirementsStatus['approval_document']['exists'] ? 1 : 0) }}
+                        </span>
+                        @if(($requirementsStatus['approval_document']['approved_count'] ?? 0) === ($requirementsStatus['approval_document']['total'] ?? 1) && ($requirementsStatus['approval_document']['total'] ?? 0) > 0)
+                            <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-green-100">
+                                <x-heroicon-s-check class="w-3 h-3 text-green-600" />
+                            </span>
                         @else
-                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                <x-heroicon-s-x-circle class="w-3 h-3 mr-1" />
-                                Belum Diunggah
+                            <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-yellow-100">
+                                <x-heroicon-s-exclamation-triangle class="w-3 h-3 text-yellow-600" />
                             </span>
                         @endif
                     </div>
                 </div>
 
-                @if(!$requirementsStatus['approval_document']['exists'])
-                    <div class="text-xs text-red-600 bg-red-50 p-2 rounded">
-                        <x-heroicon-o-exclamation-triangle class="w-3 h-3 inline mr-1" />
-                        Dokumen persetujuan studi lanjut belum diunggah
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    @php
+                        $approvalTotal = $requirementsStatus['approval_document']['total'] ?? ($requirementsStatus['approval_document']['exists'] ? 1 : 0);
+                        $approvalApproved = $requirementsStatus['approval_document']['approved_count'] ?? ($requirementsStatus['approval_document']['approved'] ? 1 : 0);
+                        $approvalPercentage = $approvalTotal > 0 ? ($approvalApproved / $approvalTotal) * 100 : 0;
+                    @endphp
+                    <div class="h-2 rounded-full transition-all duration-300
+                        @if($approvalPercentage === 100) bg-green-500 @elseif($approvalPercentage > 0) bg-yellow-500 @else bg-gray-300 @endif"
+                         style="width: {{ $approvalPercentage }}%">
                     </div>
-                @elseif(!$requirementsStatus['approval_document']['approved'])
+                </div>
+
+                @if(($requirementsStatus['approval_document']['total'] ?? 0) > 0 && ($requirementsStatus['approval_document']['approved_count'] ?? 0) < ($requirementsStatus['approval_document']['total'] ?? 0))
                     <div class="text-xs text-yellow-600 bg-yellow-50 p-2 rounded">
-                        <x-heroicon-o-clock class="w-3 h-3 inline mr-1" />
-                        Dokumen persetujuan sedang dalam proses approval
+                        <x-heroicon-o-information-circle class="w-3 h-3 inline mr-1" />
+                        {{ ($requirementsStatus['approval_document']['total'] ?? 0) - ($requirementsStatus['approval_document']['approved_count'] ?? 0) }} dokumen persetujuan belum disetujui
                     </div>
                 @endif
             </div>

@@ -159,7 +159,7 @@ class Employee extends Model
         if (!$this->research_lab_id) {
             return collect();
         }
-        
+
         return $this->researchLab->employees()->where('id', '!=', $this->id)->get();
     }
 
@@ -174,5 +174,11 @@ class Employee extends Model
     public function educations()
     {
         return $this->hasMany(Education::class);
+    }
+
+    public function studyCalendar()
+    {
+        // For compatibility with whereHas('studyCalendar')
+        return $this->hasOne(StudyCalendar::class);
     }
 }

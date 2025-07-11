@@ -5,6 +5,14 @@
     {{-- Active Advanced Study Information --}}
     <x-documents.study-info-card :study-info="$activeStudyInfo" />
 
+    {{-- Document Completion Status Card (Status Kelengkapan) --}}
+    <x-documents.completion-status-card
+        :available-document-types="$availableDocumentTypes"
+        :completion-status="$completionStatus"
+        title="Status Kelengkapan"
+        :supports-semester="false"
+        :key="'completion-status-' . ($selectedEmployeeId ?? 'default')" />
+
     {{-- Approval Documents Info Card --}}
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
         <div class="flex items-center justify-between mb-4">

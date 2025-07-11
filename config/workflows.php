@@ -10,8 +10,6 @@ return [
         'default_timeout_hours' => 24,
         'enable_notifications' => true,
         'log_all_transitions' => true,
-        'cache_workflow_instances' => true,
-        'max_history_entries' => 1000,
     ],
 
     /*

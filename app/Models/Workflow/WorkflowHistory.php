@@ -43,4 +43,20 @@ class WorkflowHistory extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    /**
+     * Accessor for transition_name
+     */
+    public function getTransitionNameAttribute()
+    {
+        // If transition_name is set, use it
+        if (!empty($this->attributes['transition_name'])) {
+            return $this->attributes['transition_name'];
+        }
+        // Otherwise, resolve from transition id and workflow name
+        if (!empty($this->transition) && !empty($this->workflow_name)) {
+            return \App\Services\Workflow\WorkflowDefinition::getTransitionName($this->transition, $this->workflow_name);
+        }
+        return null;
+    }
 }

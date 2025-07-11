@@ -39,7 +39,9 @@ class Lecturer extends Component
             'request' => request()->all(),
             'component' => static::class,
         ]);
-        $query = Employee::with(['user', 'researchLab.researchGroup']);
+        $query = Employee::with(['user', 'researchLab.researchGroup', 'studyCalendars' => function($q) {
+            $q->latest();
+        }]);
 
         if ($this->researchGroup) {
             $query->whereHas('researchLab.researchGroup', function ($q) {

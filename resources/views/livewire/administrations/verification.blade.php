@@ -8,7 +8,7 @@
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 flex items-center">
                     <x-heroicon-o-document-text class="w-8 h-8 mr-3 text-blue-600" />
-                    Verifikasi Dokumen
+                    Verifikasi Dokumen Akademik
                 </h1>
                 <p class="text-gray-600 mt-1">
                     Verifikasi dan kelola dokumen persyaratan studi lanjut, laporan semester, dan laporan akhir

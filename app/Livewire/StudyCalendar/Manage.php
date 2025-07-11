@@ -13,6 +13,7 @@ use Livewire\WithPagination;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Pagination\LengthAwarePaginator;
+use App\Models\DocumentType;
 
 class Manage extends WorkflowComponent
 {
@@ -162,9 +163,18 @@ class Manage extends WorkflowComponent
             $verifiedAcademicDocs = $academicDocuments->where('workflow_state', 3)->count(); // VERIFIED state
             $totalAcademicDocs = $academicDocuments->count();
 
-            // Check Approval Document
-            $approvalDocument = ApprovalDocument::where('employee_id', $employee->id)->first();
-            $approvalDocumentApproved = $approvalDocument && $approvalDocument->workflow_state === 4; // APPROVED state
+            // Get approval document type names and IDs
+            $approvalTypeNames = DocumentTypeConstants::getApprovalDocumentNames();
+            $approvalTypeIds = DocumentType::whereIn('name', $approvalTypeNames)->pluck('id');
+
+            // Check Approval Documents (all types for this employee)
+            $approvalDocuments = ApprovalDocument::where('employee_id', $employee->id)
+                ->whereIn('document_type_id', $approvalTypeIds)
+                ->get();
+            $approvalTotal = count($approvalTypeIds);
+            $approvalApproved = $approvalDocuments->where('workflow_state', 4)->count(); // APPROVED state
+            $approvalDocument = $approvalDocuments->first();
+            $approvalDocumentApproved = $approvalDocument && $approvalDocument->workflow_state === 4; // legacy single doc logic
 
             return [
                 'academic_documents' => [
@@ -174,11 +184,13 @@ class Manage extends WorkflowComponent
                 ],
                 'approval_document' => [
                     'exists' => $approvalDocument !== null,
-                    'approved' => $approvalDocumentApproved
+                    'approved' => $approvalDocumentApproved,
+                    'approved_count' => $approvalApproved,
+                    'total' => $approvalTotal
                 ],
                 'all_requirements_met' => $verifiedAcademicDocs === $totalAcademicDocs &&
                                         $totalAcademicDocs > 0 &&
-                                        $approvalDocumentApproved
+                                        $approvalApproved === $approvalTotal && $approvalTotal > 0
             ];
         } catch (\Exception $e) {
             Log::error('Error getting requirements status: ' . $e->getMessage());

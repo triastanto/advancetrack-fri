@@ -26,17 +26,6 @@
                     <div class="bg-white px-6 pt-6 pb-4 sm:p-8 sm:pb-6">
                         <h3 class="text-lg leading-6 font-medium text-gray-900 mb-6">{{ $document->file_name }}</h3>
 
-                        <!-- Document Category Info (for debugging/development) -->
-                        @if($documentModel)
-                        <div class="mb-4 p-2 bg-blue-50 border border-blue-200 rounded-md">
-                            <p class="text-xs text-blue-700">
-                                <strong>Kategori:</strong> {{ ucfirst(str_replace('-', ' ', $this->getDocumentCategory())) }}
-                                <br>
-                                <strong>Model:</strong> {{ class_basename($documentModel) }}
-                            </p>
-                        </div>
-                        @endif
-
                         <!-- Document Preview -->
                         <div class="aspect-w-16 aspect-h-9 mb-6">
                             @if(in_array(pathinfo($document->file_path, PATHINFO_EXTENSION), ['pdf']))

@@ -68,11 +68,17 @@ class WorkflowDefinition
         return $transition['color'] ?? 'primary';
     }
 
+    public static function getTransitionName(int $id, string $workflowName): ?string
+    {
+        $transition = self::getTransition($id, $workflowName);
+        return $transition['name'] ?? null;
+    }
+
     public static function getAvailableTransitions(int $stateId, string $workflowName): array
     {
         $transitions = [];
         $allTransitions = self::getAllTransitions($workflowName);
-        
+
         foreach ($allTransitions as $id => $transition) {
             if ($transition['from_state'] === $stateId) {
                 $transitions[$id] = $transition;

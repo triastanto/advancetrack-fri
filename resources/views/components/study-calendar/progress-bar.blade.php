@@ -1,4 +1,4 @@
-@props(['progress'])
+@props(['progress', 'studyCalendar'])
 
 @php
     $baseStates = [
@@ -34,6 +34,46 @@
             Timeline Status Kalender Studi
         </h3>
     </div>
+    {{-- Study Calendar Status Cards --}}
+    @if($studyCalendar)
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div class="bg-blue-50 rounded-lg p-4">
+            <div class="flex items-center">
+                <x-heroicon-o-calendar class="w-8 h-8 text-blue-600 mr-3" />
+                <div>
+                    <p class="text-sm font-medium text-blue-900">Tanggal Mulai</p>
+                    <p class="text-lg font-semibold text-blue-700">
+                        {{ $studyCalendar->study_start ? \Carbon\Carbon::parse($studyCalendar->study_start)->format('d M Y') : 'Belum ditentukan' }}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-green-50 rounded-lg p-4">
+            <div class="flex items-center">
+                <x-heroicon-o-academic-cap class="w-8 h-8 text-green-600 mr-3" />
+                <div>
+                    <p class="text-sm font-medium text-green-900">Estimasi Selesai</p>
+                    <p class="text-lg font-semibold text-green-700">
+                        {{ $studyCalendar->estimated_study_end ? \Carbon\Carbon::parse($studyCalendar->estimated_study_end)->format('d M Y') : 'Belum ditentukan' }}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-purple-50 rounded-lg p-4">
+            <div class="flex items-center">
+                <x-heroicon-o-trophy class="w-8 h-8 text-purple-600 mr-3" />
+                <div>
+                    <p class="text-sm font-medium text-purple-900">Tanggal Lulus</p>
+                    <p class="text-lg font-semibold text-purple-700">
+                        {{ $studyCalendar->graduation_date ? \Carbon\Carbon::parse($studyCalendar->graduation_date)->format('d M Y') : 'Belum lulus' }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
 
     <div class="relative">
         {{-- DEBUG: Inspect current_state value --}}
@@ -102,7 +142,7 @@
     </div>
 
     {{-- Timeline Description --}}
-    <div class="mt-8 p-4 bg-gray-50 rounded-lg">
+    <div class="mt-16 p-4 bg-gray-50 rounded-lg">
         <div class="flex items-center">
             <x-heroicon-o-information-circle class="w-5 h-5 text-blue-600 mr-2" />
             <div>

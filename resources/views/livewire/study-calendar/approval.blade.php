@@ -2,6 +2,83 @@
     {{-- Success message --}}
     <x-ui.alert-message />
 
+    {{-- Page Header --}}
+    <div class="mb-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900 flex items-center">
+                    <x-heroicon-o-academic-cap class="w-8 h-8 mr-3 text-blue-600" />
+                    Persetujuan Kalender Studi
+                </h1>
+                <p class="text-gray-600 mt-1">
+                    Review dan persetujuan kalender studi lanjut dosen
+                </p>
+            </div>
+            <div class="flex items-center space-x-2">
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    <x-heroicon-o-user class="w-3 h-3 mr-1" />
+                    Supervisor
+                </span>
+            </div>
+        </div>
+    </div>
+
+    {{-- Statistics Cards --}}
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <x-heroicon-o-clock class="w-8 h-8 text-yellow-500" />
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-500">Menunggu Persetujuan</p>
+                    <p class="text-2xl font-semibold text-gray-900">
+                        {{ $studyCalendars->where('workflow_state', 2)->count() }}
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <x-heroicon-o-check-circle class="w-8 h-8 text-green-500" />
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-500">Disetujui</p>
+                    <p class="text-2xl font-semibold text-gray-900">
+                        {{ $studyCalendars->where('workflow_state', 3)->count() }}
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <x-heroicon-o-book-open class="w-8 h-8 text-blue-500" />
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-500">Aktif Studi</p>
+                    <p class="text-2xl font-semibold text-gray-900">
+                        {{ $studyCalendars->where('workflow_state', 5)->count() }}
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <x-heroicon-o-x-circle class="w-8 h-8 text-red-500" />
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-500">Ditolak</p>
+                    <p class="text-2xl font-semibold text-gray-900">
+                        {{ $studyCalendars->where('workflow_state', 4)->count() }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {{-- Filters --}}
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
         <div class="flex items-center justify-between mb-4">
@@ -14,7 +91,7 @@
             </button>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             {{-- Search --}}
             <div>
                 <label for="search" class="block text-sm font-medium text-gray-700 mb-2">Cari Dosen</label>
@@ -209,7 +286,7 @@
 
     {{-- Workflow Transition Modal --}}
     <livewire:components.workflow.workflow-transition-modal />
-    
+
     {{-- Study Calendar View Modal --}}
     <livewire:components.study-calendar.study-calendar-view-modal />
 </div>

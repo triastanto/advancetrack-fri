@@ -30,6 +30,12 @@
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                     @foreach($documents as $document)
+                        @php
+                            $availableTransitions = method_exists($document, 'getFormattedTransitions') ? $document->getFormattedTransitions() : [];
+                            $canVerify = collect($availableTransitions)->contains(function($t) {
+                                return isset($t['name']) && strtoupper($t['name']) === 'VERIFY';
+                            });
+                        @endphp
                         <tr class="hover:bg-gray-50">
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex items-center">
@@ -59,20 +65,21 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 @php
-                                    $statusConfig = match($document->workflow_state) {
-                                        1 => ['label' => 'Draft', 'color' => 'gray', 'bg' => 'bg-gray-100', 'text' => 'text-gray-800'],
-                                        2 => ['label' => 'Menunggu Persetujuan', 'color' => 'yellow', 'bg' => 'bg-yellow-100', 'text' => 'text-yellow-800'],
-                                        3 => ['label' => 'Disetujui', 'color' => 'green', 'bg' => 'bg-green-100', 'text' => 'text-green-800'],
-                                        4 => ['label' => 'Ditolak', 'color' => 'red', 'bg' => 'bg-red-100', 'text' => 'text-red-800'],
-                                        5 => ['label' => 'Aktif Studi', 'color' => 'blue', 'bg' => 'bg-blue-100', 'text' => 'text-blue-800'],
-                                        6 => ['label' => 'Cuti', 'color' => 'orange', 'bg' => 'bg-orange-100', 'text' => 'text-orange-800'],
-                                        7 => ['label' => 'Selesai', 'color' => 'green', 'bg' => 'bg-green-100', 'text' => 'text-green-800'],
-                                        8 => ['label' => 'Drop Out', 'color' => 'red', 'bg' => 'bg-red-100', 'text' => 'text-red-800'],
-                                        default => ['label' => 'Unknown', 'color' => 'gray', 'bg' => 'bg-gray-100', 'text' => 'text-gray-800']
+                                    $label = $workflowStates[$document->workflow_state]['label'] ?? 'Unknown';
+                                    $bg = match($document->workflow_state) {
+                                        1 => 'bg-gray-100 text-gray-800',
+                                        2 => 'bg-yellow-100 text-yellow-800',
+                                        3 => 'bg-green-100 text-green-800',
+                                        4 => 'bg-red-100 text-red-800',
+                                        5 => 'bg-blue-100 text-blue-800',
+                                        6 => 'bg-orange-100 text-orange-800',
+                                        7 => 'bg-green-100 text-green-800',
+                                        8 => 'bg-red-100 text-red-800',
+                                        default => 'bg-gray-100 text-gray-800',
                                     };
                                 @endphp
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statusConfig['bg'] }} {{ $statusConfig['text'] }}">
-                                    {{ $statusConfig['label'] }}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $bg }}">
+                                    {{ $label }}
                                 </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -81,11 +88,11 @@
                             @if($showActions)
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <div class="flex items-center space-x-2">
-                                        <button wire:click="showDocument({{ $document->id }})" class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                        <button wire:click="openDetailModal({{ $document->id }})" class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                                             <x-heroicon-o-eye class="w-4 h-4 mr-1" />
                                             Detail
                                         </button>
-                                        @if($canManageWorkflow)
+                                        @if($canManageWorkflow && $canVerify)
                                             <button wire:click="openVerificationModal({{ $document->id }})" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
                                                 <x-heroicon-o-check class="w-4 h-4 mr-1" />
                                                 Verifikasi

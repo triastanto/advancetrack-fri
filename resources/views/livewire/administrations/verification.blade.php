@@ -69,6 +69,9 @@
             empty-message="Tidak ada dokumen untuk diverifikasi." />
     </div>
 
+    {{-- Detail Document Modal --}}
+    <livewire:components.document.document-view-modal />
+
     {{-- Verification Document Modal --}}
     <x-verification.verification-document-modal
         :modalOpen="$isModalOpen"

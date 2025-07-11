@@ -14,6 +14,9 @@ class StudyCalendar extends Model
 
     protected $casts = [
         'workflow_state' => 'integer',
+        'study_start' => 'date',
+        'estimated_study_end' => 'date',
+        'graduation_date' => 'date',
     ];
 
     public function employee()

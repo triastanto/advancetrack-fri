@@ -217,6 +217,10 @@ class Verification extends WorkflowComponent
         $this->workflowComment = '';
     }
 
+    public function openDetailModal($documentId)
+    {
+        $this->dispatch('document-view-modal:open', ['documentId' => $documentId]);
+    }
     /**
      * Verify the currently selected document
      */

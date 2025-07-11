@@ -138,13 +138,13 @@
                                         <div class="flex items-center">
                                             <x-heroicon-o-document-text class="w-4 h-4 mr-2 {{ $requirements['academic_documents']['complete'] ? 'text-green-500' : 'text-red-500' }}" />
                                             <span class="text-xs">
-                                                Dokumen Persyaratan: {{ $requirements['academic_documents']['verified'] }}/{{ $requirements['academic_documents']['total'] }}
+                                                Persyaratan: {{ $requirements['academic_documents']['verified'] }}/{{ $requirements['academic_documents']['total'] }}
                                             </span>
                                         </div>
                                         <div class="flex items-center">
                                             <x-heroicon-o-check-circle class="w-4 h-4 mr-2 {{ $requirements['approval_document']['approved'] ? 'text-green-500' : 'text-gray-400' }}" />
                                             <span class="text-xs">
-                                                Dokumen Persetujuan: {{ $requirements['approval_document']['approved'] ? 'Disetujui' : 'Belum disetujui' }}
+                                                Persetujuan: {{ $requirements['approval_document']['approved'] ? 'Disetujui' : 'Belum disetujui' }}
                                             </span>
                                         </div>
                                     </div>
@@ -153,7 +153,7 @@
                                     <div class="flex items-center space-x-2">
                                         {{-- View Details Button --}}
                                         <button
-                                            onclick="Livewire.dispatch('openModal', { component: 'study-calendar-details-modal', arguments: { studyCalendarId: {{ $studyCalendar->id }} }})"
+                                            wire:click="$dispatch('openStudyCalendarModal', { studyCalendarId: {{ $studyCalendar->id }} })"
                                             class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                                         >
                                             <x-heroicon-o-eye class="w-4 h-4 mr-1" />
@@ -209,4 +209,7 @@
 
     {{-- Workflow Transition Modal --}}
     <livewire:components.workflow.workflow-transition-modal />
+    
+    {{-- Study Calendar View Modal --}}
+    <livewire:components.study-calendar.study-calendar-view-modal />
 </div>

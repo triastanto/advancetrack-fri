@@ -26,17 +26,18 @@
     }
 @endphp
 
-<div class="mb-6">
-    <div class="flex items-center justify-between mb-4">
+<div class="bg-white rounded-lg shadow-md overflow-hidden mb-6 border border-gray-200">
+    <div class="px-6 py-4 border-b border-[var(--color-border)]">
         <h3 class="text-lg font-semibold text-gray-900 flex items-center">
-            <x-heroicon-o-chart-bar class="w-5 h-5 mr-2 text-blue-600" />
-            Timeline Status Kalender Studi
+            <x-heroicon-o-academic-cap class="w-5 h-5 mr-2 text-blue-600" />
+            Timeline Kalender Studi
         </h3>
     </div>
+    
     {{-- Study Calendar Status Cards --}}
     @if($studyCalendar)
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div class="bg-blue-50 rounded-lg p-4">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 px-6 py-4">
+        <div class="bg-blue-50 rounded-lg p-4 hover:bg-blue-100 transition-colors duration-200">
             <div class="flex items-center">
                 <x-heroicon-o-calendar class="w-8 h-8 text-blue-600 mr-3" />
                 <div>
@@ -48,7 +49,7 @@
             </div>
         </div>
 
-        <div class="bg-green-50 rounded-lg p-4">
+        <div class="bg-green-50 rounded-lg p-4 hover:bg-green-100 transition-colors duration-200">
             <div class="flex items-center">
                 <x-heroicon-o-academic-cap class="w-8 h-8 text-green-600 mr-3" />
                 <div>
@@ -60,7 +61,7 @@
             </div>
         </div>
 
-        <div class="bg-purple-50 rounded-lg p-4">
+        <div class="bg-purple-50 rounded-lg p-4 hover:bg-purple-100 transition-colors duration-200">
             <div class="flex items-center">
                 <x-heroicon-o-trophy class="w-8 h-8 text-purple-600 mr-3" />
                 <div>
@@ -80,17 +81,18 @@
             @foreach($states as $index => $state)
                 <div class="flex flex-col items-center flex-1 min-w-[90px] z-10">
                     {{-- State Circle --}}
-                    <div class="relative">
-                        <div class="w-9 h-9 rounded-full flex items-center justify-center text-sm font-medium border-2
+                    <div class="relative group">
+                        <div class="w-9 h-9 rounded-full flex items-center justify-center text-sm font-medium border-2 transition-all duration-200
                             @if(stateStatus($state['id'], $currentState) === 'completed')
-                                bg-green-500 text-white border-green-500
+                                bg-green-500 text-white border-green-500 shadow-lg
                             @elseif(stateStatus($state['id'], $currentState) === 'current')
-                                bg-blue-500 text-white border-blue-500 ring-4 ring-blue-100
+                                bg-blue-500 text-white border-blue-500 ring-4 ring-blue-100 shadow-lg
                             @elseif($state['terminal'])
                                 bg-gray-200 text-gray-500 border-gray-400
                             @else
                                 bg-gray-200 text-gray-500 border-gray-300
-                            @endif">
+                            @endif
+                            hover:scale-110 cursor-pointer">
                             @switch($state['icon'])
                                 @case('pencil')
                                     <x-heroicon-o-pencil class="w-5 h-5" />
@@ -117,9 +119,25 @@
                                     {{ $state['id'] }}
                             @endswitch
                         </div>
+                        
+                        {{-- Tooltip --}}
+                        <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-20">
+                            <div class="font-medium">{{ $state['name'] }}</div>
+                            <div class="text-gray-300">
+                                @if(stateStatus($state['id'], $currentState) === 'completed')
+                                    Selesai
+                                @elseif(stateStatus($state['id'], $currentState) === 'current')
+                                    Sedang Berlangsung
+                                @else
+                                    Belum Dimulai
+                                @endif
+                            </div>
+                            <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+                        </div>
+                        
                         {{-- State Label --}}
                         <div class="absolute top-11 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
-                            <span class="text-xs font-medium
+                            <span class="text-xs font-medium transition-colors duration-200
                                 @if(stateStatus($state['id'], $currentState) === 'completed')
                                     text-green-600
                                 @elseif(stateStatus($state['id'], $currentState) === 'current')
@@ -138,9 +156,12 @@
         </div>
     </div>
 
+    
+
+
     {{-- Timeline Description --}}
-    <div class="mt-16 p-4 bg-gray-50 rounded-lg">
-        <div class="flex items-center">
+    <div class="mt-16 p-4 rounded-lg">
+        <div class="flex items-center py-3 px-4 text-sm text-gray-700 bg-gray-50 rounded-lg border border-gray-200">
             <x-heroicon-o-information-circle class="w-5 h-5 text-blue-600 mr-2" />
             <div>
                 <p class="text-sm font-medium text-gray-900">
@@ -178,5 +199,12 @@
                 </p>
             </div>
         </div>
+    </div>
+
+    {{-- Actions & Transitions --}}
+    <div class="rounded-lg shadow-md p-4">
+        <x-study-calendar.actions
+            :study-calendar="$studyCalendar"
+            :requirements-status="$requirementsStatus" />
     </div>
 </div>

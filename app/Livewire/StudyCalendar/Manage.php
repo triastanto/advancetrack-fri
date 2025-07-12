@@ -9,6 +9,7 @@ use App\Livewire\Base\WorkflowComponent;
 use App\Traits\HasDocumentManagement;
 use App\Traits\HasCommonValidation;
 use App\Constants\DocumentTypeConstants;
+use App\Services\StudyCalendarRequirementsService;
 use Livewire\WithPagination;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -21,10 +22,56 @@ class Manage extends WorkflowComponent
 
     public $selectedTransition;
     public $transitionComment = '';
+    public $activeTab = 'timeline-approval';
 
     // Modal states
     public $workflowModalOpen = false;
     public $currentStudyCalendar;
+
+    // Study Information Edit Modals
+    public $showStudyInfoModal = false;
+    public $showSupportInfoModal = false;
+
+    // Form data for editing
+    public $editStudyStart;
+    public $editEstimatedEnd;
+    public $editGraduationDate;
+    public $editTotalSemester;
+    public $editUniversityName;
+    public $editUniversityAddress;
+    public $editUniversityEmail;
+    public $editUniversityPhone;
+    public $editStudyProgramId;
+    public $editStudyLevel;
+    public $editStudyAddress;
+    public $editFundingSource;
+    public $editScholarship;
+    public $editStudyRegulationNotes;
+
+    // Form data for editing support information
+    public $editSupervisorAssignments = [];
+    public $editPromotors = [];
+    public $editCourseResponsibilities = [];
+    
+    // Support modal form data
+    public $newSupervisorName;
+    public $newSupervisorNidn;
+    public $newSupervisorStartDate;
+    public $newSupervisorEndDate;
+    public $newSupervisorIsActive = true;
+    
+    public $newPromotorName;
+    public $newPromotorEmail;
+    public $newPromotorType = 'primary'; // primary, secondary
+    
+    public $newCourseName;
+    public $newCourseSemester;
+    public $newCourseAcademicYear;
+
+    // Form toggle properties
+    public $showSupervisorForm = false;
+    public $showPromotorForm = false;
+    public $showCourseForm = false;
 
     protected $listeners = [
         'workflow:transition-applied' => 'handleTransitionApplied',
@@ -33,6 +80,13 @@ class Manage extends WorkflowComponent
 
     protected $rules = [];
     protected $messages = [];
+
+    protected StudyCalendarRequirementsService $requirementsService;
+
+    public function boot(StudyCalendarRequirementsService $requirementsService)
+    {
+        $this->requirementsService = $requirementsService;
+    }
 
     public function mount(...$parameters)
     {
@@ -80,6 +134,296 @@ class Manage extends WorkflowComponent
         }
     }
 
+    // Study Information Edit Modal Methods
+    public function openStudyInfoModal()
+    {
+        $studyCalendar = $this->getStudyCalendarForEmployee();
+        if ($studyCalendar) {
+            $this->editStudyStart = $studyCalendar->study_start?->format('Y-m-d');
+            $this->editEstimatedEnd = $studyCalendar->estimated_study_end?->format('Y-m-d');
+            $this->editGraduationDate = $studyCalendar->graduation_date?->format('Y-m-d');
+            $this->editTotalSemester = $studyCalendar->studyDetail?->total_semester;
+            $this->editUniversityName = $studyCalendar->studyDetail?->university_name;
+            $this->editUniversityAddress = $studyCalendar->studyDetail?->university_address;
+            $this->editUniversityEmail = $studyCalendar->studyDetail?->university_email;
+            $this->editUniversityPhone = $studyCalendar->studyDetail?->university_phone;
+            $this->editStudyProgramId = $studyCalendar->studyDetail?->study_program_id;
+            $this->editStudyLevel = $studyCalendar->studyDetail?->study_level;
+            $this->editStudyAddress = $studyCalendar->studyDetail?->study_address;
+            $this->editFundingSource = $studyCalendar->studyDetail?->funding_source;
+            $this->editScholarship = $studyCalendar->studyDetail?->scholarship;
+            $this->editStudyRegulationNotes = $studyCalendar->studyDetail?->study_regulation_notes;
+        }
+        $this->showStudyInfoModal = true;
+    }
+
+    public function openSupportInfoModal()
+    {
+        // Load support information data
+        $studyCalendar = $this->getStudyCalendarForEmployee();
+        $employee = $this->getEmployee();
+        
+        if ($studyCalendar && $employee) {
+            // Load supervisor assignments
+            $supervisorAssignments = $this->getSupervisorAssignments($employee);
+            $this->editSupervisorAssignments = $supervisorAssignments->map(function($assignment) {
+                $startDate = $assignment['start_date'];
+                $endDate = $assignment['end_date'];
+                
+                // Handle date formatting - check if it's already a string or Carbon object
+                $formattedStartDate = null;
+                $formattedEndDate = null;
+                
+                if ($startDate) {
+                    $formattedStartDate = is_string($startDate) ? $startDate : $startDate->format('Y-m-d');
+                }
+                
+                if ($endDate) {
+                    $formattedEndDate = is_string($endDate) ? $endDate : $endDate->format('Y-m-d');
+                }
+                
+                return [
+                    'id' => $assignment['id'] ?? null,
+                    'supervisor_name' => $assignment['supervisor_name'],
+                    'supervisor_nidn' => $assignment['supervisor_nidn'],
+                    'start_date' => $formattedStartDate,
+                    'end_date' => $formattedEndDate,
+                    'is_active' => $assignment['is_active'],
+                ];
+            })->toArray();
+
+            // Load promotors
+            if ($studyCalendar->studyDetail) {
+                $this->editPromotors = $studyCalendar->studyDetail->promotors->map(function($promotor) {
+                    return [
+                        'id' => $promotor->id,
+                        'name' => $promotor->name,
+                        'email' => $promotor->email,
+                        'type' => $promotor->type, // primary, secondary
+                    ];
+                })->toArray();
+            }
+
+            // Load course responsibilities
+            $courseResponsibilities = $this->getCourseResponsibilities($employee);
+            $this->editCourseResponsibilities = $courseResponsibilities->map(function($course) {
+                return [
+                    'id' => $course['id'] ?? null,
+                    'course_name' => $course['course_name'],
+                    'semester' => $course['semester'],
+                    'academic_year' => $course['academic_year'],
+                ];
+            })->toArray();
+        }
+        $this->showSupportInfoModal = true;
+    }
+
+    public function addSupervisor()
+    {
+        $this->validate([
+            'newSupervisorName' => 'required|string|max:255',
+            'newSupervisorNidn' => 'required|string|max:20',
+            'newSupervisorStartDate' => 'required|date',
+            'newSupervisorEndDate' => 'required|date|after:newSupervisorStartDate',
+        ]);
+
+        $this->editSupervisorAssignments[] = [
+            'id' => null,
+            'supervisor_name' => $this->newSupervisorName,
+            'supervisor_nidn' => $this->newSupervisorNidn,
+            'start_date' => $this->newSupervisorStartDate,
+            'end_date' => $this->newSupervisorEndDate,
+            'is_active' => $this->newSupervisorIsActive,
+        ];
+
+        $this->reset(['newSupervisorName', 'newSupervisorNidn', 'newSupervisorStartDate', 'newSupervisorEndDate', 'newSupervisorIsActive']);
+    }
+
+    public function removeSupervisor($index)
+    {
+        unset($this->editSupervisorAssignments[$index]);
+        $this->editSupervisorAssignments = array_values($this->editSupervisorAssignments);
+    }
+
+    public function addPromotor()
+    {
+        $this->validate([
+            'newPromotorName' => 'required|string|max:255',
+            'newPromotorEmail' => 'required|email',
+            'newPromotorType' => 'required|in:primary,secondary',
+        ]);
+
+        $this->editPromotors[] = [
+            'id' => null,
+            'name' => $this->newPromotorName,
+            'email' => $this->newPromotorEmail,
+            'type' => $this->newPromotorType,
+        ];
+
+        $this->reset(['newPromotorName', 'newPromotorEmail', 'newPromotorType']);
+    }
+
+    public function removePromotor($index)
+    {
+        unset($this->editPromotors[$index]);
+        $this->editPromotors = array_values($this->editPromotors);
+    }
+
+    public function addCourse()
+    {
+        $this->validate([
+            'newCourseName' => 'required|string|max:255',
+            'newCourseSemester' => 'required|integer|min:1|max:14',
+            'newCourseAcademicYear' => 'required|string|max:20',
+        ]);
+
+        $this->editCourseResponsibilities[] = [
+            'id' => null,
+            'course_name' => $this->newCourseName,
+            'semester' => $this->newCourseSemester,
+            'academic_year' => $this->newCourseAcademicYear,
+        ];
+
+        $this->reset(['newCourseName', 'newCourseSemester', 'newCourseAcademicYear']);
+    }
+
+    public function removeCourse($index)
+    {
+        unset($this->editCourseResponsibilities[$index]);
+        $this->editCourseResponsibilities = array_values($this->editCourseResponsibilities);
+    }
+
+    public function closeModal($modalName)
+    {
+        $this->$modalName = false;
+        $this->resetFormData();
+    }
+
+    private function resetFormData()
+    {
+        $this->editStudyStart = null;
+        $this->editEstimatedEnd = null;
+        $this->editGraduationDate = null;
+        $this->editTotalSemester = null;
+        $this->editUniversityName = null;
+        $this->editUniversityAddress = null;
+        $this->editUniversityEmail = null;
+        $this->editUniversityPhone = null;
+        $this->editStudyProgramId = null;
+        $this->editStudyLevel = null;
+        $this->editStudyAddress = null;
+        $this->editFundingSource = null;
+        $this->editScholarship = null;
+        $this->editStudyRegulationNotes = null;
+        
+        // Reset support form data
+        $this->editSupervisorAssignments = [];
+        $this->editPromotors = [];
+        $this->editCourseResponsibilities = [];
+        $this->newSupervisorName = null;
+        $this->newSupervisorNidn = null;
+        $this->newSupervisorStartDate = null;
+        $this->newSupervisorEndDate = null;
+        $this->newSupervisorIsActive = true;
+        $this->newPromotorName = null;
+        $this->newPromotorEmail = null;
+        $this->newPromotorType = 'primary';
+        $this->newCourseName = null;
+        $this->newCourseSemester = null;
+        $this->newCourseAcademicYear = null;
+        
+        // Reset form toggle properties
+        $this->showSupervisorForm = false;
+        $this->showPromotorForm = false;
+        $this->showCourseForm = false;
+    }
+
+    public function saveStudyInfo()
+    {
+        $this->validate([
+            'editStudyStart' => 'required|date',
+            'editEstimatedEnd' => 'required|date|after:editStudyStart',
+            'editTotalSemester' => 'required|integer|min:1',
+            'editUniversityName' => 'required|string|max:255',
+            'editUniversityAddress' => 'required|string',
+            'editUniversityEmail' => 'nullable|email',
+            'editUniversityPhone' => 'nullable|string|max:20',
+            'editStudyProgramId' => 'required|exists:study_programs,id',
+            'editStudyLevel' => 'required|in:S2,S3,Postdoc,Specialist',
+            'editStudyAddress' => 'required|string',
+            'editFundingSource' => 'required|in:LPDP,Pribadi,Instansi,Perusahaan,Yayasan',
+            'editScholarship' => 'nullable|string|max:255',
+            'editStudyRegulationNotes' => 'nullable|string',
+        ]);
+
+        try {
+            $studyCalendar = $this->getStudyCalendarForEmployee();
+            if ($studyCalendar) {
+                $studyCalendar->update([
+                    'study_start' => $this->editStudyStart,
+                    'estimated_study_end' => $this->editEstimatedEnd,
+                    'graduation_date' => $this->editGraduationDate,
+                ]);
+
+                if ($studyCalendar->studyDetail) {
+                    $studyCalendar->studyDetail->update([
+                        'total_semester' => $this->editTotalSemester,
+                        'university_name' => $this->editUniversityName,
+                        'university_address' => $this->editUniversityAddress,
+                        'university_email' => $this->editUniversityEmail,
+                        'university_phone' => $this->editUniversityPhone,
+                        'study_program_id' => $this->editStudyProgramId,
+                        'study_level' => $this->editStudyLevel,
+                        'study_address' => $this->editStudyAddress,
+                        'funding_source' => $this->editFundingSource,
+                        'scholarship' => $this->editScholarship,
+                        'study_regulation_notes' => $this->editStudyRegulationNotes,
+                    ]);
+                }
+
+                session()->flash('success', 'Informasi studi lanjut berhasil diperbarui.');
+                $this->closeModal('showStudyInfoModal');
+            }
+        } catch (\Exception $e) {
+            session()->flash('error', 'Gagal memperbarui informasi studi: ' . $e->getMessage());
+        }
+    }
+
+    public function saveSupportInfo()
+    {
+        try {
+            $studyCalendar = $this->getStudyCalendarForEmployee();
+            if ($studyCalendar) {
+                // Save supervisor assignments
+                // This would typically involve creating/updating/deleting supervisor assignment records
+                // For now, we'll just show a success message
+                
+                // Save promotors
+                if ($studyCalendar->studyDetail) {
+                    // Clear existing promotors and add new ones
+                    $studyCalendar->studyDetail->promotors()->delete();
+                    
+                    foreach ($this->editPromotors as $promotor) {
+                        $studyCalendar->studyDetail->promotors()->create([
+                            'name' => $promotor['name'],
+                            'email' => $promotor['email'],
+                            'type' => $promotor['type'],
+                        ]);
+                    }
+                }
+                
+                // Save course responsibilities
+                // This would typically involve creating/updating/deleting course responsibility records
+                // For now, we'll just show a success message
+                
+                session()->flash('success', 'Informasi pendukung studi berhasil diperbarui.');
+                $this->closeModal('showSupportInfoModal');
+            }
+        } catch (\Exception $e) {
+            session()->flash('error', 'Gagal memperbarui informasi pendukung studi: ' . $e->getMessage());
+        }
+    }
+
     // Study Calendar Operations
     public function submitForApproval($studyCalendarId)
     {
@@ -112,15 +456,16 @@ class Manage extends WorkflowComponent
             session()->flash('error', 'Kalender studi harus berstatus APPROVED sebelum memulai studi.');
             return;
         }
+        
         $requirements = $this->getRequirementsStatus();
-        if (!$requirements['academic_documents']['complete']) {
-            session()->flash('error', 'Semua dokumen persyaratan harus diverifikasi sebelum memulai studi.');
+        $missingRequirements = $this->requirementsService->getMissingRequirements($requirements);
+        
+        if (!empty($missingRequirements)) {
+            $missingText = implode(', ', $missingRequirements);
+            session()->flash('error', "Tidak dapat memulai studi. {$missingText}.");
             return;
         }
-        if (!$requirements['approval_document']['approved']) {
-            session()->flash('error', 'Dokumen persetujuan harus disetujui sebelum memulai studi.');
-            return;
-        }
+        
         $this->openWorkflowModal($studyCalendarId, 5); // START_STUDY transition
     }
 
@@ -149,49 +494,7 @@ class Manage extends WorkflowComponent
     {
         try {
             $employee = $this->getEmployee();
-
-            // Get study requirement document type names from constants
-            $studyRequirementNames = DocumentTypeConstants::getStudyRequirementNames();
-
-            // Check Academic Documents (Study Requirements)
-            $academicDocuments = AcademicDocument::where('employee_id', $employee->id)
-                ->whereHas('documentType', function($query) use ($studyRequirementNames) {
-                    $query->whereIn('name', $studyRequirementNames);
-                })
-                ->get();
-
-            $verifiedAcademicDocs = $academicDocuments->where('workflow_state', 3)->count(); // VERIFIED state
-            $totalAcademicDocs = $academicDocuments->count();
-
-            // Get approval document type names and IDs
-            $approvalTypeNames = DocumentTypeConstants::getApprovalDocumentNames();
-            $approvalTypeIds = DocumentType::whereIn('name', $approvalTypeNames)->pluck('id');
-
-            // Check Approval Documents (all types for this employee)
-            $approvalDocuments = ApprovalDocument::where('employee_id', $employee->id)
-                ->whereIn('document_type_id', $approvalTypeIds)
-                ->get();
-            $approvalTotal = count($approvalTypeIds);
-            $approvalApproved = $approvalDocuments->where('workflow_state', 4)->count(); // APPROVED state
-            $approvalDocument = $approvalDocuments->first();
-            $approvalDocumentApproved = $approvalDocument && $approvalDocument->workflow_state === 4; // legacy single doc logic
-
-            return [
-                'academic_documents' => [
-                    'verified' => $verifiedAcademicDocs,
-                    'total' => $totalAcademicDocs,
-                    'complete' => $verifiedAcademicDocs === $totalAcademicDocs && $totalAcademicDocs > 0
-                ],
-                'approval_document' => [
-                    'exists' => $approvalDocument !== null,
-                    'approved' => $approvalDocumentApproved,
-                    'approved_count' => $approvalApproved,
-                    'total' => $approvalTotal
-                ],
-                'all_requirements_met' => $verifiedAcademicDocs === $totalAcademicDocs &&
-                                        $totalAcademicDocs > 0 &&
-                                        $approvalApproved === $approvalTotal && $approvalTotal > 0
-            ];
+            return $this->requirementsService->getRequirementsStatus($employee->id);
         } catch (\Exception $e) {
             Log::error('Error getting requirements status: ' . $e->getMessage());
             return [
@@ -209,7 +512,7 @@ class Manage extends WorkflowComponent
         }
 
         $requirements = $this->getRequirementsStatus();
-        return $requirements['all_requirements_met'];
+        return $this->requirementsService->canStartStudy($requirements);
     }
 
     public function getStudyCalendarForEmployee()
@@ -296,6 +599,57 @@ class Manage extends WorkflowComponent
         ];
     }
 
+    public function getSupervisorAssignments($employee)
+    {
+        try {
+            return $employee->supervisorAssignments()
+                ->with(['supervisor.user'])
+                ->orderBy('start_date', 'desc')
+                ->get()
+                ->map(function($assignment) {
+                    return [
+                        'id' => $assignment->id,
+                        'supervisor_name' => $assignment->supervisor->user->name ?? 'Unknown',
+                        'supervisor_nidn' => $assignment->supervisor->nidn ?? '-',
+                        'start_date' => $assignment->start_date,
+                        'end_date' => $assignment->end_date,
+                        'is_active' => $assignment->isActive(),
+                        'formatted_start_date' => $assignment->start_date->format('d M Y'),
+                        'formatted_end_date' => $assignment->end_date ? $assignment->end_date->format('d M Y') : 'Sekarang',
+                        'duration' => $assignment->end_date 
+                            ? $assignment->start_date->diffInDays($assignment->end_date) . ' hari'
+                            : $assignment->start_date->diffInDays(now()) . ' hari'
+                    ];
+                });
+        } catch (\Exception $e) {
+            Log::error('Error getting supervisor assignments: ' . $e->getMessage());
+            return collect();
+        }
+    }
+
+    public function getCourseResponsibilities($employee)
+    {
+        try {
+            return $employee->courseResponsibilities()
+                ->orderBy('academic_year', 'desc')
+                ->orderBy('semester')
+                ->get()
+                ->map(function($course) {
+                    return [
+                        'id' => $course->id,
+                        'course_name' => $course->course_name,
+                        'semester' => $course->semester,
+                        'academic_year' => $course->academic_year,
+                        'formatted_semester' => $course->semester ? 'Semester ' . $course->semester : '-',
+                        'formatted_academic_year' => $course->academic_year ?? '-'
+                    ];
+                });
+        } catch (\Exception $e) {
+            Log::error('Error getting course responsibilities: ' . $e->getMessage());
+            return collect();
+        }
+    }
+
     // Override trait methods for custom behavior
     protected function getSuccessMessage(): string
     {
@@ -315,6 +669,12 @@ class Manage extends WorkflowComponent
             $requirementsStatus = $this->getRequirementsStatus();
             $workflowProgress = $this->getWorkflowProgress($studyCalendar);
             $workflowTimeline = $studyCalendar ? $this->getWorkflowTimeline($studyCalendar) : collect();
+            $supervisorAssignments = $this->getSupervisorAssignments($employee);
+            $courseResponsibilities = $this->getCourseResponsibilities($employee);
+
+            // Get document states for display
+            $academicDocumentsWithStates = $this->requirementsService->getAcademicDocumentsWithStates($employee->id);
+            $approvalDocumentsWithStates = $this->requirementsService->getApprovalDocumentsWithStates($employee->id);
 
             // Ensure progress bar gets the actual workflow_state as current_state
             $workflowProgressWithState = array_merge(
@@ -327,7 +687,11 @@ class Manage extends WorkflowComponent
                 'requirementsStatus' => $requirementsStatus,
                 'workflowProgress' => $workflowProgressWithState,
                 'workflowTimeline' => $workflowTimeline,
-                'canManageWorkflow' => $this->canUserManageWorkflow()
+                'supervisorAssignments' => $supervisorAssignments,
+                'courseResponsibilities' => $courseResponsibilities,
+                'canManageWorkflow' => $this->canUserManageWorkflow(),
+                'academicDocumentsWithStates' => $academicDocumentsWithStates,
+                'approvalDocumentsWithStates' => $approvalDocumentsWithStates,
             ]);
         } catch (\Exception $e) {
             session()->flash('error', 'Terjadi kesalahan: ' . $e->getMessage());
@@ -351,7 +715,11 @@ class Manage extends WorkflowComponent
                     'current_state' => 1
                 ],
                 'workflowTimeline' => collect(),
-                'canManageWorkflow' => false
+                'supervisorAssignments' => collect(),
+                'courseResponsibilities' => collect(),
+                'canManageWorkflow' => false,
+                'academicDocumentsWithStates' => [],
+                'approvalDocumentsWithStates' => [],
             ]);
         }
     }

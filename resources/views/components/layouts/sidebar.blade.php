@@ -56,6 +56,7 @@
                         <x-heroicon-o-user class="w-5 h-5" />
                         Manajemen Akun
                     </a>
+
                     <!-- Help Link -->
                     <a href={{ route('help') }} class="flex items-center gap-2 px-3 py-2 text-sm text-[var(--color-text-main)] hover:bg-[var(--color-primary-bg)]">
                         <x-heroicon-o-question-mark-circle class="w-5 h-5" />

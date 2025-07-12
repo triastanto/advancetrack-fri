@@ -53,17 +53,6 @@
                             Unggah {{ $documentTypeName }}
                         </h3>
 
-                        <!-- Document Category Info (for debugging/development) -->
-                        @if($documentCategory)
-                        <div class="mb-4 p-2 bg-blue-50 border border-blue-200 rounded-md">
-                            <p class="text-xs text-blue-700">
-                                <strong>Kategori:</strong> {{ ucfirst(str_replace('-', ' ', $documentCategory)) }}
-                                <br>
-                                <strong>Model:</strong> {{ class_basename($documentClass) }}
-                            </p>
-                        </div>
-                        @endif
-
                         <form wire:submit.prevent="uploadDocument">
                             <!-- Document Type Selection -->
                             @if(!$selectedDocumentTypeId || count($availableDocumentTypes) > 1)

@@ -25,6 +25,7 @@ class StudyDetailSeeder extends Seeder
                 'study_program_id' => \App\Models\StudyProgram::inRandomOrder()->first()?->id ?? 1,
                 'study_address' => $this->getRandomStudyAddress(),
                 'study_level' => $this->getRandomStudyLevel(),
+                'total_semester' => $this->getRandomTotalSemester(),
                 'scholarship' => $this->getRandomScholarship(),
                 'funding_source' => $this->getRandomFundingSource(),
                 'study_regulation_notes' => $this->getRandomRegulationNotes(),
@@ -117,6 +118,12 @@ class StudyDetailSeeder extends Seeder
     private function getRandomStudyLevel(): string
     {
         return ['S2', 'S3'][array_rand(['S2', 'S3'])];
+    }
+
+    private function getRandomTotalSemester(): int
+    {
+        // S2 typically 4 semesters, S3 typically 6-8 semesters
+        return rand(4, 8);
     }
 
     private function getRandomScholarship(): ?string

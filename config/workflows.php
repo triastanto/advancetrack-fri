@@ -518,16 +518,16 @@ return [
                 'auto_notify' => true,
                 'notification_types' => ['in_app', 'email'],
                 'events' => [
-                    1 => ['approvers'], // SUBMIT_STUDY - notify approvers
-                    2 => ['student'], // APPROVE_STUDY - notify student
-                    3 => ['student'], // REJECT_STUDY - notify student
-                    4 => ['approvers'], // RESUBMIT_STUDY - notify approvers
-                    5 => ['student', 'supervisors', 'admin'], // START_STUDY - notify student, supervisors, and admin
-                    6 => ['student', 'supervisors'], // TAKE_LEAVE - notify student and supervisors
-                    7 => ['student', 'supervisors'], // RETURN_FROM_LEAVE - notify student and supervisors
-                    8 => ['student', 'supervisors', 'admin'], // COMPLETE_STUDY - notify student, supervisors, and admin
-                    9 => ['student', 'supervisors', 'admin'], // DROP_OUT_ACTIVE - notify student, supervisors, and admin
-                    10 => ['student', 'supervisors', 'admin'], // DROP_OUT_LEAVE - notify student, supervisors, and admin
+                    1 => ['head_of_study_program', 'fri_vice_dean', 'hr_finance_staff'], // SUBMIT_STUDY - notify approvers
+                    2 => ['lecturer'], // APPROVE_STUDY - notify student
+                    3 => ['lecturer'], // REJECT_STUDY - notify student
+                    4 => ['head_of_study_program', 'fri_vice_dean', 'hr_finance_staff'], // RESUBMIT_STUDY - notify approvers
+                    5 => ['lecturer', 'head_of_study_program', 'fri_vice_dean', 'head_of_hr_finance', 'hr_finance_staff'], // START_STUDY - notify student, supervisors, and admin
+                    6 => ['lecturer', 'head_of_study_program', 'fri_vice_dean'], // TAKE_LEAVE - notify student and supervisors
+                    7 => ['lecturer', 'head_of_study_program', 'fri_vice_dean'], // RETURN_FROM_LEAVE - notify student and supervisors
+                    8 => ['lecturer', 'head_of_study_program', 'fri_vice_dean', 'head_of_hr_finance', 'hr_finance_staff'], // COMPLETE_STUDY - notify student, supervisors, and admin
+                    9 => ['lecturer', 'head_of_study_program', 'fri_vice_dean', 'head_of_hr_finance', 'hr_finance_staff'], // DROP_OUT_ACTIVE - notify student, supervisors, and admin
+                    10 => ['lecturer', 'head_of_study_program', 'fri_vice_dean', 'head_of_hr_finance', 'hr_finance_staff'], // DROP_OUT_LEAVE - notify student, supervisors, and admin
                 ],
                 'approver_roles' => ['head_of_study_program', 'fri_vice_dean', 'hr_finance_staff'],
                 'supervisor_roles' => ['head_of_study_program', 'fri_vice_dean'],

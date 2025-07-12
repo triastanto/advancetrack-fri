@@ -428,13 +428,16 @@ class NotifyStakeholders
     private function sendNotificationToUser(User $user, string $type, array $data): void
     {
         try {
+            // Determine specific notification type based on workflow and transition
+            $specificType = $this->determineNotificationType($data);
+            
             // Use Laravel's notification system
-            $user->notify(new \App\Notifications\WorkflowNotification($type, $data));
+            $user->notify(new \App\Notifications\WorkflowNotification($specificType, $data));
 
             Log::info('In-app notification sent', [
                 'user_id' => $user->id,
                 'user_name' => $user->name,
-                'type' => $type,
+                'type' => $specificType,
                 'workflow' => $data['workflow_name'] ?? 'unknown',
                 'model_id' => $data['model_id'] ?? null,
             ]);
@@ -445,6 +448,44 @@ class NotifyStakeholders
                 'error' => $e->getMessage(),
             ]);
         }
+    }
+
+    /**
+     * Determine specific notification type based on workflow and transition
+     */
+    private function determineNotificationType(array $data): string
+    {
+        $workflowName = $data['workflow_name'] ?? '';
+        $transition = $data['transition_id'] ?? null;
+        
+        // Document workflow notifications
+        if (in_array($workflowName, ['verification_by_staff', 'verification_by_management'])) {
+            return match($transition) {
+                1 => 'document_submitted',
+                2 => 'document_approved',
+                3 => 'document_rejected',
+                4 => 'document_submitted', // resubmit
+                default => 'workflow_updated'
+            };
+        }
+        
+        // Study calendar workflow notifications
+        if ($workflowName === 'study_calendar') {
+            return match($transition) {
+                1 => 'workflow_action_required', // SUBMIT_STUDY
+                2 => 'study_calendar_approved',
+                3 => 'study_calendar_rejected',
+                4 => 'workflow_action_required', // RESUBMIT_STUDY
+                5 => 'study_started',
+                6 => 'workflow_updated', // TAKE_LEAVE
+                7 => 'workflow_updated', // RETURN_FROM_LEAVE
+                8 => 'study_completed',
+                9, 10 => 'workflow_updated', // DROP_OUT
+                default => 'workflow_updated'
+            };
+        }
+        
+        return 'workflow_updated';
     }
 
     /**
@@ -478,10 +519,12 @@ class NotifyStakeholders
      */
     private function getUsersByRoleType(string $roleType, string $workflowName): Collection
     {
+        // Handle direct role names (for backward compatibility and direct role mapping)
         $roles = NotificationConfig::getRolesByType($roleType, $workflowName);
 
         if (empty($roles)) {
-            return collect();
+            // If no configured roles, treat the roleType as a direct role name
+            $roles = [$roleType];
         }
 
         return User::whereHas('employee', function ($query) use ($roles) {

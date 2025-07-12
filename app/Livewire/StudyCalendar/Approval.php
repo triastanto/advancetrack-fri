@@ -145,9 +145,16 @@ class Approval extends WorkflowComponent
             $verifiedAcademicDocs = $academicDocuments->where('workflow_state', 3)->count(); // VERIFIED state
             $totalAcademicDocs = $academicDocuments->count();
 
-            // Check Approval Document
-            $approvalDocument = ApprovalDocument::where('employee_id', $employee->id)->first();
-            $approvalDocumentApproved = $approvalDocument && $approvalDocument->workflow_state === 4; // APPROVED state
+            // Get approval document type names and IDs
+            $approvalTypeNames = DocumentTypeConstants::getApprovalDocumentNames();
+            $approvalTypeIds = \App\Models\DocumentType::whereIn('name', $approvalTypeNames)->pluck('id');
+
+            // Check Approval Documents (all types for this employee)
+            $approvalDocuments = ApprovalDocument::where('employee_id', $employee->id)
+                ->whereIn('document_type_id', $approvalTypeIds)
+                ->get();
+            $approvalTotal = count($approvalTypeIds); // Should be 5
+            $approvalApproved = $approvalDocuments->where('workflow_state', 4)->count(); // APPROVED state
 
             return [
                 'academic_documents' => [
@@ -156,18 +163,21 @@ class Approval extends WorkflowComponent
                     'complete' => $verifiedAcademicDocs === $totalAcademicDocs && $totalAcademicDocs > 0
                 ],
                 'approval_document' => [
-                    'exists' => $approvalDocument !== null,
-                    'approved' => $approvalDocumentApproved
+                    'exists' => $approvalDocuments->count() > 0,
+                    'approved' => $approvalApproved === $approvalTotal && $approvalTotal > 0,
+                    'approved_count' => $approvalApproved,
+                    'total' => $approvalTotal
                 ],
                 'all_requirements_met' => $verifiedAcademicDocs === $totalAcademicDocs &&
                                         $totalAcademicDocs > 0 &&
-                                        $approvalDocumentApproved
+                                        $approvalApproved === $approvalTotal &&
+                                        $approvalTotal > 0
             ];
         } catch (\Exception $e) {
             Log::error('Error getting requirements status for study calendar: ' . $e->getMessage());
             return [
                 'academic_documents' => ['verified' => 0, 'total' => 0, 'complete' => false],
-                'approval_document' => ['exists' => false, 'approved' => false],
+                'approval_document' => ['exists' => false, 'approved' => false, 'approved_count' => 0, 'total' => 0],
                 'all_requirements_met' => false
             ];
         }

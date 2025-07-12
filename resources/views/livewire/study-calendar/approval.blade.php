@@ -219,9 +219,9 @@
                                             </span>
                                         </div>
                                         <div class="flex items-center">
-                                            <x-heroicon-o-check-circle class="w-4 h-4 mr-2 {{ $requirements['approval_document']['approved'] ? 'text-green-500' : 'text-gray-400' }}" />
+                                            <x-heroicon-o-check-circle class="w-4 h-4 mr-2 {{ ($requirements['approval_document']['approved_count'] ?? 0) === ($requirements['approval_document']['total'] ?? 0) && ($requirements['approval_document']['total'] ?? 0) > 0 ? 'text-green-500' : 'text-gray-400' }}" />
                                             <span class="text-xs">
-                                                Persetujuan: {{ $requirements['approval_document']['approved'] ? 'Disetujui' : 'Belum disetujui' }}
+                                                Persetujuan: {{ $requirements['approval_document']['approved_count'] ?? 0 }}/{{ $requirements['approval_document']['total'] ?? 0 }}
                                             </span>
                                         </div>
                                     </div>
@@ -248,15 +248,7 @@
                                                 class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 {{ !$requirements['academic_documents']['complete'] ? 'opacity-50 cursor-not-allowed' : '' }}"
                                             >
                                                 <x-heroicon-o-check class="w-4 h-4 mr-1" />
-                                                Setujui
-                                            </button>
-
-                                            <button
-                                                wire:click="rejectStudy({{ $studyCalendar->id }})"
-                                                class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                                            >
-                                            <x-heroicon-o-x-circle class="w-4 h-4 mr-1" />
-                                                Tolak
+                                                Verifikasi
                                             </button>
                                         @endif
                                     </div>

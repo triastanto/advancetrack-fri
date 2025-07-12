@@ -17,8 +17,20 @@
             ['label' => 'NIP', 'value' => $employeeNip],
         ];
         
-        if($document->employee && $document->employee->studyPrograms->isNotEmpty()) {
-            $documentInfoItems[] = ['label' => 'Program Studi', 'value' => $document->employee->studyPrograms->first()->name];
+        // Get study program from employee's active study calendar
+        $activeStudy = $document->employee->studyCalendars()
+            ->with('studyDetail.studyProgram')
+            ->where('workflow_state', 5) // ACTIVE state
+            ->latest()
+            ->first();
+        if (!$activeStudy) {
+            $activeStudy = $document->employee->studyCalendars()
+                ->with('studyDetail.studyProgram')
+                ->latest()
+                ->first();
+        }
+        if($activeStudy && $activeStudy->studyDetail && $activeStudy->studyDetail->studyProgram) {
+            $documentInfoItems[] = ['label' => 'Program Studi', 'value' => $activeStudy->studyDetail->studyProgram->name];
         }
         
         $documentInfoItems[] = ['label' => 'Waktu Submit', 'value' => $submissionDate];

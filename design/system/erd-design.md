@@ -167,6 +167,7 @@
 - study_program_id (FK → study_programs.id, cascade)
 - study_address (text)
 - study_level
+- total_semester
 - scholarship (nullable)
 - funding_source (nullable)
 - study_regulation_notes (text, nullable)

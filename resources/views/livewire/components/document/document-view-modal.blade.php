@@ -65,10 +65,27 @@
                                     <span class="font-medium text-gray-700">Tanggal Upload:</span>
                                     <span class="text-gray-900">{{ $document->created_at->format('d M Y H:i') }}</span>
                                 </div>
-                                @if($document->employee->studyPrograms->isNotEmpty())
+                                @php
+                                    // Get study program from employee's active study calendar
+                                    $activeStudy = $document->employee->studyCalendars()
+                                        ->with('studyDetail.studyProgram')
+                                        ->where('workflow_state', 5) // ACTIVE state
+                                        ->latest()
+                                        ->first();
+                                    if (!$activeStudy) {
+                                        $activeStudy = $document->employee->studyCalendars()
+                                            ->with('studyDetail.studyProgram')
+                                            ->latest()
+                                            ->first();
+                                    }
+                                    $studyProgramName = $activeStudy && $activeStudy->studyDetail && $activeStudy->studyDetail->studyProgram 
+                                        ? $activeStudy->studyDetail->studyProgram->name 
+                                        : null;
+                                @endphp
+                                @if($studyProgramName)
                                 <div>
                                     <span class="font-medium text-gray-700">Program Studi:</span>
-                                    <span class="text-gray-900">{{ $document->employee->studyPrograms->first()->name }}</span>
+                                    <span class="text-gray-900">{{ $studyProgramName }}</span>
                                 </div>
                                 @endif
                             </div>

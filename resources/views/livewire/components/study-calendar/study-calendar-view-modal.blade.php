@@ -67,10 +67,6 @@
                         <div class="bg-gray-50 p-4 rounded-md mb-4">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                 <div>
-                                    <span class="font-medium text-gray-700">Program Studi:</span>
-                                    <span class="text-gray-900">{{ $studyCalendar->employee->studyPrograms->first()->name ?? 'N/A' }}</span>
-                                </div>
-                                <div>
                                     <span class="font-medium text-gray-700">Status:</span>
                                     <x-workflow.workflow-status :model="$studyCalendar" />
                                 </div>
@@ -78,12 +74,6 @@
                                     <span class="font-medium text-gray-700">Tanggal Dibuat:</span>
                                     <span class="text-gray-900">{{ $studyCalendar->created_at->format('d M Y H:i') }}</span>
                                 </div>
-                                @if($studyCalendar->employee->studyPrograms->isNotEmpty())
-                                <div>
-                                    <span class="font-medium text-gray-700">Program Studi:</span>
-                                    <span class="text-gray-900">{{ $studyCalendar->employee->studyPrograms->first()->name }}</span>
-                                </div>
-                                @endif
                             </div>
                         </div>
 

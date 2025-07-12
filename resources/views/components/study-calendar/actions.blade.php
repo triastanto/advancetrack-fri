@@ -92,7 +92,7 @@
                             <p class="text-sm text-gray-600">
                                 @switch($transition['name'])
                                     @case('SUBMIT_STUDY')
-                                        Ajukan kalender studi untuk mendapatkan persetujuan dari supervisor. Memerlukan semua dokumen persyaratan sudah diverifikasi.
+                                        Ajukan kalender studi untuk mendapatkan persetujuan dari Staf SDM & Keuangan. <br > Memerlukan semua dokumen persyaratan sudah diverifikasi.
                                         @break
                                     @case('RESUBMIT_STUDY')
                                         Revisi dan ajukan ulang kalender studi setelah ditolak.

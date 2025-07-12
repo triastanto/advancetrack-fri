@@ -1,13 +1,16 @@
 <x-ui.page-container title="Data Pribadi">
-    <x-ui.card>
-        @if (session()->has('success'))
-            <div class="bg-green-100 text-green-800 p-2 rounded mb-4">
-                {{ session('success') }}
-            </div>
-        @endif
+    <x-ui.alert-message />
 
-        <form wire:submit.prevent="save" enctype="multipart/form-data">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    {{-- Form Section --}}
+    <div class="bg-white rounded-lg shadow-md overflow-hidden mb-8">
+        <div class="px-6 py-4 border-b border-[var(--color-border)]">
+            <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                <x-heroicon-o-user class="w-5 h-5 mr-2 text-blue-600" />
+                Edit Data Pribadi
+            </h3>
+        </div>
+        <form wire:submit.prevent="save" enctype="multipart/form-data" class="px-6 py-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="md:col-span-2 flex flex-col items-center mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Foto Profil</label>
                     @if ($photo_preview)
@@ -93,7 +96,7 @@
                     @error('contact_email') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
                 </div>
             </div>
-            <div class="relative bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse mt-6 rounded-b-lg">
+            <div class="relative px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse mt-6 rounded-b-lg">
                 <button
                     type="submit"
                     class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200 sm:ml-3 sm:w-auto sm:text-sm"
@@ -105,5 +108,5 @@
                 </button>
             </div>
         </form>
-    </x-ui.card>
+    </div>
 </x-ui.page-container>

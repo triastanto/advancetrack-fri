@@ -30,6 +30,7 @@ class StudyDetailFactory extends Factory
             'study_program_id' => \App\Models\StudyProgram::inRandomOrder()->first()?->id ?? 1,
             'study_address' => $this->faker->address(),
             'study_level' => $this->faker->randomElement(['S2', 'S3']),
+            'total_semester' => $this->faker->numberBetween(4, 12),
             'scholarship' => $this->faker->optional(0.6)->randomElement([
                 'LPDP',
                 'Beasiswa Unggulan',
@@ -56,6 +57,7 @@ class StudyDetailFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'study_level' => 'S3',
+            'total_semester' => $this->faker->numberBetween(8, 12),
             'study_program_id' => \App\Models\StudyProgram::whereIn('name', [
                 'Doktor Matematika',
                 'Doktor Fisika',
@@ -72,6 +74,7 @@ class StudyDetailFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'study_level' => 'S2',
+            'total_semester' => $this->faker->numberBetween(4, 8),
             'study_program_id' => \App\Models\StudyProgram::whereIn('name', [
                 'Magister Matematika',
                 'Magister Fisika',

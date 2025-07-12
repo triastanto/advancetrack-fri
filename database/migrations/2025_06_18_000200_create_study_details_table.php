@@ -21,6 +21,7 @@ return new class extends Migration
             $table->foreignId('study_program_id')->constrained('study_programs')->onDelete('cascade');
             $table->text('study_address');
             $table->string('study_level');
+            $table->integer('total_semester');
             $table->string('scholarship')->nullable();
             $table->string('funding_source')->nullable();
             $table->text('study_regulation_notes')->nullable();

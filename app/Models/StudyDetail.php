@@ -20,6 +20,7 @@ class StudyDetail extends Model
         'study_program_id',
         'study_address',
         'study_level',
+        'total_semester',
         'scholarship',
         'funding_source',
         'study_regulation_notes',

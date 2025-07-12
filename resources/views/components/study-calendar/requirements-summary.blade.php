@@ -6,19 +6,6 @@
             <x-heroicon-o-clipboard-document-list class="w-5 h-5 mr-2 text-blue-600" />
             Ringkasan Persyaratan dan Persetujuan
         </h3>
-        <div class="flex items-center space-x-2">
-            @if($requirementsStatus['all_requirements_met'])
-                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                    <x-heroicon-s-check-circle class="w-4 h-4 mr-1" />
-                    Semua Persyaratan Terpenuhi
-                </span>
-            @else
-                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
-                    <x-heroicon-s-exclamation-triangle class="w-4 h-4 mr-1" />
-                    Persyaratan Belum Lengkap
-                </span>
-            @endif
-        </div>
     </div>
 
     {{-- Overall Status --}}

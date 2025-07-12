@@ -220,12 +220,14 @@ trait HasDocumentManagement
     {
         try {
             $activeStudy = $employee->studyCalendars()
+                ->with('studyDetail.studyProgram')
                 ->where('workflow_state', 5) // ACTIVE state
                 ->latest()
                 ->first();
 
             if (!$activeStudy) {
                 $activeStudy = $employee->studyCalendars()
+                    ->with('studyDetail.studyProgram')
                     ->latest()
                     ->first();
 
@@ -234,23 +236,35 @@ trait HasDocumentManagement
                 }
             }
 
-            $studyProgram = $employee->studyPrograms()->first();
-            $programName = $studyProgram ? $studyProgram->name : 'Tidak tersedia';
+            // Get study program from study details instead of employee_study_program
+            $studyDetail = $activeStudy->studyDetail;
+            $programName = $studyDetail && $studyDetail->studyProgram ? $studyDetail->studyProgram->name : 'Tidak tersedia';
+            
+
 
             $startDate = Carbon::parse($activeStudy->study_start);
             $now = Carbon::now();
             $monthsDiff = $startDate->diffInMonths($now);
             $currentSemester = max(1, floor($monthsDiff / 6) + 1);
+            
+            // Get total semester from study details
+            $totalSemester = $activeStudy->studyDetail ? $activeStudy->studyDetail->total_semester : null;
 
-            return [
+            $result = [
                 'program' => $programName,
+                'study_program_name' => $programName, // Add this field for the component
                 'status' => $this->getStudyStatusFromWorkflowState($activeStudy->workflow_state),
                 'start_date' => $startDate->format('F Y'),
                 'estimated_end' => Carbon::parse($activeStudy->estimated_study_end)->format('F Y'),
                 'current_semester' => $currentSemester,
+                'total_semester' => $totalSemester, // Add total semester from study details
                 'has_multiple_studies' => $employee->studyCalendars()->count() > 1,
                 'months_elapsed' => $monthsDiff
             ];
+            
+
+            
+            return $result;
         } catch (\Exception $e) {
             Log::error('Error getting active study info: ' . $e->getMessage(), [
                 'employee_id' => $employee->id,

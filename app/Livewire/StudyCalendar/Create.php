@@ -19,6 +19,7 @@ class Create extends Component
     // Step 1
     public $start_date;
     public $end_date;
+    public $total_semester;
 
     // Step 2
     public $university_name;
@@ -39,6 +40,7 @@ class Create extends Component
     protected $rules = [
         'start_date' => 'required|date_format:Y-m-d',
         'end_date' => 'required|date_format:Y-m-d|after_or_equal:start_date',
+        'total_semester' => 'required|integer|min:1|max:20',
         'university_name' => 'required|string',
         'university_address' => 'required|string',
         'study_program_id' => 'required|integer|exists:study_programs,id',
@@ -55,6 +57,10 @@ class Create extends Component
         'end_date.required' => 'Tanggal selesai studi wajib diisi.',
         'end_date.date_format' => 'Format tanggal selesai studi harus YYYY-MM-DD (contoh: 2024-12-31).',
         'end_date.after_or_equal' => 'Tanggal selesai harus setelah tanggal mulai.',
+        'total_semester.required' => 'Total semester wajib diisi.',
+        'total_semester.integer' => 'Total semester harus berupa angka.',
+        'total_semester.min' => 'Total semester minimal 1 semester.',
+        'total_semester.max' => 'Total semester maksimal 20 semester.',
         'university_name.required' => 'Nama universitas wajib diisi.',
         'university_address.required' => 'Alamat universitas wajib diisi.',
         'study_program_id.required' => 'Program studi wajib dipilih.',
@@ -91,7 +97,7 @@ class Create extends Component
         $errorStep = $this->getErrorStep();
 
         // Determine which steps are completed based on data, not just current step
-        $hasStep1Data = !empty($this->start_date) && !empty($this->end_date);
+        $hasStep1Data = !empty($this->start_date) && !empty($this->end_date) && !empty($this->total_semester);
         $hasStep2Data = !empty($this->university_name) && !empty($this->university_address) &&
                        !empty($this->study_program_id) && !empty($this->study_level) &&
                        !empty($this->funding_source) && !empty($this->study_address);
@@ -139,6 +145,7 @@ class Create extends Component
             return [
                 'start_date' => $this->rules['start_date'],
                 'end_date' => $this->rules['end_date'],
+                'total_semester' => $this->rules['total_semester'],
             ];
         } elseif ($this->step == 2) {
             return [
@@ -183,6 +190,7 @@ class Create extends Component
             'step' => $this->step,
             'start_date' => $this->start_date,
             'end_date' => $this->end_date,
+            'total_semester' => $this->total_semester,
             'university_name' => $this->university_name,
             'university_address' => $this->university_address,
             'study_program_id' => $this->study_program_id,
@@ -201,6 +209,7 @@ class Create extends Component
             'step' => $this->step,
             'start_date' => $this->start_date,
             'end_date' => $this->end_date,
+            'total_semester' => $this->total_semester,
             'university_name' => $this->university_name,
             'university_address' => $this->university_address,
             'study_program_id' => $this->study_program_id,
@@ -246,6 +255,7 @@ class Create extends Component
                     'step' => $this->step,
                     'start_date' => $this->start_date,
                     'end_date' => $this->end_date,
+                    'total_semester' => $this->total_semester,
                     'university_name' => $this->university_name,
                     'university_address' => $this->university_address,
                     'study_program_id' => $this->study_program_id,
@@ -276,6 +286,7 @@ class Create extends Component
         Log::info('StudyCalendar Create - Form data:', [
             'start_date' => $this->start_date,
             'end_date' => $this->end_date,
+            'total_semester' => $this->total_semester,
             'university_name' => $this->university_name,
             'university_address' => $this->university_address,
             'study_program_id' => $this->study_program_id,
@@ -313,6 +324,7 @@ class Create extends Component
                 'university_phone' => '', // Add default value for required field
                 'study_program_id' => $this->study_program_id,
                 'study_level' => $this->study_level,
+                'total_semester' => $this->total_semester,
                 'scholarship' => $this->scholarship,
                 'funding_source' => $this->funding_source,
                 'study_address' => $this->study_address,
@@ -341,7 +353,7 @@ class Create extends Component
      */
     private function getStepForField($fieldName)
     {
-        $step1Fields = ['start_date', 'end_date'];
+        $step1Fields = ['start_date', 'end_date', 'total_semester'];
         $step2Fields = ['university_name', 'university_address', 'study_program_id', 'study_level', 'scholarship', 'funding_source', 'study_address'];
         $step3Fields = ['agreed'];
 
@@ -398,21 +410,16 @@ class Create extends Component
      */
     public function getCurrentStepErrors()
     {
-        $errorBag = $this->getErrorBag();
-        $currentStepFields = array_keys($this->stepRules());
-        $stepErrors = [];
-
-        foreach ($currentStepFields as $field) {
-            if ($errorBag->has($field)) {
-                $stepErrors[$field] = $errorBag->first($field);
-            }
+        try {
+            $this->validate($this->stepRules(), $this->messages);
+            return [];
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $e->validator->errors()->toArray();
         }
-
-        return $stepErrors;
     }
 
     /**
-     * Navigate to the step with errors
+     * Navigate to the step that has validation errors
      */
     public function goToErrorStep()
     {
@@ -424,33 +431,25 @@ class Create extends Component
     }
 
     /**
-     * Check if there are errors on other steps
+     * Check if there are validation errors on other steps
      */
     public function hasErrorsOnOtherSteps()
     {
         $errorStep = $this->getErrorStep();
-        return $errorStep && $errorStep !== $this->step;
+        return $errorStep !== null && $errorStep !== $this->step;
     }
 
     /**
-     * Reset form data for debugging
+     * Reset form data
      */
     public function resetFormData()
     {
-        $this->start_date = '';
-        $this->end_date = '';
-        $this->university_name = '';
-        $this->university_address = '';
-        $this->study_program_id = null;
-        $this->study_level = '';
-        $this->scholarship = '';
-        $this->funding_source = '';
-        $this->study_address = '';
-        $this->agreed = false;
+        $this->reset([
+            'start_date', 'end_date', 'total_semester', 'university_name', 'university_address',
+            'study_program_id', 'study_level', 'scholarship', 'funding_source', 'study_address', 'agreed'
+        ]);
         $this->step = 1;
         $this->clearErrors();
-
-        Log::debug('Form data reset');
     }
 
     public function render()

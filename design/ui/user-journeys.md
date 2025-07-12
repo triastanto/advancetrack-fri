@@ -17,6 +17,7 @@
 - **Actions**:
   - Create initial study calendar (DRAFT state)
   - Define study timeline and milestones
+  - Select study program from available options
   - Save draft for later completion
 - **Permissions**: Create/edit own study calendar
 
@@ -40,7 +41,7 @@
 #### **Week 9-10: Study Calendar Submission**
 - **Navigation Access**: Kalender Studi Lanjut → Kelola Kalender Studi Lanjut
 - **Actions**:
-  - Finalize study calendar
+  - Finalize study calendar with study program details
   - Submit for approval (DRAFT → PENDING_APPROVAL)
   - Wait for supervisor approval
 - **Permissions**: Submit study calendar for approval
@@ -155,7 +156,7 @@
 - **Navigation Access**: Monitoring & Laporan → Laporan Dosen
 - **Actions**:
   - Generate dosen reports per semester
-  - Track dosen by study program
+  - Track dosen by study program (accessed through study calendars)
   - Monitor approaching study deadlines
 - **Permissions**: Generate and view reports
 
@@ -210,7 +211,7 @@
 #### **Weekly: Calendar Review**
 - **Navigation Access**: Kalender Studi Lanjut → Persetujuan Kalender Studi Lanjut
 - **Actions**:
-  - Review submitted study calendars
+  - Review submitted study calendars with study program details
   - Approve or reject study plans (PENDING_APPROVAL → APPROVED/REJECTED)
   - Provide academic guidance and comments
 - **Permissions**: Approve/reject study calendars, add comments
@@ -220,7 +221,7 @@
 #### **Monthly: Progress Tracking**
 - **Navigation Access**: Monitoring & Laporan → Laporan Dosen
 - **Actions**:
-  - Monitor dosen progress in study programs
+  - Monitor dosen progress in study programs (via study calendars)
   - Review semester reports
   - Track completion rates
 - **Permissions**: View dosen progress, generate academic reports

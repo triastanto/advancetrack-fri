@@ -36,7 +36,6 @@
         }
     }
     $statusInfo = getStudyStatus($studyInfo['status'] ?? null);
-    // Use study program from study details instead of employee_study_program
     $program = $studyInfo['study_program_name'] ?? $studyInfo['program'] ?? '-';
     $startDate = $studyInfo['start_date'] ?? '-';
     $estimatedEnd = $studyInfo['estimated_end'] ?? '-';

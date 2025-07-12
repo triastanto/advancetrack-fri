@@ -15,7 +15,8 @@ Day 8-14:  Review dashboard, understand system
 ```
 Day 15-17: Create initial study calendar (DRAFT)
 Day 18-21: Define study timeline and milestones
-Day 22-28: Save draft, review requirements
+Day 22-28: Select study program from available options
+Day 29-35: Save draft, review requirements
 ```
 
 #### **Week 5-8: Document Collection & Upload**
@@ -29,7 +30,7 @@ Week 8:    Upload SK Inpassing, SK JAD, Surat Pernyataan
 
 #### **Week 9-10: Study Calendar Submission**
 ```
-Day 57-63: Finalize study calendar
+Day 57-63: Finalize study calendar with study program details
 Day 64-70: Submit for approval (DRAFT → PENDING_APPROVAL)
 ```
 
@@ -92,7 +93,7 @@ Friday:    Generate weekly report
 #### **Monthly: Report Generation**
 ```
 Week 1:   Generate dosen reports per semester
-Week 2:   Track dosen by study program
+Week 2:   Track dosen by study program (via study calendars)
 Week 3:   Monitor approaching study deadlines
 Week 4:   Prepare monthly summary report
 ```
@@ -132,7 +133,7 @@ Week 4:   Update policies if needed
 
 #### **Weekly: Study Calendar Review**
 ```
-Monday:    Review submitted study calendars
+Monday:    Review submitted study calendars with study program details
 Tuesday:   Approve/reject calendars (PENDING_APPROVAL → APPROVED/REJECTED)
 Wednesday: Provide academic guidance
 Thursday:  Review calendar revisions
@@ -148,7 +149,7 @@ Day X+2:   Add detailed comments
 
 #### **Monthly: Progress Tracking**
 ```
-Week 1:   Monitor dosen progress in study programs
+Week 1:   Monitor dosen progress in study programs (via study calendars)
 Week 2:   Review semester reports
 Week 3:   Track completion rates
 Week 4:   Generate monthly academic report
@@ -237,7 +238,7 @@ Dependencies: All documents must be verified before calendar submission
 ```
 Lecturer Submit → Head Prodi/Vice Dean Approve
 Timeline: 2-4 weeks
-Dependencies: All documents verified, calendar complete
+Dependencies: All documents verified, calendar complete with study program details
 ```
 
 ### 📋 Critical Path 3: Approval Document Process

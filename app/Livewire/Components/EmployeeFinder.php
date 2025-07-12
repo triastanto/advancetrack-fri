@@ -31,7 +31,7 @@ class EmployeeFinder extends Component
     {
         if ($selectedEmployeeId) {
             $this->selectedEmployeeId = $selectedEmployeeId;
-            $this->selectedEmployee = Employee::with(['user', 'studyPrograms'])->find($selectedEmployeeId);
+            $this->selectedEmployee = Employee::with(['user'])->find($selectedEmployeeId);
         }
     }
 
@@ -52,7 +52,7 @@ class EmployeeFinder extends Component
 
     public function selectEmployee($employeeId)
     {
-        $employee = Employee::with(['user', 'studyPrograms'])->find($employeeId);
+        $employee = Employee::with(['user'])->find($employeeId);
 
         if ($employee) {
             $this->selectedEmployeeId = $employeeId;
@@ -80,12 +80,12 @@ class EmployeeFinder extends Component
     public function handleEmployeeSelected($data)
     {
         $this->selectedEmployeeId = $data['employeeId'];
-        $this->selectedEmployee = Employee::with(['user', 'studyPrograms'])->find($data['employeeId']);
+        $this->selectedEmployee = Employee::with(['user'])->find($data['employeeId']);
     }
 
     public function getEmployeesProperty()
     {
-        return Employee::with(['user', 'studyPrograms'])
+        return Employee::with(['user'])
             ->where('role', 'lecturer') // Only show lecturers for approval documents
             ->whereHas('studyCalendar') // Only those with a study calendar record
             ->when($this->search, function ($query) {

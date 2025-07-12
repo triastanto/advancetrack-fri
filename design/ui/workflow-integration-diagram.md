@@ -20,7 +20,8 @@ PHASE 1: INITIAL SETUP & DOCUMENT SUBMISSION
 │ Week 3-4: Study Calendar Creation                                            │
 │ ├── Kalender Studi → Kelola Kalender Studi Lanjut                           │
 │ ├── Create study calendar (DRAFT state)                                      │
-│ └── Define timeline and milestones                                           │
+│ ├── Define timeline and milestones                                           │
+│ └── Select study program from available options                              │
 │                                                                               │
 │ Week 5-8: Document Collection                                                │
 │ ├── Dokumen Akademik → Persyaratan Studi Lanjut                             │
@@ -29,7 +30,7 @@ PHASE 1: INITIAL SETUP & DOCUMENT SUBMISSION
 │ └── Track verification status                                                │
 │                                                                               │
 │ Week 9-10: Calendar Submission                                               │
-│ ├── Finalize study calendar                                                  │
+│ ├── Finalize study calendar with study program details                       │
 │ ├── Submit for approval (DRAFT → PENDING_APPROVAL)                          │
 │ └── Wait for supervisor approval                                             │
 └─────────────────────────────────────────────────────────────────────────────────┘
@@ -58,7 +59,7 @@ PHASE 2: APPROVAL & STUDY PREPARATION
 ├─────────────────────────────────────────────────────────────────────────────────┤
 │ Weekly: Study Calendar Review                                                │
 │ ├── Kalender Studi → Persetujuan Kalender Studi Lanjut                      │
-│ ├── Review submitted calendars                                               │
+│ ├── Review submitted calendars with study program details                     │
 │ ├── Approve/reject (PENDING_APPROVAL → APPROVED/REJECTED)                   │
 │ └── Provide academic guidance                                                │
 │                                                                               │

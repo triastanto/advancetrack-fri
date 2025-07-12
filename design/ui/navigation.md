@@ -93,12 +93,12 @@
 │   ├── 📈 Dasbor Analitik
 │   │   ├── Overview Statistik Umum (Grafik jumlah dosen aktif, lulus, dan dropout)
 │   │   ├── Tren Studi Lanjut per Tahun (Analisis tren pertumbuhan studi lanjut)
-│   │   ├── Distribusi Program Studi (Sebaran dosen berdasarkan program yang diambil)
+│   │   ├── Distribusi Program Studi (Sebaran dosen berdasarkan program yang diambil melalui study calendars)
 │   │   └── Rata-rata Masa Studi (Analisis durasi penyelesaian studi)
 │   👥 **Akses**: Staf SDM & Keuangan, Kepala Urusan SDM & Keuangan, Ketua Program Studi, Ketua Kelompok Keilmuan, Wakil Dekan II FRI
 │   ├── 📋 Laporan Dosen
 │   │   ├── Rekap Dosen Studi Lanjut per Semester (Daftar dosen aktif per periode)
-│   │   ├── Rekap Dosen per Program Studi (Pengelompokan berdasarkan prodi asal)
+│   │   ├── Rekap Dosen per Program Studi (Pengelompokan berdasarkan prodi asal melalui study calendars)
 │   │   ├── Dosen Mendekati Batas Studi (Alert dosen yang akan habis masa studi)
 │   │   └── Laporan Kelulusan Dosen (Rekap dosen yang telah lulus)
 │   👥 **Akses**: Staf SDM & Keuangan, Kepala Urusan SDM & Keuangan, Ketua Program Studi, Ketua Kelompok Keilmuan, Wakil Dekan II FRI
@@ -161,7 +161,7 @@
 - **Status**: DRAFT → PENDING_L1 → PENDING_L2 → APPROVED/REJECTED
 
 #### 📅 Kalender Studi Lanjut (study_calendar)
-- **Dosen**: Submit kalender studi
+- **Dosen**: Submit kalender studi dengan detail program studi
 - **Ketua Prodi & Wakil Dekan**: Persetujuan kalender
 - **Status**: DRAFT → PENDING_APPROVAL → APPROVED → ACTIVE → FINISHED/DROP_OUT
 

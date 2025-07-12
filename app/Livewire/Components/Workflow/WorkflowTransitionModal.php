@@ -77,7 +77,6 @@ class WorkflowTransitionModal extends Component
         try {
             $document = Document::with([
                 'employee.user',
-                'employee.studyPrograms',
                 'documentType',
                 'workflowHistory.user'
             ])->find($id);
@@ -109,7 +108,6 @@ class WorkflowTransitionModal extends Component
             case 'AcademicDocument':
                 return AcademicDocument::with([
                     'employee.user',
-                    'employee.studyPrograms',
                     'documentType',
                     'workflowHistory.user'
                 ])->find($id);
@@ -118,7 +116,6 @@ class WorkflowTransitionModal extends Component
             case 'ApprovalDocument':
                 return ApprovalDocument::with([
                     'employee.user',
-                    'employee.studyPrograms',
                     'documentType',
                     'workflowHistory.user'
                 ])->find($id);
@@ -127,7 +124,6 @@ class WorkflowTransitionModal extends Component
                 // Fallback to Document
                 return Document::with([
                     'employee.user',
-                    'employee.studyPrograms',
                     'documentType',
                     'workflowHistory.user'
                 ])->find($id);

@@ -101,7 +101,6 @@ class DocumentViewModal extends Component
             
             $document = $modelClass::with([
                 'employee.user', 
-                'employee.studyPrograms', 
                 'documentType',
                 'workflowHistory.user'
             ])->findOrFail($documentId);

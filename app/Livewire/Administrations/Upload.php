@@ -92,7 +92,7 @@ class Upload extends WorkflowComponent
                 throw new \Exception('Silakan pilih dosen terlebih dahulu.');
             }
 
-            $employee = Employee::with(['user', 'studyPrograms'])->find($this->selectedEmployeeId);
+            $employee = Employee::with(['user'])->find($this->selectedEmployeeId);
             if (!$employee) {
                 throw new \Exception('Data dosen tidak ditemukan.');
             }
@@ -110,7 +110,7 @@ class Upload extends WorkflowComponent
     public function handleEmployeeSelected($data)
     {
         $this->selectedEmployeeId = $data['employeeId'];
-        $this->selectedEmployee = Employee::with(['user', 'studyPrograms'])->find($data['employeeId']);
+        $this->selectedEmployee = Employee::with(['user'])->find($data['employeeId']);
 
         // Force refresh of the component data
         $this->refreshData();

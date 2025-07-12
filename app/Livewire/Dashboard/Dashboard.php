@@ -28,7 +28,6 @@ class Dashboard extends Component
                         ->first();
                 }
                 if ($activeStudy) {
-                    // Get study program from study details instead of employee_study_program
                     $studyDetail = $activeStudy->studyDetail;
                     $programName = $studyDetail && $studyDetail->studyProgram ? $studyDetail->studyProgram->name : 'Tidak tersedia';
                     $startDate = $activeStudy->study_start ? \Carbon\Carbon::parse($activeStudy->study_start) : null;

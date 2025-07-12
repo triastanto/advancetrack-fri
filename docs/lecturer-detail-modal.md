@@ -23,7 +23,7 @@ The Lecturer Detail Modal is a comprehensive view component that displays detail
 - **Chronological Order**: Education records sorted by graduation year (descending)
 
 ### Study Calendar Information
-- **Study Programs**: Current or past study programs and universities
+- **Study Programs**: Current or past study programs and universities accessed through study details
 - **Timeline**: Study start dates, estimated completion, and graduation dates
 - **Status Tracking**: Workflow state of study calendars (Draft, Pending, Approved, etc.)
 - **Promotors**: Lists of primary and secondary promotors/supervisors
@@ -32,10 +32,6 @@ The Lecturer Detail Modal is a comprehensive view component that displays detail
 - **Teaching Assignments**: Courses the lecturer is responsible for
 - **Semester Information**: Semester and academic year details
 - **Workload Overview**: Complete teaching portfolio
-
-### Study Programs
-- **Program Affiliations**: Study programs the lecturer is associated with
-- **Role Indicators**: Visual badges showing program memberships
 
 ## Technical Implementation
 
@@ -69,13 +65,14 @@ The modal loads comprehensive data through the following relationships:
 Employee::with([
     'user',
     'researchLab.researchGroup',
-    'studyPrograms',
     'educations',
     'studyCalendars.studyDetail.studyProgram',
     'studyCalendars.studyDetail.promotors',
     'courseResponsibilities'
 ])->find($lecturerId);
 ```
+
+**Note**: The `studyPrograms` relationship has been removed. Study program information is now accessed through the `studyCalendars → studyDetail → studyProgram` relationship chain.
 
 ### Usage
 
@@ -105,7 +102,6 @@ The modal uses Livewire's event system for communication:
 - Education section only displays if education records exist
 - Study Calendar section shows only if study calendars are present
 - Course Responsibilities section displays only if teaching assignments exist
-- Study Programs section shows only if program affiliations exist
 
 ### Status Indicators
 - Workflow states are color-coded for easy identification
@@ -117,6 +113,12 @@ The modal uses Livewire's event system for communication:
 - GPA values are displayed with 2 decimal places
 - Academic years are shown in standard format (YYYY/YYYY)
 - Gender and role labels are translated to Indonesian
+
+### Study Program Display
+- Study programs are displayed from the active study calendar's study details
+- If no active study calendar exists, the latest study calendar is used
+- Study program information includes university name, program name, and study level
+- Multiple study calendars can be displayed if the lecturer has multiple study attempts
 
 ## Security Considerations
 

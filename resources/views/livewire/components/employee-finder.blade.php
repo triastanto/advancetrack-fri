@@ -29,9 +29,25 @@
                         </div>
                         <div class="text-xs text-gray-600 space-y-0.5">
                             <p><span class="font-medium">NIDN:</span> {{ $selectedEmployee->nidn }} • <span class="font-medium">Jabatan:</span> {{ $selectedEmployee->position }}</p>
-                            @if($selectedEmployee->studyPrograms->count() > 0)
+                            @php
+                                $activeStudy = $selectedEmployee->studyCalendars()
+                                    ->with('studyDetail.studyProgram')
+                                    ->where('workflow_state', 5) // ACTIVE state
+                                    ->latest()
+                                    ->first();
+                                if (!$activeStudy) {
+                                    $activeStudy = $selectedEmployee->studyCalendars()
+                                        ->with('studyDetail.studyProgram')
+                                        ->latest()
+                                        ->first();
+                                }
+                                $studyProgramName = $activeStudy && $activeStudy->studyDetail && $activeStudy->studyDetail->studyProgram 
+                                    ? $activeStudy->studyDetail->studyProgram->name 
+                                    : null;
+                            @endphp
+                            @if($studyProgramName)
                                 <p class="text-blue-600">
-                                    <span class="font-medium">Program Studi:</span> {{ $selectedEmployee->studyPrograms->pluck('name')->join(', ') }}
+                                    <span class="font-medium">Program Studi:</span> {{ $studyProgramName }}
                                 </p>
                             @endif
                         </div>
@@ -146,9 +162,25 @@
                                                     <p class="text-xs text-gray-400">
                                                         {{ $employee->user->email }}
                                                     </p>
-                                                    @if($employee->studyPrograms->count() > 0)
+                                                    @php
+                                                        $activeStudy = $employee->studyCalendars()
+                                                            ->with('studyDetail.studyProgram')
+                                                            ->where('workflow_state', 5) // ACTIVE state
+                                                            ->latest()
+                                                            ->first();
+                                                        if (!$activeStudy) {
+                                                            $activeStudy = $employee->studyCalendars()
+                                                                ->with('studyDetail.studyProgram')
+                                                                ->latest()
+                                                                ->first();
+                                                        }
+                                                        $studyProgramName = $activeStudy && $activeStudy->studyDetail && $activeStudy->studyDetail->studyProgram 
+                                                            ? $activeStudy->studyDetail->studyProgram->name 
+                                                            : null;
+                                                    @endphp
+                                                    @if($studyProgramName)
                                                         <p class="text-xs text-blue-600">
-                                                            Program Studi: {{ $employee->studyPrograms->pluck('name')->join(', ') }}
+                                                            Program Studi: {{ $studyProgramName }}
                                                         </p>
                                                     @endif
                                                 </div>

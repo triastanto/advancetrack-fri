@@ -26,7 +26,6 @@ class LecturerDetailModal extends Component
             $this->lecturer = Employee::with([
                 'user',
                 'researchLab.researchGroup',
-                'studyPrograms',
                 'educations',
                 'studyCalendars.studyDetail.studyProgram',
                 'studyCalendars.studyDetail.promotors',

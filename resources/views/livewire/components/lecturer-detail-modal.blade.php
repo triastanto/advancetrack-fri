@@ -251,22 +251,7 @@
                         </div>
                         @endif
 
-                        <!-- Study Programs Section -->
-                        @if($lecturer->studyPrograms->count() > 0)
-                        <div class="bg-gray-50 rounded-lg p-6">
-                            <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                                <x-heroicon-o-academic-cap class="w-5 h-5 mr-2 text-[#009444]" />
-                                Program Studi
-                            </h4>
-                            <div class="flex flex-wrap gap-2">
-                                @foreach($lecturer->studyPrograms as $program)
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-                                    {{ $program->name }}
-                                </span>
-                                @endforeach
-                            </div>
-                        </div>
-                        @endif
+                        <!-- Study Programs are now shown in the Study Calendar section above -->
                     </div>
 
                     <!-- Modal Footer -->

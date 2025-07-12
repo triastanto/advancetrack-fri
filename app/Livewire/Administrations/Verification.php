@@ -126,7 +126,7 @@ class Verification extends WorkflowComponent
      */
     protected function getFilteredDocuments()
     {
-        $query = AcademicDocument::with(['employee.user', 'employee.studyPrograms', 'workflowHistory.user', 'documentType']);
+        $query = AcademicDocument::with(['employee.user', 'workflowHistory.user', 'documentType']);
 
         // Apply search filters using trait validation
         if ($this->search && strlen($this->search) >= 2) {

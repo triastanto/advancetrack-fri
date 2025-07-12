@@ -14,18 +14,16 @@ class StudyCalendarSeeder extends Seeder
      */
     public function run(): void
     {
-        // Get all lecturers who have study program assignments
-        $lecturersWithPrograms = Employee::where('role', 'lecturer')
-            ->whereHas('studyPrograms')
-            ->get();
+        // Get all lecturers (no longer need study program assignments)
+        $lecturers = Employee::where('role', 'lecturer')->get();
 
-        if ($lecturersWithPrograms->isEmpty()) {
-            $this->command->info('No lecturers with study program assignments found. Run EmployeeStudyProgramSeeder first.');
+        if ($lecturers->isEmpty()) {
+            $this->command->info('No lecturers found.');
             return;
         }
 
         // Only seed one lecturer with a draft study calendar
-        $lecturer = $lecturersWithPrograms->first();
+        $lecturer = $lecturers->first();
         if (!$lecturer) {
             $this->command->warn('No eligible lecturer found.');
             return;

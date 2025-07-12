@@ -36,7 +36,7 @@ trait HasWorkflowManagement
     {
         // Use the abstract method to get the model class
         $modelClass = $this->getWorkflowModelClass();
-        $document = $modelClass::with(['employee.user', 'employee.studyPrograms', 'documentType'])->findOrFail($documentId);
+        $document = $modelClass::with(['employee.user', 'documentType'])->findOrFail($documentId);
 
         $this->setWorkflowDocument($document);
         $this->setWorkflowTransitionId($transitionId);

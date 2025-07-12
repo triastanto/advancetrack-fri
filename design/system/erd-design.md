@@ -99,20 +99,13 @@
 - updated_at
 - INDEX: role, nidn, research_lab_id, is_lab_head
 
-### 3. employee_study_program
-- employee_id (FK → employees.id, cascade)
-- study_program_id (FK → study_programs.id, cascade)
-- created_at
-- updated_at
-- PRIMARY: [employee_id, study_program_id]
-
-### 4. study_programs
+### 3. study_programs
 - id (PK)
 - name
 - created_at
 - updated_at
 
-### 5. document_types
+### 4. document_types
 - id (PK)
 - name (unique)
 - display_name
@@ -120,7 +113,7 @@
 - created_at
 - updated_at
 
-### 6. documents
+### 5. documents
 - id (PK)
 - employee_id (FK → employees.id, cascade)
 - document_type_id (FK → document_types.id, restrict)
@@ -133,7 +126,7 @@
 - created_at
 - updated_at
 
-### 7. workflow_histories
+### 6. workflow_histories
 - id (PK)
 - workflowable_type
 - workflowable_id
@@ -147,7 +140,7 @@
 - updated_at
 - INDEX: workflowable_type + workflowable_id
 
-### 8. study_calendars
+### 7. study_calendars
 - id (PK)
 - employee_id (FK → employees.id, cascade)
 - study_start (date)
@@ -157,7 +150,7 @@
 - created_at
 - updated_at
 
-### 9. study_details
+### 8. study_details
 - id (PK)
 - study_calendar_id (FK → study_calendars.id, cascade)
 - university_name
@@ -174,7 +167,7 @@
 - created_at
 - updated_at
 
-### 10. study_promotors
+### 9. study_promotors
 - id (PK)
 - study_detail_id (FK → study_details.id, cascade)
 - name
@@ -183,7 +176,7 @@
 - created_at
 - updated_at
 
-### 11. supervisor_assignments
+### 10. supervisor_assignments
 - id (PK)
 - employee_id (FK → employees.id, cascade)
 - supervisor_id (FK → employees.id, cascade, self-reference)
@@ -192,7 +185,7 @@
 - created_at
 - updated_at
 
-### 12. course_responsibilities
+### 11. course_responsibilities
 - id (PK)
 - employee_id (FK → employees.id, cascade)
 - course_name
@@ -201,7 +194,7 @@
 - created_at
 - updated_at
 
-### 13. research_groups
+### 12. research_groups
 - id (PK)
 - name (indexed)
 - description (nullable)
@@ -209,7 +202,7 @@
 - created_at
 - updated_at
 
-### 14. research_labs
+### 13. research_labs
 - id (PK)
 - name (indexed)
 - alias_name (nullable)
@@ -218,7 +211,7 @@
 - created_at
 - updated_at
 
-### 15. educations
+### 14. educations
 - id (PK)
 - employee_id (FK → employees.id, cascade)
 - degree
@@ -232,8 +225,6 @@
 ## Relationships
 
 - users (1) --- (0..1) employees (user_id)
-- employees (1) --- (N) employee_study_program (employee_id)
-- study_programs (1) --- (N) employee_study_program (study_program_id)
 - research_groups (1) --- (N) research_labs (research_group_id)
 - research_groups (1) --- (0..1) employees (head_employee_id) // Ketua Kelompok Keilmuan
 - research_labs (1) --- (N) employees (research_lab_id)
@@ -263,16 +254,17 @@
                  ┌----+----┐      (N)
                 (N)       (N)       |
                  |         |   research_labs
-    employee_study_    documents    |
-       program           |         (1)
-          |             (N)         |
-         (N)             |       research_groups
-          |              |           |
-     study_programs     (1)         (1)
-                    |   |
-                    | educations
-                    |
-                users
+    study_calendars    documents    |
+         |              |         (1)
+         |              |       research_groups
+         |              |           |
+    study_details      (1)         (1)
+         |              |           |
+         |              |       educations
+         |              |           |
+    study_programs      |           |
+                        |           |
+                    users
 
 Legend:
 - (1) = One-to-one relationship
@@ -317,6 +309,12 @@ Legend:
 - Each research laboratory is supervised by exactly one Ketua Laboratorium Riset, but employees can exist without lab assignments
 - Multiple employees can be lab heads within the same research group (across different labs)
 
+### Study Program Assignment
+- **New Approach**: Study programs are now assigned through the `study_details` table
+- **Active Study Program**: The system determines a lecturer's current study program through their active study calendar
+- **Multiple Studies**: A lecturer can have multiple study calendars, each with its own study details and program assignment
+- **Program Access**: Study program information is accessed via `study_calendar → study_detail → study_program`
+
 ### Data Integrity Considerations
 - Foreign key constraints with appropriate cascade/set null actions ensure referential integrity
 - Unique constraints on critical fields (email, nidn) prevent duplicate entries
@@ -332,9 +330,11 @@ Legend:
 - Study calendars represent the official timeline and status, while study details contain the academic specifics
 - Document workflows and study calendar workflows operate independently but may be related through business processes
 - Employee roles (lecturer, hr_finance_staff, etc.) determine system permissions and available actions
+- Study program assignment is now tied to specific study attempts rather than general employee affiliation
 
 ### Scalability and Performance
 - Indexes are strategically placed on frequently queried fields (role, nidn, research_lab_id, research_group_id, workflow states)
 - Polymorphic relationships reduce table proliferation while maintaining flexibility
 - Hierarchical research organization allows for efficient querying and reporting
 - Separation of concerns between workflow management, document storage, and academic data allows for independent scaling
+- Study program queries now go through the study calendar relationship, which provides better data consistency

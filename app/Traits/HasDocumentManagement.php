@@ -236,7 +236,6 @@ trait HasDocumentManagement
                 }
             }
 
-            // Get study program from study details instead of employee_study_program
             $studyDetail = $activeStudy->studyDetail;
             $programName = $studyDetail && $studyDetail->studyProgram ? $studyDetail->studyProgram->name : 'Tidak tersedia';
             

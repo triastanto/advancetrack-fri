@@ -125,7 +125,7 @@ class Approval extends WorkflowComponent
      */
     protected function getFilteredDocuments()
     {
-        $query = ApprovalDocument::with(['employee.user', 'employee.studyPrograms', 'workflowHistory.user', 'documentType']);
+        $query = ApprovalDocument::with(['employee.user', 'workflowHistory.user', 'documentType']);
 
         // Apply search filters using trait validation
         if ($this->search && strlen($this->search) >= 2) {

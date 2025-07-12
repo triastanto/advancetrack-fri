@@ -11,10 +11,7 @@ class StudyProgram extends Model
 
     protected $guarded = [];
 
-    public function lecturers()
-    {
-        return $this->belongsToMany(Employee::class)->withTimestamps();
-    }
+    // Removed lecturers() relationship - now using study_details > employee relationship
 
     public function studyDetails()
     {

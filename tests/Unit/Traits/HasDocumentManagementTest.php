@@ -241,13 +241,20 @@ test('it gets active study info with caching', function () {
     // Create study program and calendar
     $studyProgram = \App\Models\StudyProgram::factory()->create();
     $this->employee = createEmployee();
-    $this->employee->studyPrograms()->attach($studyProgram->id);
 
     $studyCalendar = createStudyCalendar([
         'employee_id' => $this->employee->id,
         'workflow_state' => 5, // ACTIVE state
         'study_start' => Carbon::now()->subMonths(6),
         'estimated_study_end' => Carbon::now()->addMonths(18)
+    ]);
+
+    // Create study detail with study program
+    createStudyDetail([
+        'study_calendar_id' => $studyCalendar->id,
+        'study_program_id' => $studyProgram->id,
+        'university_name' => 'Test University',
+        'study_level' => 'S3'
     ]);
 
     // First call should calculate and cache
@@ -272,13 +279,20 @@ test('it calculates current semester correctly', function () {
     // Create study calendar with 6 months ago start
     $studyProgram = \App\Models\StudyProgram::factory()->create();
     $this->employee = createEmployee();
-    $this->employee->studyPrograms()->attach($studyProgram->id);
 
     $studyCalendar = createStudyCalendar([
         'employee_id' => $this->employee->id,
         'workflow_state' => 5, // ACTIVE state
         'study_start' => Carbon::now()->subMonths(6),
         'estimated_study_end' => Carbon::now()->addMonths(18)
+    ]);
+
+    // Create study detail with study program
+    createStudyDetail([
+        'study_calendar_id' => $studyCalendar->id,
+        'study_program_id' => $studyProgram->id,
+        'university_name' => 'Test University',
+        'study_level' => 'S3'
     ]);
 
     $semester = $this->calculateCurrentSemester($this->employee);

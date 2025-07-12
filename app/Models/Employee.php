@@ -38,10 +38,7 @@ class Employee extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function studyPrograms()
-    {
-        return $this->belongsToMany(StudyProgram::class)->withTimestamps();
-    }
+    // Removed studyPrograms() relationship - now using study_details > study_program relationship
 
     public function documents()
     {

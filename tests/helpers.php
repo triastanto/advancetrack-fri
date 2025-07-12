@@ -3,6 +3,7 @@
 use App\Models\DocumentType;
 use App\Models\Employee;
 use App\Models\StudyCalendar;
+use App\Models\StudyDetail;
 use App\Models\User;
 use App\Models\AcademicDocument;
 use App\Models\ApprovalDocument;
@@ -53,6 +54,14 @@ function createAcademicDocument($attributes = []): AcademicDocument
 function createApprovalDocument($attributes = []): ApprovalDocument
 {
     return ApprovalDocument::factory()->create($attributes);
+}
+
+/**
+ * Create a study detail for testing
+ */
+function createStudyDetail($attributes = []): StudyDetail
+{
+    return StudyDetail::factory()->create($attributes);
 }
 
 /**

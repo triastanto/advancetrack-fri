@@ -24,10 +24,8 @@ class StudyRequirementDocumentSeeder extends Seeder
             return;
         }
 
-        // Get the same lecturer seeded by StudyCalendarSeeder (first lecturer with study program assignments)
-        $lecturer = Employee::where('role', 'lecturer')
-            ->whereHas('studyPrograms')
-            ->first();
+        // Get the same lecturer seeded by StudyCalendarSeeder (first lecturer)
+        $lecturer = Employee::where('role', 'lecturer')->first();
 
         if (!$lecturer) {
             $this->command->warn('No eligible lecturer found.');

@@ -31,6 +31,11 @@ class Lecturer extends Component
         $this->resetPage();
     }
 
+    public function openLecturerDetail($lecturerId)
+    {
+        $this->dispatch('lecturer-detail-modal:open', $lecturerId);
+    }
+
     public function render()
     {
         Log::debug('Livewire render', [

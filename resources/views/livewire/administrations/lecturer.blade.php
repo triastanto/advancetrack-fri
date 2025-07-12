@@ -30,7 +30,10 @@
     <!-- Lecturer Card Grid -->
     <section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         @forelse($lecturers as $lecturer)
-            <article class="group bg-white rounded-xl shadow-md p-8 flex flex-col items-center border border-gray-100 hover:shadow-lg transition">
+            <article 
+                wire:click="openLecturerDetail({{ $lecturer->id }})"
+                class="group bg-white rounded-xl shadow-md p-8 flex flex-col items-center border border-gray-100 hover:shadow-lg transition cursor-pointer hover:bg-gray-50"
+            >
                 <div class="w-20 h-20 rounded-full bg-[#f3f3f3] flex items-center justify-center mb-4 shadow-inner overflow-hidden">
                     @if (!empty($lecturer->photo))
                         <img src="{{ $lecturer->photo }}" alt="Foto {{ $lecturer->user->name }}" class="w-20 h-20 rounded-full object-cover" />
@@ -99,4 +102,7 @@
             {{ $lecturers->links() }}
         </div>
     </footer>
+
+    <!-- Lecturer Detail Modal -->
+    <livewire:components.lecturer-detail-modal />
 </x-ui.page-container>

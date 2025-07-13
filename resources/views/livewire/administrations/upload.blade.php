@@ -27,62 +27,6 @@
                 </div>
             </div>
 
-            {{-- Statistics Cards --}}
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0">
-                            <x-heroicon-o-document class="w-8 h-8 text-blue-500" />
-                        </div>
-                        <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-500">Total Dokumen</p>
-                            <p class="text-2xl font-semibold text-gray-900">
-                                {{ $documents->total() }}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0">
-                            <x-heroicon-o-clock class="w-8 h-8 text-yellow-500" />
-                        </div>
-                        <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-500">Draft</p>
-                            <p class="text-2xl font-semibold text-gray-900">
-                                {{ $documents->where('workflow_state', 1)->count() }}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0">
-                            <x-heroicon-o-check-circle class="w-8 h-8 text-green-500" />
-                        </div>
-                        <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-500">Terverifikasi</p>
-                            <p class="text-2xl font-semibold text-gray-900">
-                                {{ $documents->where('workflow_state', 3)->count() }}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0">
-                            <x-heroicon-o-check class="w-8 h-8 text-green-600" />
-                        </div>
-                        <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-500">Disetujui</p>
-                            <p class="text-2xl font-semibold text-gray-900">
-                                {{ $documents->where('workflow_state', 4)->count() }}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             {{-- Active Advanced Study Information --}}
             <x-documents.study-info-card
                 :study-info="$activeStudyInfo"
@@ -124,10 +68,10 @@
                         <div>
                             <h1 class="text-2xl font-bold text-gray-900 flex items-center">
                                 <x-heroicon-o-cloud-arrow-up class="w-8 h-8 mr-3 text-blue-600" />
-                                Kelola Dokumen Persetujuan
+                                Unggah Persetujuan Studi Lanjut
                             </h1>
                             <p class="text-gray-600 mt-1">
-                                Pilih dosen untuk mengelola dokumen persetujuan studi lanjut
+                                Pilih dosen untuk mengunggah dokumen persetujuan studi lanjut
                             </p>
                         </div>
                         <div class="flex items-center space-x-2">
@@ -153,11 +97,8 @@
                         <div>
                             <h1 class="text-2xl font-bold text-gray-900 flex items-center">
                                 <x-heroicon-o-cloud-arrow-up class="w-8 h-8 mr-3 text-blue-600" />
-                                Kelola Dokumen - {{ $selectedEmployee->user->name ?? 'Unknown' }}
+                                 Unggah Persetujuan Studi Lanjut
                             </h1>
-                            <p class="text-gray-600 mt-1">
-                                Kelola dokumen persetujuan studi lanjut untuk {{ $selectedEmployee->user->name ?? 'Unknown' }}
-                            </p>
                         </div>
                         <div class="flex items-center space-x-4">
                             <button
@@ -166,80 +107,72 @@
                                 <x-heroicon-o-arrow-left class="w-4 h-4 mr-2" />
                                 Kembali ke Daftar
                             </button>
-                            <div class="flex items-center space-x-2">
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                    <x-heroicon-o-user class="w-3 h-3 mr-1" />
-                                    {{ $selectedEmployee->user->email ?? '' }}
-                                    @if($selectedEmployee->nidn)
-                                        • NIDN: {{ $selectedEmployee->nidn }}
-                                    @endif
-                                </span>
-                                @if($selectedEmployee->studyCalendar)
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                        @if($selectedEmployee->studyCalendar->workflow_state === 3) bg-green-100 text-green-800
-                                        @elseif($selectedEmployee->studyCalendar->workflow_state === 2) bg-yellow-100 text-yellow-800
-                                        @else bg-gray-100 text-gray-800 @endif">
-                                        {{ $selectedEmployee->studyCalendar->workflow_state === 3 ? 'Approved' : 
-                                           ($selectedEmployee->studyCalendar->workflow_state === 2 ? 'Pending Approval' : 'Draft') }}
-                                    </span>
-                                @endif
-                            </div>
                         </div>
                     </div>
                 </div>
 
-                {{-- Statistics Cards --}}
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0">
-                                <x-heroicon-o-document class="w-8 h-8 text-blue-500" />
+                {{-- Employee Information Card --}}
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="flex-shrink-0 h-12 w-12">
+                                @php
+                                    $avatar = $selectedEmployee->photo ?? null;
+                                    $name = $selectedEmployee->user->name ?? '-';
+                                @endphp
+                                @if($avatar)
+                                    <img class="h-12 w-12 rounded-full object-cover" src="{{ $avatar }}" alt="{{ $name }}">
+                                @else
+                                    <div class="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
+                                        <span class="text-blue-600 font-bold text-lg">{{ mb_substr($name, 0, 1) }}</span>
+                                    </div>
+                                @endif
                             </div>
-                            <div class="ml-4">
-                                <p class="text-sm font-medium text-gray-500">Total Dokumen</p>
-                                <p class="text-2xl font-semibold text-gray-900">
-                                    {{ $documents->total() }}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0">
-                                <x-heroicon-o-clock class="w-8 h-8 text-yellow-500" />
-                            </div>
-                            <div class="ml-4">
-                                <p class="text-sm font-medium text-gray-500">Draft</p>
-                                <p class="text-2xl font-semibold text-gray-900">
-                                    {{ $documents->where('workflow_state', 1)->count() }}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0">
-                                <x-heroicon-o-check-circle class="w-8 h-8 text-green-500" />
-                            </div>
-                            <div class="ml-4">
-                                <p class="text-sm font-medium text-gray-500">Terverifikasi</p>
-                                <p class="text-2xl font-semibold text-gray-900">
-                                    {{ $documents->where('workflow_state', 3)->count() }}
-                                </p>
+                            <div class="flex flex-col space-y-1">
+                                <h3 class="text-base font-semibold text-gray-900">{{ $selectedEmployee->user->name ?? 'N/A' }}</h3>
+                                <div class="flex items-center space-x-4 text-xs text-gray-600">
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                        {{ $selectedEmployee->user->email ?? 'N/A' }}
+                                    </span>
+                                    @if($selectedEmployee->nidn)
+                                        <span>• NIDN: {{ $selectedEmployee->nidn }}</span>
+                                    @endif
+                                    @if($selectedEmployee->position)
+                                        <span>• {{ $selectedEmployee->position }}</span>
+                                    @endif
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
                         <div class="flex items-center">
-                            <div class="flex-shrink-0">
-                                <x-heroicon-o-check class="w-8 h-8 text-green-600" />
-                            </div>
-                            <div class="ml-4">
-                                <p class="text-sm font-medium text-gray-500">Disetujui</p>
-                                <p class="text-2xl font-semibold text-gray-900">
-                                    {{ $documents->where('workflow_state', 4)->count() }}
-                                </p>
-                            </div>
+                            @if($selectedEmployee->studyCalendar)
+                                @php
+                                    $workflowState = $selectedEmployee->studyCalendar->workflow_state;
+                                    $statusConfig = match($workflowState) {
+                                        1 => ['bg' => 'bg-gray-100', 'text' => 'text-gray-800', 'label' => 'Draft'],
+                                        2 => ['bg' => 'bg-yellow-100', 'text' => 'text-yellow-800', 'label' => 'Pending Approval'],
+                                        3 => ['bg' => 'bg-green-100', 'text' => 'text-green-800', 'label' => 'Approved'],
+                                        4 => ['bg' => 'bg-red-100', 'text' => 'text-red-800', 'label' => 'Rejected'],
+                                        5 => ['bg' => 'bg-blue-100', 'text' => 'text-blue-800', 'label' => 'Active Study'],
+                                        6 => ['bg' => 'bg-orange-100', 'text' => 'text-orange-800', 'label' => 'On Hold'],
+                                        7 => ['bg' => 'bg-green-100', 'text' => 'text-green-800', 'label' => 'Completed'],
+                                        8 => ['bg' => 'bg-red-100', 'text' => 'text-red-800', 'label' => 'Terminated'],
+                                        default => ['bg' => 'bg-gray-100', 'text' => 'text-gray-800', 'label' => 'Unknown']
+                                    };
+                                @endphp
+                                <div class="text-right">
+                                    <p class="text-xs font-medium text-gray-500 mb-1">Study Calendar</p>
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $statusConfig['bg'] }} {{ $statusConfig['text'] }}">
+                                        {{ $statusConfig['label'] }}
+                                    </span>
+                                </div>
+                            @else
+                                <div class="text-right">
+                                    <p class="text-xs font-medium text-gray-500 mb-1">Study Calendar</p>
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                        Not Available
+                                    </span>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>

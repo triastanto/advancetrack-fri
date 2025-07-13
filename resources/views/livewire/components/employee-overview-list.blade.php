@@ -2,7 +2,7 @@
     {{-- Header with Search and Filters --}}
     <div class="px-6 py-4 border-b border-gray-200">
         <div class="flex items-center justify-between">
-            <h3 class="text-lg font-medium text-gray-900">Daftar Dosen dengan Kalender Studi</h3>
+            <h3 class="text-lg font-medium text-gray-900">Daftar Dosen dengan Kalender Studi Lanjut</h3>
             <div class="flex items-center space-x-4">
                 {{-- Search --}}
                 <div class="relative">
@@ -165,8 +165,8 @@
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <button
                                 wire:click="selectEmployee({{ $employee->id }})"
-                                class="text-blue-600 hover:text-blue-900 transition-colors duration-200">
-                                Kelola Dokumen
+                                class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"">
+                                Unggah
                             </button>
                         </td>
                     </tr>

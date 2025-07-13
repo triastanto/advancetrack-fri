@@ -8,7 +8,7 @@
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 flex items-center">
                     <x-heroicon-o-academic-cap class="w-8 h-8 mr-3 text-blue-600" />
-                    Persetujuan Kalender Studi
+                    Persetujuan Kalender Studi Lanjut
                 </h1>
                 <p class="text-gray-600 mt-1">
                     Review dan persetujuan kalender studi lanjut dosen

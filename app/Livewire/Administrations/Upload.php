@@ -36,7 +36,7 @@ class Upload extends WorkflowComponent
     // Filter properties (same as Approval page)
     public $searchTerm = '';
     public $statusFilter = '';
-    protected $queryString = ['searchTerm', 'statusFilter'];
+    protected $queryString = ['searchTerm', 'statusFilter', 'selectedEmployeeId'];
 
     protected $listeners = [
         'employeeSelected' => 'handleEmployeeSelected',
@@ -144,6 +144,9 @@ class Upload extends WorkflowComponent
         $this->viewMode = 'list';
         $this->selectedEmployeeId = null;
         $this->selectedEmployee = null;
+        
+        // Force refresh to update URL
+        $this->refreshData();
     }
 
     /**
@@ -422,6 +425,20 @@ class Upload extends WorkflowComponent
 
         // Check if current user is non-lecturer role
         $this->isNonLecturerRole = $this->checkIsNonLecturerRole();
+
+        // Handle URL parameters for employee selection
+        if (request()->has('selectedEmployeeId') && $this->isNonLecturerRole) {
+            $this->selectedEmployeeId = request()->get('selectedEmployeeId');
+            $this->selectedEmployee = Employee::with(['user'])->find($this->selectedEmployeeId);
+            if ($this->selectedEmployee) {
+                $this->viewMode = 'management';
+            } else {
+                // Invalid employee ID, reset to list view
+                $this->selectedEmployeeId = null;
+                $this->selectedEmployee = null;
+                $this->viewMode = 'list';
+            }
+        }
 
         // If user is lecturer, auto-select their employee record
         if (!$this->isNonLecturerRole) {

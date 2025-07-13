@@ -9,7 +9,7 @@
     @endif
     @if(Auth::user()->employee && Auth::user()->employee->role !== 'lecturer')
         <x-sidebar.item route="study-calendar.approval" :active="request()->routeIs('study-calendar.approval')" icon="heroicon-o-user">
-            Persetujuan Kalender
+            Persetujuan Kalender Studi Lanjut
         </x-sidebar.item>
     @endif
 </x-sidebar.section>

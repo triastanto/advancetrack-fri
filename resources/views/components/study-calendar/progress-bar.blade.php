@@ -156,47 +156,30 @@
         </div>
     </div>
 
-    
-
-
-    {{-- Timeline Description --}}
-    <div class="mt-16 p-4 rounded-lg">
-        <div class="flex items-center py-3 px-4 text-sm text-gray-700 bg-gray-50 rounded-lg border border-gray-200">
-            <x-heroicon-o-information-circle class="w-5 h-5 text-blue-600 mr-2" />
+    {{-- Workflow Process Explanation --}}
+    <div class="mt-16 px-6 py-4 bg-gray-50 border-t border-gray-200">
+        <div class="flex items-start">
+            <x-heroicon-o-light-bulb class="w-5 h-5 text-blue-600 mr-3 mt-0.5" />
             <div>
-                <p class="text-sm font-medium text-gray-900">
-                    Status Saat Ini: {{ $current['name'] ?? 'Draft' }}
-                </p>
-                <p class="text-sm text-gray-600 mt-1">
-                    @switch($current['label'] ?? 'DRAFT')
-                        @case('DRAFT')
-                            Kalender studi masih dalam tahap penyusunan. Anda dapat mengedit dan menyiapkan dokumen persyaratan.
-                            @break
-                        @case('PENDING_APPROVAL')
-                            Kalender studi telah diajukan dan sedang menunggu persetujuan dari supervisor.
-                            @break
-                        @case('REJECTED')
-                            Kalender studi ditolak. Silakan revisi dan ajukan kembali kalender studi Anda.
-                            @break
-                        @case('APPROVED')
-                            Kalender studi telah disetujui. Anda dapat memulai studi setelah semua persyaratan terpenuhi.
-                            @break
-                        @case('ACTIVE')
-                            Studi sedang berjalan. Pastikan untuk memperbarui status jika mengambil cuti atau menyelesaikan studi.
-                            @break
-                        @case('LEAVE')
-                            Anda sedang dalam status cuti resmi. Ajukan kembali untuk aktif studi jika sudah selesai cuti.
-                            @break
-                        @case('FINISHED')
-                            Studi telah selesai. Selamat atas pencapaian Anda!
-                            @break
-                        @case('DROP_OUT')
-                            Studi dihentikan. Silakan hubungi admin untuk informasi lebih lanjut.
-                            @break
-                        @default
-                            Kalender studi sedang dalam proses.
-                    @endswitch
-                </p>
+                <h4 class="text-sm font-medium text-gray-900 mb-2">Proses Workflow Kalender Studi</h4>
+                <div class="text-xs text-gray-600 space-y-1">
+                    <div class="flex items-center">
+                        <span class="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
+                        <strong>Draft:</strong> Siapkan dokumen Persyaratan Studi Lanjut dan ajukan kalender studi
+                    </div>
+                    <div class="flex items-center">
+                        <span class="w-2 h-2 bg-yellow-500 rounded-full mr-2"></span>
+                        <strong>Menunggu Persetujuan:</strong> Supervisor memverifikasi kalender studi
+                    </div>
+                    <div class="flex items-center">
+                        <span class="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                        <strong>Disetujui:</strong> HR/Finance Staff memproses dokumen Persetujuan Studi Lanjut
+                    </div>
+                    <div class="flex items-center">
+                        <span class="w-2 h-2 bg-purple-500 rounded-full mr-2"></span>
+                        <strong>Aktif Studi:</strong> Mulai studi setelah semua persetujuan selesai
+                    </div>
+                </div>
             </div>
         </div>
     </div>

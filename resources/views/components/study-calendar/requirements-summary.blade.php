@@ -6,31 +6,7 @@
             Ringkasan Persyaratan dan Persetujuan
         </h3>
     </div>
-
-    {{-- Overall Status with Enhanced Analytics --}}
-    <div class="mt-6 mb-4 p-4 rounded-lg
-        @if($requirementsStatus['all_requirements_met']) bg-green-50 border border-green-200 @else bg-yellow-50 border border-yellow-200 @endif">
-        <div class="flex items-center">
-            @if($requirementsStatus['all_requirements_met'])
-                <x-heroicon-o-check-circle class="w-5 h-5 text-green-600 mr-2" />
-                <div>
-                    <h4 class="text-sm font-medium text-green-800">Siap Memulai Studi</h4>
-                    <p class="text-sm text-green-700 mt-1">
-                        Semua persyaratan telah terpenuhi. Anda dapat memulai program studi.
-                    </p>
-                </div>
-            @else
-                <x-heroicon-o-exclamation-triangle class="w-5 h-5 text-yellow-600 mr-2" />
-                <div>
-                    <h4 class="text-sm font-medium text-yellow-800">Persyaratan Belum Lengkap</h4>
-                    <p class="text-sm text-yellow-700 mt-1">
-                        Beberapa persyaratan belum terpenuhi. Silakan lengkapi dokumen yang diperlukan sebelum memulai studi.
-                    </p>
-                </div>
-            @endif
-        </div>
-    </div>
-
+    
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         {{-- Academic Documents Section with Enhanced Analytics --}}
         <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow duration-200">
@@ -82,6 +58,20 @@
                     </div>
                 @endif
                 
+                {{-- Document Summary --}}
+                @php
+                    $uploadedCount = collect($academicDocumentsWithStates)->where('status', 'uploaded')->count();
+                    $verifiedCount = collect($academicDocumentsWithStates)->where('is_verified', true)->count();
+                    $totalCount = count($academicDocumentsWithStates);
+                @endphp
+                <div class="text-xs text-gray-600 bg-gray-50 p-2 rounded">
+                    <div class="flex justify-between">
+                        <span>Total: {{ $totalCount }} dokumen</span>
+                        <span>Diunggah: {{ $uploadedCount }}</span>
+                        <span>Diverifikasi: {{ $verifiedCount }}</span>
+                    </div>
+                </div>
+                
                 {{-- Related Documents List with Workflow States and Toggle --}}
                 <div class="mt-4">
                     <button 
@@ -94,10 +84,14 @@
                         @if(count($academicDocumentsWithStates) > 0)
                             <ul class="text-xs text-gray-600 space-y-2">
                                 @foreach($academicDocumentsWithStates as $document)
-                                    <li class="flex items-center justify-between p-2 bg-gray-50 rounded">
+                                    <li class="flex items-center justify-between p-2 {{ $document['status'] === 'not_uploaded' ? 'bg-red-50 border border-red-200' : 'bg-gray-50' }} rounded">
                                         <div class="flex items-center">
-                                            <x-heroicon-o-document class="w-3 h-3 mr-2 text-blue-500" />
-                                            <span class="font-medium">{{ $document['name'] }}</span>
+                                            @if($document['status'] === 'not_uploaded')
+                                                <x-heroicon-o-document class="w-3 h-3 mr-2 text-red-500" />
+                                            @else
+                                                <x-heroicon-o-document class="w-3 h-3 mr-2 text-blue-500" />
+                                            @endif
+                                            <span class="font-medium {{ $document['status'] === 'not_uploaded' ? 'text-red-700' : 'text-gray-700' }}">{{ $document['name'] }}</span>
                                         </div>
                                         <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
                                             @if($document['workflow_state_color'] === 'green') bg-green-100 text-green-800
@@ -136,9 +130,9 @@
                     <span class="text-sm text-gray-600">Status Persetujuan:</span>
                     <div class="flex items-center space-x-2">
                         <span class="text-sm font-medium text-gray-900">
-                            {{ $requirementsStatus['approval_document']['approved_count'] ?? ($requirementsStatus['approval_document']['approved'] ? 1 : 0) }}/{{ $requirementsStatus['approval_document']['total'] ?? ($requirementsStatus['approval_document']['exists'] ? 1 : 0) }}
+                            {{ $requirementsStatus['approval_document']['approved_count'] ?? 0 }}/{{ $requirementsStatus['approval_document']['total'] ?? 0 }}
                         </span>
-                        @if(($requirementsStatus['approval_document']['approved_count'] ?? 0) === ($requirementsStatus['approval_document']['total'] ?? 1) && ($requirementsStatus['approval_document']['total'] ?? 0) > 0)
+                        @if(($requirementsStatus['approval_document']['approved_count'] ?? 0) === ($requirementsStatus['approval_document']['total'] ?? 0) && ($requirementsStatus['approval_document']['total'] ?? 0) > 0)
                             <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-green-100">
                                 <x-heroicon-s-check class="w-3 h-3 text-green-600" />
                             </span>
@@ -152,13 +146,27 @@
 
                 <div class="w-full bg-gray-200 rounded-full h-2">
                     @php
-                        $approvalTotal = $requirementsStatus['approval_document']['total'] ?? ($requirementsStatus['approval_document']['exists'] ? 1 : 0);
-                        $approvalApproved = $requirementsStatus['approval_document']['approved_count'] ?? ($requirementsStatus['approval_document']['approved'] ? 1 : 0);
+                        $approvalTotal = $requirementsStatus['approval_document']['total'] ?? 0;
+                        $approvalApproved = $requirementsStatus['approval_document']['approved_count'] ?? 0;
                         $approvalPercentage = $approvalTotal > 0 ? ($approvalApproved / $approvalTotal) * 100 : 0;
                     @endphp
                     <div class="h-2 rounded-full transition-all duration-300
                         @if($approvalPercentage === 100) bg-green-500 @elseif($approvalPercentage > 0) bg-yellow-500 @else bg-gray-300 @endif"
                          style="width: {{ $approvalPercentage }}%">
+                    </div>
+                </div>
+                
+                {{-- Document Summary --}}
+                @php
+                    $uploadedCount = collect($approvalDocumentsWithStates)->where('status', 'uploaded')->count();
+                    $approvedCount = collect($approvalDocumentsWithStates)->where('is_approved', true)->count();
+                    $totalCount = count($approvalDocumentsWithStates);
+                @endphp
+                <div class="text-xs text-gray-600 bg-gray-50 p-2 rounded">
+                    <div class="flex justify-between">
+                        <span>Total: {{ $totalCount }} dokumen</span>
+                        <span>Diunggah: {{ $uploadedCount }}</span>
+                        <span>Disetujui: {{ $approvedCount }}</span>
                     </div>
                 </div>
                 
@@ -174,10 +182,14 @@
                         @if(count($approvalDocumentsWithStates) > 0)
                             <ul class="text-xs text-gray-600 space-y-2">
                                 @foreach($approvalDocumentsWithStates as $document)
-                                    <li class="flex items-center justify-between p-2 bg-gray-50 rounded">
+                                    <li class="flex items-center justify-between p-2 {{ $document['status'] === 'not_uploaded' ? 'bg-red-50 border border-red-200' : 'bg-gray-50' }} rounded">
                                         <div class="flex items-center">
-                                            <x-heroicon-o-document class="w-3 h-3 mr-2 text-green-500" />
-                                            <span class="font-medium">{{ $document['name'] }}</span>
+                                            @if($document['status'] === 'not_uploaded')
+                                                <x-heroicon-o-document class="w-3 h-3 mr-2 text-red-500" />
+                                            @else
+                                                <x-heroicon-o-document class="w-3 h-3 mr-2 text-green-500" />
+                                            @endif
+                                            <span class="font-medium {{ $document['status'] === 'not_uploaded' ? 'text-red-700' : 'text-gray-700' }}">{{ $document['name'] }}</span>
                                         </div>
                                         <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
                                             @if($document['workflow_state_color'] === 'green') bg-green-100 text-green-800

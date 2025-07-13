@@ -8,6 +8,7 @@ use App\Models\ApprovalDocument;
 use App\Constants\DocumentTypeConstants;
 use Livewire\Component;
 use Illuminate\Support\Facades\Log;
+use App\Services\StudyCalendarRequirementsService;
 
 class StudyCalendarViewModal extends Component
 {
@@ -110,50 +111,20 @@ class StudyCalendarViewModal extends Component
         if (!$this->studyCalendar) {
             return [
                 'academic_documents' => ['verified' => 0, 'total' => 0, 'complete' => false],
-                'approval_document' => ['exists' => false, 'approved' => false],
+                'approval_document' => ['exists' => false, 'approved' => false, 'approved_count' => 0, 'total' => 0],
                 'all_requirements_met' => false
             ];
         }
 
         try {
             $employee = $this->studyCalendar->employee;
-
-            // Get study requirement document type names from constants
-            $studyRequirementNames = DocumentTypeConstants::getStudyRequirementNames();
-
-            // Check Academic Documents (Study Requirements)
-            $academicDocuments = AcademicDocument::where('employee_id', $employee->id)
-                ->whereHas('documentType', function($query) use ($studyRequirementNames) {
-                    $query->whereIn('name', $studyRequirementNames);
-                })
-                ->get();
-
-            $verifiedAcademicDocs = $academicDocuments->where('workflow_state', 3)->count(); // VERIFIED state
-            $totalAcademicDocs = $academicDocuments->count();
-
-            // Check Approval Document
-            $approvalDocument = ApprovalDocument::where('employee_id', $employee->id)->first();
-            $approvalDocumentApproved = $approvalDocument && $approvalDocument->workflow_state === 4; // APPROVED state
-
-            return [
-                'academic_documents' => [
-                    'verified' => $verifiedAcademicDocs,
-                    'total' => $totalAcademicDocs,
-                    'complete' => $verifiedAcademicDocs === $totalAcademicDocs && $totalAcademicDocs > 0
-                ],
-                'approval_document' => [
-                    'exists' => $approvalDocument !== null,
-                    'approved' => $approvalDocumentApproved
-                ],
-                'all_requirements_met' => $verifiedAcademicDocs === $totalAcademicDocs &&
-                                        $totalAcademicDocs > 0 &&
-                                        $approvalDocumentApproved
-            ];
+            $requirementsService = app(StudyCalendarRequirementsService::class);
+            return $requirementsService->getRequirementsStatus($employee->id);
         } catch (\Exception $e) {
             Log::error('Error getting requirements status: ' . $e->getMessage());
             return [
                 'academic_documents' => ['verified' => 0, 'total' => 0, 'complete' => false],
-                'approval_document' => ['exists' => false, 'approved' => false],
+                'approval_document' => ['exists' => false, 'approved' => false, 'approved_count' => 0, 'total' => 0],
                 'all_requirements_met' => false
             ];
         }

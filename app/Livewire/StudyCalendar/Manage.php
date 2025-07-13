@@ -3,18 +3,14 @@
 namespace App\Livewire\StudyCalendar;
 
 use App\Models\StudyCalendar;
-use App\Models\AcademicDocument;
-use App\Models\ApprovalDocument;
 use App\Livewire\Base\WorkflowComponent;
 use App\Traits\HasDocumentManagement;
 use App\Traits\HasCommonValidation;
-use App\Constants\DocumentTypeConstants;
 use App\Services\StudyCalendarRequirementsService;
 use Livewire\WithPagination;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Pagination\LengthAwarePaginator;
-use App\Models\DocumentType;
+use Carbon\Carbon;
 
 class Manage extends WorkflowComponent
 {
@@ -139,8 +135,8 @@ class Manage extends WorkflowComponent
     {
         $studyCalendar = $this->getStudyCalendarForEmployee();
         if ($studyCalendar) {
-            $this->editStudyStart = $studyCalendar->study_start?->format('Y-m-d');
-            $this->editEstimatedEnd = $studyCalendar->estimated_study_end?->format('Y-m-d');
+            $this->editStudyStart = $studyCalendar->study_start ? Carbon::parse($studyCalendar->study_start)->format('Y-m-d') : null;
+            $this->editEstimatedEnd = $studyCalendar->estimated_study_end ? Carbon::parse($studyCalendar->estimated_study_end)->format('Y-m-d') : null;
             $this->editGraduationDate = $studyCalendar->graduation_date?->format('Y-m-d');
             $this->editTotalSemester = $studyCalendar->studyDetail?->total_semester;
             $this->editUniversityName = $studyCalendar->studyDetail?->university_name;
@@ -450,7 +446,7 @@ class Manage extends WorkflowComponent
 
     public function startStudy($studyCalendarId)
     {
-        // START_STUDY: Only allowed if Study Calendar is APPROVED, all AcademicDocuments are VERIFIED, and ApprovalDocument is APPROVED
+        // START_STUDY: Only allowed if Study Calendar is APPROVED, all AcademicDocuments are VERIFIED, and all ApprovalDocuments are APPROVED
         $studyCalendar = StudyCalendar::find($studyCalendarId);
         if (!$studyCalendar || $studyCalendar->workflow_state !== 3) { // 3 = APPROVED
             session()->flash('error', 'Kalender studi harus berstatus APPROVED sebelum memulai studi.');
@@ -499,7 +495,7 @@ class Manage extends WorkflowComponent
             Log::error('Error getting requirements status: ' . $e->getMessage());
             return [
                 'academic_documents' => ['verified' => 0, 'total' => 0, 'complete' => false],
-                'approval_document' => ['exists' => false, 'approved' => false],
+                'approval_document' => ['exists' => false, 'approved' => false, 'approved_count' => 0, 'total' => 0],
                 'all_requirements_met' => false
             ];
         }
@@ -673,8 +669,8 @@ class Manage extends WorkflowComponent
             $courseResponsibilities = $this->getCourseResponsibilities($employee);
 
             // Get document states for display
-            $academicDocumentsWithStates = $this->requirementsService->getAcademicDocumentsWithStates($employee->id);
-            $approvalDocumentsWithStates = $this->requirementsService->getApprovalDocumentsWithStates($employee->id);
+            $academicDocumentsWithStates = $this->requirementsService->getCompleteStudyRequirementDocuments($employee->id);
+            $approvalDocumentsWithStates = $this->requirementsService->getCompleteApprovalDocuments($employee->id);
 
             // Ensure progress bar gets the actual workflow_state as current_state
             $workflowProgressWithState = array_merge(
@@ -700,7 +696,7 @@ class Manage extends WorkflowComponent
                 'studyCalendar' => null,
                 'requirementsStatus' => [
                     'academic_documents' => ['verified' => 0, 'total' => 0, 'complete' => false],
-                    'approval_document' => ['exists' => false, 'approved' => false],
+                    'approval_document' => ['exists' => false, 'approved' => false, 'approved_count' => 0, 'total' => 0],
                     'all_requirements_met' => false
                 ],
                 'workflowProgress' => [

@@ -248,7 +248,7 @@
                                             <div>
                                                 <div class="text-sm font-medium text-gray-900">Dokumen Persetujuan</div>
                                                 <div class="text-xs text-gray-500">
-                                                    {{ $requirementsStatus['approval_document']['approved'] ? 'Dokumen persetujuan telah disetujui' : 'Dokumen persetujuan belum disetujui' }}
+                                                    {{ $requirementsStatus['approval_document']['approved_count'] ?? 0 }} dari {{ $requirementsStatus['approval_document']['total'] ?? 0 }} dokumen disetujui
                                                 </div>
                                             </div>
                                         </div>

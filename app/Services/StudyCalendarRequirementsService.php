@@ -51,7 +51,7 @@ class StudyCalendarRequirementsService
             $approvalTotal = count($approvalTypeIds);
             $approvalApproved = $approvalDocuments->where('workflow_state', 4)->count();
             $approvalDocument = $approvalDocuments->first();
-            $approvalDocumentApproved = $approvalDocument && $approvalDocument->workflow_state === 4;
+            $allApprovalDocumentsApproved = $approvalApproved === $approvalTotal && $approvalTotal > 0;
 
             return [
                 'academic_documents' => [
@@ -61,7 +61,7 @@ class StudyCalendarRequirementsService
                 ],
                 'approval_document' => [
                     'exists' => $approvalDocument !== null,
-                    'approved' => $approvalDocumentApproved,
+                    'approved' => $allApprovalDocumentsApproved,
                     'approved_count' => $approvalApproved,
                     'total' => $approvalTotal
                 ],
@@ -76,7 +76,7 @@ class StudyCalendarRequirementsService
             
             return [
                 'academic_documents' => ['verified' => 0, 'total' => 0, 'complete' => false],
-                'approval_document' => ['exists' => false, 'approved' => false],
+                'approval_document' => ['exists' => false, 'approved' => false, 'approved_count' => 0, 'total' => 0],
                 'all_requirements_met' => false
             ];
         }
@@ -103,7 +103,10 @@ class StudyCalendarRequirementsService
         }
 
         if (!$requirementsStatus['approval_document']['approved']) {
-            $missing[] = "Dokumen persetujuan belum disetujui";
+            $approvedCount = $requirementsStatus['approval_document']['approved_count'] ?? 0;
+            $totalCount = $requirementsStatus['approval_document']['total'] ?? 0;
+            $missingCount = $totalCount - $approvedCount;
+            $missing[] = "{$missingCount} dari {$totalCount} dokumen persetujuan belum disetujui (semua {$totalCount} dokumen harus disetujui)";
         }
 
         return $missing;
@@ -170,6 +173,126 @@ class StudyCalendarRequirementsService
             })->toArray();
         } catch (\Exception $e) {
             Log::error('Error getting approval documents with states: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Get complete study requirement documents with status
+     */
+    public function getCompleteStudyRequirementDocuments(int $employeeId): array
+    {
+        try {
+            $studyRequirementNames = DocumentTypeConstants::getStudyRequirementNames();
+            $documentTypeIds = DocumentType::whereIn('name', $studyRequirementNames)->pluck('id', 'name');
+            
+            // Get uploaded documents for this employee
+            $uploadedDocuments = AcademicDocument::where('employee_id', $employeeId)
+                ->whereIn('document_type_id', $documentTypeIds->values())
+                ->with(['documentType'])
+                ->get()
+                ->keyBy('documentType.name');
+
+            $completeDocuments = [];
+            
+            foreach ($studyRequirementNames as $documentName) {
+                $documentType = DocumentTypeConstants::getByName($documentName);
+                $uploadedDocument = $uploadedDocuments->get($documentName);
+                
+                if ($uploadedDocument) {
+                    // Document is uploaded
+                    $completeDocuments[] = [
+                        'name' => $documentType['display_name'] ?? $documentName,
+                        'type' => $documentName,
+                        'status' => 'uploaded',
+                        'workflow_state' => $uploadedDocument->workflow_state,
+                        'workflow_state_label' => $this->getWorkflowStateLabel($uploadedDocument->workflow_state),
+                        'workflow_state_color' => $this->getWorkflowStateColor($uploadedDocument->workflow_state),
+                        'uploaded_at' => $uploadedDocument->created_at,
+                        'document_id' => $uploadedDocument->id,
+                        'is_verified' => $uploadedDocument->workflow_state === 3,
+                        'is_approved' => $uploadedDocument->workflow_state === 4,
+                    ];
+                } else {
+                    // Document is not uploaded
+                    $completeDocuments[] = [
+                        'name' => $documentType['display_name'] ?? $documentName,
+                        'type' => $documentName,
+                        'status' => 'not_uploaded',
+                        'workflow_state' => null,
+                        'workflow_state_label' => 'Belum Diunggah',
+                        'workflow_state_color' => 'gray',
+                        'uploaded_at' => null,
+                        'document_id' => null,
+                        'is_verified' => false,
+                        'is_approved' => false,
+                    ];
+                }
+            }
+
+            return $completeDocuments;
+        } catch (\Exception $e) {
+            Log::error('Error getting complete study requirement documents: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Get complete approval documents with status
+     */
+    public function getCompleteApprovalDocuments(int $employeeId): array
+    {
+        try {
+            $approvalTypeNames = DocumentTypeConstants::getApprovalDocumentNames();
+            $documentTypeIds = DocumentType::whereIn('name', $approvalTypeNames)->pluck('id', 'name');
+            
+            // Get uploaded documents for this employee
+            $uploadedDocuments = ApprovalDocument::where('employee_id', $employeeId)
+                ->whereIn('document_type_id', $documentTypeIds->values())
+                ->with(['documentType'])
+                ->get()
+                ->keyBy('documentType.name');
+
+            $completeDocuments = [];
+            
+            foreach ($approvalTypeNames as $documentName) {
+                $documentType = DocumentTypeConstants::getByName($documentName);
+                $uploadedDocument = $uploadedDocuments->get($documentName);
+                
+                if ($uploadedDocument) {
+                    // Document is uploaded
+                    $completeDocuments[] = [
+                        'name' => $documentType['display_name'] ?? $documentName,
+                        'type' => $documentName,
+                        'status' => 'uploaded',
+                        'workflow_state' => $uploadedDocument->workflow_state,
+                        'workflow_state_label' => $this->getWorkflowStateLabel($uploadedDocument->workflow_state),
+                        'workflow_state_color' => $this->getWorkflowStateColor($uploadedDocument->workflow_state),
+                        'uploaded_at' => $uploadedDocument->created_at,
+                        'document_id' => $uploadedDocument->id,
+                        'is_verified' => $uploadedDocument->workflow_state === 3,
+                        'is_approved' => $uploadedDocument->workflow_state === 4,
+                    ];
+                } else {
+                    // Document is not uploaded
+                    $completeDocuments[] = [
+                        'name' => $documentType['display_name'] ?? $documentName,
+                        'type' => $documentName,
+                        'status' => 'not_uploaded',
+                        'workflow_state' => null,
+                        'workflow_state_label' => 'Belum Diunggah',
+                        'workflow_state_color' => 'gray',
+                        'uploaded_at' => null,
+                        'document_id' => null,
+                        'is_verified' => false,
+                        'is_approved' => false,
+                    ];
+                }
+            }
+
+            return $completeDocuments;
+        } catch (\Exception $e) {
+            Log::error('Error getting complete approval documents: ' . $e->getMessage());
             return [];
         }
     }

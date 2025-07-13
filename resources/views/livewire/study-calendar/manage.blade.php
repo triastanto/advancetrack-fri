@@ -8,7 +8,7 @@
             <div class="flex">
                 <div class="flex-shrink-0">
                     <x-heroicon-o-exclamation-triangle class="h-5 w-5 text-red-400" />
-                </div>
+                            </div>
                 <div class="ml-3">
                     <h3 class="text-sm font-medium text-red-800">Terjadi Kesalahan</h3>
                     <div class="mt-2 text-sm text-red-700">
@@ -30,7 +30,7 @@
     @else
         {{-- Empty State: No Study Calendar --}}
         @include('livewire.study-calendar.partials.empty-state')
-    @endif
+        @endif
 
     @if($studyCalendar)
         {{-- Main Content --}}

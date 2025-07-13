@@ -22,7 +22,10 @@
                     } elseif ($transition['name'] === 'START_STUDY') {
                         if (!($requirementsStatus['academic_documents']['complete'] && $requirementsStatus['approval_document']['approved'])) {
                             $isDisabled = true;
-                            $disabledReason = 'Semua dokumen persyaratan harus diverifikasi dan dokumen persetujuan harus disetujui';
+                            $approvedCount = $requirementsStatus['approval_document']['approved_count'] ?? 0;
+                            $totalCount = $requirementsStatus['approval_document']['total'] ?? 0;
+                            $missingCount = $totalCount - $approvedCount;
+                            $disabledReason = "Semua dokumen persyaratan harus diverifikasi dan semua {$totalCount} dokumen persetujuan harus disetujui (masih ada {$missingCount} yang belum disetujui)";
                         }
                     }
                 @endphp
@@ -61,29 +64,10 @@
 
                         {{-- Action Details --}}
                         <div class="flex-1 min-w-0">
-                            <div class="flex items-center gap-2 mb-1">
-                                <h4 class="text-sm font-medium text-gray-900">{{ $transition['label'] }}</h4>
-
-                                {{-- Status badges --}}
-                                @if($transition['requires_comment'])
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
-                                        <x-heroicon-o-chat-bubble-left class="w-3 h-3 mr-1" />
-                                        Perlu komentar
-                                    </span>
-                                @endif
-
-                                @if($isDisabled)
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
-                                        <x-heroicon-o-exclamation-triangle class="w-3 h-3 mr-1" />
-                                        Tidak tersedia
-                                    </span>
-                                @endif
-                            </div>
-
                             <p class="text-sm text-gray-600">
                                 @switch($transition['name'])
                                     @case('SUBMIT_STUDY')
-                                        Ajukan kalender studi untuk mendapatkan persetujuan dari Staf SDM & Keuangan. <br > Memerlukan semua dokumen persyaratan sudah diverifikasi.
+                                        Ajukan kalender studi untuk memulai proses verifikasi dokumen Persetujuan Studi Lanjut oleh HR/Finance Staff.
                                         @break
                                     @case('RESUBMIT_STUDY')
                                         Revisi dan ajukan ulang kalender studi setelah ditolak.
@@ -149,17 +133,71 @@
         </div>
     @endif
 
-    {{-- Requirements Warning --}}
-    @if($currentState === 3 && !($requirementsStatus['academic_documents']['complete'] && $requirementsStatus['approval_document']['approved']))
-        <div class="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <div class="flex items-center">
-                <x-heroicon-o-exclamation-triangle class="w-5 h-5 text-yellow-600 mr-2" />
+    {{-- State-specific guidance messages --}}
+    @if($currentState === 1)
+        {{-- Draft State Guidance --}}
+        <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <div class="flex items-start">
+                <x-heroicon-o-information-circle class="w-5 h-5 text-blue-600 mr-3 mt-0.5" />
                 <div>
-                    <h4 class="text-sm font-medium text-yellow-800">Persyaratan Belum Lengkap</h4>
-                    <p class="text-sm text-yellow-700 mt-1">
-                        Anda belum dapat memulai studi karena beberapa persyaratan belum terpenuhi.
-                        Pastikan semua dokumen persyaratan telah diverifikasi dan dokumen persetujuan telah disetujui.
+                    <h4 class="text-sm font-medium text-blue-800">Langkah Selanjutnya: Ajukan Kalender Studi</h4>
+                    <p class="text-sm text-blue-700 mt-1">
+                        Setelah semua dokumen Persyaratan Studi Lanjut diverifikasi, Anda dapat mengajukan kalender studi. 
+                        Pengajuan ini akan memulai proses verifikasi dokumen Persetujuan Studi Lanjut oleh HR/Finance Staff.
                     </p>
+                    <div class="mt-2 text-xs text-blue-600">
+                        <strong>Persyaratan:</strong> Semua dokumen Persyaratan Studi Lanjut harus diverifikasi terlebih dahulu.
+                    </div>
+                </div>
+            </div>
+        </div>
+    @elseif($currentState === 2)
+        {{-- Pending Approval State Guidance --}}
+        <div class="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <div class="flex items-start">
+                <x-heroicon-o-clock class="w-5 h-5 text-yellow-600 mr-3 mt-0.5" />
+                <div>
+                    <h4 class="text-sm font-medium text-yellow-800">Menunggu Persetujuan</h4>
+                    <p class="text-sm text-yellow-700 mt-1">
+                        Kalender studi Anda telah diajukan dan sedang menunggu persetujuan dari supervisor. 
+                        Setelah disetujui, HR/Finance Staff akan mulai memproses dokumen Persetujuan Studi Lanjut.
+                    </p>
+                    <div class="mt-2 text-xs text-yellow-600">
+                        <strong>Proses selanjutnya:</strong> Supervisor → HR/Finance Staff → Manajemen
+                    </div>
+                </div>
+            </div>
+        </div>
+    @elseif($currentState === 3)
+        {{-- Approved State Guidance --}}
+        <div class="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+            <div class="flex items-start">
+                <x-heroicon-o-check-circle class="w-5 h-5 text-green-600 mr-3 mt-0.5" />
+                <div>
+                    <h4 class="text-sm font-medium text-green-800">Kalender Studi Disetujui</h4>
+                    <p class="text-sm text-green-700 mt-1">
+                        Kalender studi Anda telah disetujui! HR/Finance Staff sedang memproses dokumen Persetujuan Studi Lanjut. 
+                        Setelah semua dokumen persetujuan disetujui, Anda dapat memulai studi.
+                    </p>
+                    <div class="mt-2 text-xs text-green-600">
+                        <strong>Status:</strong> Menunggu persetujuan dokumen dari HR/Finance Staff dan Manajemen
+                    </div>
+                </div>
+            </div>
+        </div>
+    @elseif($currentState === 5)
+        {{-- Active Study State Guidance --}}
+        <div class="mt-6 p-4 bg-purple-50 border border-purple-200 rounded-lg">
+            <div class="flex items-start">
+                <x-heroicon-o-academic-cap class="w-5 h-5 text-purple-600 mr-3 mt-0.5" />
+                <div>
+                    <h4 class="text-sm font-medium text-purple-800">Studi Aktif</h4>
+                    <p class="text-sm text-purple-700 mt-1">
+                        Selamat! Studi Anda telah dimulai. Pastikan untuk memperbarui progress studi dan melaporkan perkembangan secara berkala.
+                    </p>
+                    <div class="mt-2 text-xs text-purple-600">
+                        <strong>Tips:</strong> Update informasi studi secara berkala dan siapkan laporan akhir
+                    </div>
                 </div>
             </div>
         </div>

@@ -39,10 +39,9 @@
 
 ├── 📅 Kalender Studi Lanjut (Workflow Utama)
 │   ├── Kelola Kalender Studi Lanjut (Dosen)
-│   ├── Linimasa Kalender Studi Lanjut
 │   └── Persetujuan Kalender Studi Lanjut (Supervisor)
 │   👥 **Akses**: 
-│   - Kelola & Linimasa: Dosen (lecturer)
+│   - Kelola: Dosen (lecturer)
 │   - Persetujuan: Ketua Program Studi, Wakil Dekan II FRI
 
 ├── 📁 Dokumen Akademik (Academic Documents)
@@ -89,7 +88,7 @@
 │   └── 🛡️ Persetujuan Manajemen
 │   👥 **Akses**: Staf SDM & Keuangan, Kepala Urusan SDM & Keuangan, Ketua Program Studi, Ketua Kelompok Keilmuan, Wakil Dekan II FRI
 
-├── 📊 Monitoring & Laporan
+├── 📊 Monitoring & Laporan (Dashboard untuk Non-Dosen)
 │   ├── 📈 Dasbor Analitik
 │   │   ├── Overview Statistik Umum (Grafik jumlah dosen aktif, lulus, dan dropout)
 │   │   ├── Tren Studi Lanjut per Tahun (Analisis tren pertumbuhan studi lanjut)
@@ -134,7 +133,8 @@
 
 | Menu/Fitur | Dosen | Staf SDM | Kepala SDM | Ketua Prodi | Ketua KK | Wakil Dekan |
 |------------|-------|----------|------------|-------------|----------|-------------|
-| Dashboard | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Dashboard (Lecturer) | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Dashboard (Analytics) | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Data Pribadi | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
 | Kalender Studi (Kelola) | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
 | Kalender Studi (Persetujuan) | ❌ | ❌ | ❌ | ✅ | ❌ | ✅ |

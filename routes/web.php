@@ -87,6 +87,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::prefix('study-calendar')->name('study-calendar.')->middleware(['auth', 'verified'])->group(function () {
     Route::view('manage', 'pages.study-calendar.manage')->name('manage');
     Route::view('create', 'pages.study-calendar.create')->name('create');
-    Route::view('status', 'pages.study-calendar.status')->name('status');
+
     Route::view('approval', 'pages.study-calendar.approval')->name('approval');
 });

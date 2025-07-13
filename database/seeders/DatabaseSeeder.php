@@ -49,11 +49,11 @@ class DatabaseSeeder extends Seeder
         // Create users and employees for research structure (development only)
         $this->call(PersonnelSeeder::class);
 
-        // Create complete study calendar data for one lecturer (includes all related data)
-        $this->call(StudyCalendarSeeder::class);
+        // Create study calendar with verified study requirement documents for one lecturer
+        $this->call(LecturerWithStudyRequirementSeeder::class);
 
-        // Create verified study requirement documents for one lecturer
-        $this->call(StudyRequirementDocumentSeeder::class);
+        // Create study calendar with both verified study requirement and approval documents for one lecturer
+        $this->call(LecturerWithCompleteDocumentsSeeder::class);
 
         // Add education records for all employees
         $this->call(EducationSeeder::class);

@@ -3,42 +3,99 @@
 namespace Database\Seeders;
 
 use App\Models\Employee;
+use App\Models\AcademicDocument;
 use App\Models\StudyCalendar;
 use App\Models\StudyDetail;
 use App\Models\StudyPromotor;
 use App\Models\SupervisorAssignment;
 use App\Models\CourseResponsibility;
-use App\Models\StudyProgram;
+use App\Models\DocumentType;
+use App\Constants\DocumentTypeConstants;
 use Illuminate\Database\Seeder;
 use Carbon\Carbon;
 
-class StudyCalendarSeeder extends Seeder
+class LecturerWithStudyRequirementSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        // Get all lecturers (no longer need study program assignments)
-        $lecturers = Employee::where('role', 'lecturer')->get();
+        // Get study requirement document types
+        $studyRequirementTypes = DocumentType::whereIn('name', DocumentTypeConstants::getStudyRequirementNames())->get();
 
-        if ($lecturers->isEmpty()) {
-            $this->command->info('No lecturers found.');
+        if ($studyRequirementTypes->isEmpty()) {
+            $this->command->warn('No study requirement document types found. Run DocumentTypeSeeder first.');
             return;
         }
 
-        // Only seed one lecturer with a draft study calendar
-        $lecturer = $lecturers->first();
+        // Get the first lecturer (must be executed before LecturerWithCompleteDocumentsSeeder)
+        $lecturer = Employee::where('role', 'lecturer')->first();
+
         if (!$lecturer) {
             $this->command->warn('No eligible lecturer found.');
             return;
         }
 
-        // Remove all existing study calendars and related data for this lecturer
+        $this->command->info("Creating complete lecturer data for: {$lecturer->user->name}");
+
+        $studyRequirementCount = 0;
+
+        // Create verified study requirement documents
+        foreach ($studyRequirementTypes as $documentType) {
+            // Check if document already exists for this lecturer and type
+            $existingDocument = AcademicDocument::where('employee_id', $lecturer->id)
+                ->where('document_type_id', $documentType->id)
+                ->first();
+
+            if ($existingDocument) {
+                $this->command->info("Study requirement document {$documentType->display_name} already exists for {$lecturer->user->name}, skipping...");
+                continue;
+            }
+
+            // Create verified study requirement document
+            $document = AcademicDocument::create([
+                'employee_id' => $lecturer->id,
+                'document_type_id' => $documentType->id,
+                'file_name' => $this->generateStudyRequirementFileName($documentType->name),
+                'file_path' => $this->generateStudyRequirementFilePath($lecturer->id, $documentType->name),
+                'workflow_state' => 3, // VERIFIED state
+                'upload_date' => Carbon::now()->subDays(rand(1, 30)), // Random upload date within last 30 days
+                'created_at' => Carbon::now()->subDays(rand(1, 30)),
+                'updated_at' => Carbon::now()->subDays(rand(1, 30)),
+            ]);
+
+            $studyRequirementCount++;
+            $this->command->info("Created verified study requirement document: {$documentType->display_name}");
+        }
+
+        $this->command->info("✅ Successfully created {$studyRequirementCount} verified study requirement documents for {$lecturer->user->name}");
+
+        // Create complete study calendar with all related data
+        $this->createCompleteStudyCalendar($lecturer);
+
+        $this->command->info("🎓 Lecturer {$lecturer->user->name} now has complete document set and detailed study calendar!");
+    }
+
+    /**
+     * Create complete study calendar with all related data
+     */
+    private function createCompleteStudyCalendar(Employee $lecturer): void
+    {
+        // Check if study calendar already exists
+        $existingCalendar = StudyCalendar::where('employee_id', $lecturer->id)->first();
+        
+        if ($existingCalendar) {
+            $this->command->info("Study calendar already exists for {$lecturer->user->name}, skipping...");
+            return;
+        }
+
+        // Remove any existing related data for this lecturer
         $lecturer->studyCalendars()->delete();
         $lecturer->supervisorAssignments()->delete();
         $lecturer->courseResponsibilities()->delete();
 
+        // Generate study calendar data
         $studyCalendarData = $this->generateStudyCalendarDataForState($lecturer, 1); // 1 = DRAFT
 
         // Create the study calendar
@@ -58,18 +115,13 @@ class StudyCalendarSeeder extends Seeder
         // Create course responsibilities
         $this->createCourseResponsibilities($lecturer);
 
-        $this->command->info("Seeded complete study calendar data for lecturer: {$lecturer->user->name}");
-        $this->command->info("- Study Calendar: Draft state");
-        $this->command->info("- Study Detail: Created with university information");
-        $this->command->info("- Promotors: Primary and secondary promotors added");
-        $this->command->info("- Supervisor Assignments: Active and completed assignments");
-        $this->command->info("- Course Responsibilities: Multiple courses with semester/year data");
+        $this->command->info("📅 Created complete study calendar with all related data for {$lecturer->user->name}");
     }
 
     /**
      * Generate study calendar data for a specific workflow_state
      */
-    function generateStudyCalendarDataForState(Employee $lecturer, int $workflowState): array
+    private function generateStudyCalendarDataForState(Employee $lecturer, int $workflowState): array
     {
         $lecturerName = strtolower($lecturer->user->name);
         $position = strtolower($lecturer->position);
@@ -101,7 +153,7 @@ class StudyCalendarSeeder extends Seeder
      */
     private function createStudyDetail(StudyCalendar $studyCalendar): StudyDetail
     {
-        $studyProgram = StudyProgram::inRandomOrder()->first();
+        $studyProgram = \App\Models\StudyProgram::inRandomOrder()->first();
         
         return StudyDetail::create([
             'study_calendar_id' => $studyCalendar->id,
@@ -253,6 +305,42 @@ class StudyCalendarSeeder extends Seeder
             month: $month,
             day: 1
         );
+    }
+
+    /**
+     * Generate a realistic file name for study requirement documents
+     */
+    private function generateStudyRequirementFileName(string $documentTypeName): string
+    {
+        $fileNameMap = [
+            'letter_of_acceptance' => 'Surat_Penerimaan_Resmi.pdf',
+            'scholarship_cover_letter' => 'Surat_Pengantar_Beasiswa.pdf',
+            'rector_permit_letter' => 'Surat_Izin_Rektor.pdf',
+            'permanent_lecturer_decree' => 'SK_Dosen_Tetap_Yayasan.pdf',
+            'diploma_certificate' => 'Ijazah_Terakhir.pdf',
+            's1_transcript' => 'Transkrip_Nilai_S1.pdf',
+            's2_transcript' => 'Transkrip_Nilai_S2.pdf',
+            'inpassing_decree' => 'SK_Inpassing.pdf',
+            'jad_decree' => 'SK_JAD.pdf',
+            'graduation_report_statement' => 'Surat_Pernyataan_Laporan_Kelulusan.pdf',
+            'lldikti_assignment_statement' => 'Pernyataan_Penugasan_LLDIKTI.pdf',
+            'willing_to_be_relieved_letter' => 'Surat_Bersedia_Dibebastugaskan.pdf',
+            'management_permit_letter' => 'Surat_Izin_Pimpinan.pdf',
+            'work_period_certificate' => 'Surat_Keterangan_Masa_Kerja.pdf',
+            'academic_recommendation_letter' => 'Surat_Rekomendasi_Akademisi.pdf',
+            'management_recommendation_letter' => 'Surat_Rekomendasi_Pimpinan.pdf',
+        ];
+
+        return $fileNameMap[$documentTypeName] ?? 'Dokumen_Persyaratan_Studi.pdf';
+    }
+
+    /**
+     * Generate a realistic file path for study requirement documents
+     */
+    private function generateStudyRequirementFilePath(int $employeeId, string $documentTypeName): string
+    {
+        $timestamp = Carbon::now()->format('Y/m/d');
+        return "documents/{$employeeId}/study_requirements/{$timestamp}/{$this->generateStudyRequirementFileName($documentTypeName)}";
     }
 
     /**
@@ -495,4 +583,4 @@ class StudyCalendarSeeder extends Seeder
             'Basis Data'
         ];
     }
-}
+} 

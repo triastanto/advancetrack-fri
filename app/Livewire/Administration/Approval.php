@@ -150,18 +150,33 @@ class Approval extends WorkflowComponent
     {
         session()->flash('success', $data['message'] ?? 'Dokumen berhasil disetujui.');
         $this->refreshData();
+        $this->updateNotificationCount();
     }
 
     public function handleDocumentRejected($data)
     {
         session()->flash('error', $data['message'] ?? 'Dokumen berhasil ditolak.');
         $this->refreshData();
+        $this->updateNotificationCount();
     }
 
     public function handleTransitionApplied($data)
     {
         session()->flash('success', $data['message'] ?? 'Status dokumen berhasil diperbarui.');
         $this->refreshData();
+        $this->updateNotificationCount();
+    }
+
+    /**
+     * Update notification count in the sidebar
+     */
+    public function updateNotificationCount()
+    {
+        $count = $this->getPendingApprovalCount();
+        $this->dispatch('update-sidebar-notification', [
+            'route' => 'administration.approval',
+            'count' => $count
+        ]);
     }
 
     public function refreshData()
@@ -266,6 +281,7 @@ class Approval extends WorkflowComponent
 
                     $this->closeApprovalModal();
                     $this->dispatch('document-approved', ['message' => 'Dokumen berhasil disetujui.']);
+                    $this->updateNotificationCount();
                 } catch (\Exception $e) {
                     session()->flash('error', 'Error saat menyetujui dokumen: ' . $e->getMessage());
                 }
@@ -315,6 +331,7 @@ class Approval extends WorkflowComponent
 
                     $this->closeApprovalModal();
                     $this->dispatch('document-rejected', ['message' => 'Dokumen berhasil ditolak.']);
+                    $this->updateNotificationCount();
                 } catch (\Exception $e) {
                     session()->flash('error', 'Error saat menolak dokumen: ' . $e->getMessage());
                 }
@@ -364,6 +381,7 @@ class Approval extends WorkflowComponent
 
                     $this->closeApprovalModal();
                     $this->dispatch('document-approved', ['message' => 'Dokumen berhasil disubmit untuk persetujuan.']);
+                    $this->updateNotificationCount();
                 } catch (\Exception $e) {
                     session()->flash('error', 'Error saat submit dokumen: ' . $e->getMessage());
                 }
@@ -457,11 +475,51 @@ class Approval extends WorkflowComponent
                 session()->flash('success', 'Dokumen dari notifikasi email telah dipilih untuk persetujuan.');
             }
         }
+
+        // Initialize notification count
+        $this->updateNotificationCount();
     }
 
     public function clearFilters()
     {
         $this->reset(['search', 'documentType', 'statusFilter']);
         $this->resetPage();
+    }
+
+    /**
+     * Get pending approval count for the current user's role
+     */
+    public function getPendingApprovalCount(): int
+    {
+        $user = Auth::user();
+        if (!$user || !$user->employee) {
+            return 0;
+        }
+
+        $role = $user->employee->role;
+
+        // Get approval document type IDs
+        $approvalTypeNames = DocumentTypeConstants::getApprovalDocumentNames();
+        $approvalTypeIds = DocumentType::whereIn('name', $approvalTypeNames)->pluck('id');
+
+        $query = ApprovalDocument::whereIn('document_type_id', $approvalTypeIds);
+
+        // Filter by role-specific pending states
+        switch ($role) {
+            case 'head_of_study_program':
+                // Pending Level 1 approval (state 2)
+                return $query->where('workflow_state', 2)->count();
+
+            case 'head_of_research_group':
+                // Pending Level 2 approval (state 3)
+                return $query->where('workflow_state', 3)->count();
+
+            case 'fri_vice_dean':
+                // Pending Level 1 or Level 2 approval (states 2 and 3)
+                return $query->whereIn('workflow_state', [2, 3])->count();
+
+            default:
+                return 0;
+        }
     }
 }

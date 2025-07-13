@@ -183,6 +183,86 @@ class Approval extends WorkflowComponent
         }
     }
 
+    /**
+     * Check if approval documents are missing for draft study calendars
+     * This helps hr_finance_staff understand what action is needed
+     */
+    public function getApprovalDocumentStatusForDraft($studyCalendar)
+    {
+        try {
+            $employee = $studyCalendar->employee;
+            
+            // Get approval document type names and IDs
+            $approvalTypeNames = DocumentTypeConstants::getApprovalDocumentNames();
+            $approvalTypeIds = \App\Models\DocumentType::whereIn('name', $approvalTypeNames)->pluck('id');
+
+            // Check existing approval documents
+            $existingApprovalDocs = ApprovalDocument::where('employee_id', $employee->id)
+                ->whereIn('document_type_id', $approvalTypeIds)
+                ->with('documentType')
+                ->get();
+
+            // Get all required document types
+            $requiredDocTypes = \App\Models\DocumentType::whereIn('id', $approvalTypeIds)->get();
+
+            // Check which documents are missing
+            $uploadedDocTypeIds = $existingApprovalDocs->pluck('document_type_id')->toArray();
+            $missingDocTypes = $requiredDocTypes->whereNotIn('id', $uploadedDocTypeIds);
+
+            // Check which documents are in draft state (need to be submitted)
+            $draftDocs = $existingApprovalDocs->where('workflow_state', 1); // DRAFT state
+
+            return [
+                'total_required' => count($approvalTypeIds),
+                'uploaded_count' => $existingApprovalDocs->count(),
+                'missing_count' => $missingDocTypes->count(),
+                'draft_count' => $draftDocs->count(),
+                'approved_count' => $existingApprovalDocs->where('workflow_state', 4)->count(), // APPROVED state
+                'missing_document_types' => $missingDocTypes->pluck('display_name')->toArray(),
+                'draft_documents' => $draftDocs->pluck('documentType.display_name', 'id')->toArray(),
+                'action_needed' => $missingDocTypes->count() > 0 || $draftDocs->count() > 0,
+                'action_message' => $this->getActionMessageForDraft($missingDocTypes, $draftDocs)
+            ];
+        } catch (\Exception $e) {
+            Log::error('Error getting approval document status for draft: ' . $e->getMessage());
+            return [
+                'total_required' => 5,
+                'uploaded_count' => 0,
+                'missing_count' => 5,
+                'draft_count' => 0,
+                'approved_count' => 0,
+                'missing_document_types' => [],
+                'draft_documents' => [],
+                'action_needed' => true,
+                'action_message' => 'Terjadi kesalahan saat memeriksa status dokumen persetujuan.'
+            ];
+        }
+    }
+
+    /**
+     * Generate action message for hr_finance_staff based on missing/draft documents
+     */
+    private function getActionMessageForDraft($missingDocTypes, $draftDocs)
+    {
+        $messages = [];
+
+        if ($missingDocTypes->count() > 0) {
+            $missingNames = $missingDocTypes->pluck('display_name')->implode(', ');
+            $messages[] = "Unggah dokumen persetujuan yang belum ada: {$missingNames}";
+        }
+
+        if ($draftDocs->count() > 0) {
+            $draftNames = $draftDocs->pluck('documentType.display_name')->implode(', ');
+            $messages[] = "Kirim dokumen persetujuan yang masih dalam status draft: {$draftNames}";
+        }
+
+        if (empty($messages)) {
+            return "Semua dokumen persetujuan telah diunggah dan disetujui.";
+        }
+
+        return implode('. ', $messages);
+    }
+
     // Data Retrieval Methods
     public function getPendingStudyCalendars()
     {

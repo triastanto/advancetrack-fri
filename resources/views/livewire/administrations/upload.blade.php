@@ -141,6 +141,18 @@
                                         <span>• {{ $selectedEmployee->position }}</span>
                                     @endif
                                 </div>
+                                @if($isHrFinanceStaff && $selectedEmployee->studyCalendar && $selectedEmployee->studyCalendar->workflow_state === 1)
+                                    <div class="mt-2">
+                                        <div class="bg-yellow-50 border border-yellow-200 rounded-md p-2">
+                                            <div class="flex items-center">
+                                                <x-heroicon-o-information-circle class="w-4 h-4 text-yellow-600 mr-2" />
+                                                <span class="text-xs text-yellow-800">
+                                                    <strong>Kalender Studi:</strong> Status Draft - Upload 5 dokumen persetujuan untuk melanjutkan proses
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
                             </div>
                         </div>
                         <div class="flex items-center">

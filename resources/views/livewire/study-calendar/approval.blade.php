@@ -23,6 +23,40 @@
         </div>
     </div>
 
+    {{-- Workflow Information for HR/Finance Staff --}}
+    @if(auth()->user()->employee )
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+            <div class="flex items-start">
+                <x-heroicon-o-information-circle class="w-5 h-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0" />
+                <div class="flex-1">
+                    <h3 class="text-sm font-medium text-blue-900 mb-2">
+                        Panduan Workflow Kalender Studi
+                    </h3>
+                    <div class="text-sm text-blue-800 space-y-2">
+                        <div class="flex items-start">
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mr-2 mt-0.5">1</span>
+                            <div>
+                                <strong>Draft:</strong> Dosen telah membuat kalender studi. HR/Finance perlu mengunggah 5 dokumen persetujuan: Dokumen Kesesuaian Studi Lanjut, Berita Acara Pengajuan, Berita Acara Persetujuan, NDE, dan PID.
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mr-2 mt-0.5">2</span>
+                            <div>
+                                <strong>Pending Approval:</strong> Dosen telah mengirim kalender studi untuk persetujuan. Supervisor dapat menyetujui atau menolak setelah semua dokumen persyaratan diverifikasi.
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mr-2 mt-0.5">3</span>
+                            <div>
+                                <strong>Approved:</strong> Kalender studi disetujui. Dosen dapat memulai studi setelah semua dokumen persetujuan disetujui oleh manajemen.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
     {{-- Statistics Cards --}}
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
@@ -116,8 +150,13 @@
                     class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                     <option value="">Semua Status</option>
+                    @if(auth()->user()->employee && in_array(auth()->user()->employee->role, ['hr_finance_staff', 'head_of_hr_finance']))
+                        <option value="1" class="font-medium text-yellow-600">📋 Draft (Perlu Upload Dokumen)</option>
+                    @endif
                     @foreach($workflowStates as $stateId => $state)
-                        <option value="{{ $stateId }}">{{ $state['label'] }}</option>
+                        @if(!(auth()->user()->employee && in_array(auth()->user()->employee->role, ['hr_finance_staff', 'head_of_hr_finance']) && $stateId == 1))
+                            <option value="{{ $stateId }}">{{ $state['label'] }}</option>
+                        @endif
                     @endforeach
                 </select>
             </div>
@@ -238,7 +277,25 @@
                                         </button>
 
                                         {{-- Approval Actions --}}
-                                        @if($studyCalendar->workflow_state === 2 && $canManageWorkflow) {{-- PENDING_APPROVAL --}}
+                                        @if($studyCalendar->workflow_state === 1 && auth()->user()->employee && in_array(auth()->user()->employee->role, ['hr_finance_staff', 'head_of_hr_finance'])) {{-- DRAFT for HR/Finance --}}
+                                            @php
+                                                $approvalStatus = $this->getApprovalDocumentStatusForDraft($studyCalendar);
+                                            @endphp
+                                            @if($approvalStatus['action_needed'])
+                                                <a
+                                                    href="{{ route('administrations.upload') }}?selectedEmployeeId={{ $studyCalendar->employee->id }}"
+                                                    class="inline-flex items-center px-3 py-1.5 border border-yellow-300 shadow-sm text-xs font-medium rounded text-yellow-700 bg-yellow-50 hover:bg-yellow-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-colors duration-200"
+                                                >
+                                                    <x-heroicon-o-cloud-arrow-up class="w-4 h-4 mr-1" />
+                                                    Upload Dokumen
+                                                </a>
+                                            @else
+                                                <span class="inline-flex items-center px-3 py-1.5 border border-green-300 text-xs font-medium rounded text-green-700 bg-green-50">
+                                                    <x-heroicon-o-check-circle class="w-4 h-4 mr-1" />
+                                                    Siap
+                                                </span>
+                                            @endif
+                                        @elseif($studyCalendar->workflow_state === 2 && $canManageWorkflow) {{-- PENDING_APPROVAL --}}
                                             <button
                                                 wire:click="approveStudy({{ $studyCalendar->id }})"
                                                 @if(!$requirements['academic_documents']['complete'])

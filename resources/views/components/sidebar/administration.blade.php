@@ -1,3 +1,8 @@
+@php
+    use App\Services\NotificationCountService;
+    $pendingApprovalCount = NotificationCountService::getPendingApprovalCount();
+@endphp
+
 <x-sidebar.section title="Administrasi Dokumen">
     <x-sidebar.item route="administrations.lecturers" :active="request()->routeIs('administrations.lecturers')" icon="heroicon-o-magnifying-glass">
         Daftar Dosen Studi Lanjut
@@ -13,7 +18,7 @@
     @endif
 
     @if(Auth::user()->employee && in_array(Auth::user()->employee->role, ['head_of_study_program', 'head_of_research_group', 'fri_vice_dean', 'hr_finance_staff']))
-    <x-sidebar.item route="administration.approval" :active="request()->routeIs('administration.approval')" icon="heroicon-o-shield-check">
+    <x-sidebar.item route="administration.approval" :active="request()->routeIs('administration.approval')" icon="heroicon-o-shield-check" :count="$pendingApprovalCount">
         Persetujuan Studi Lanjut
     </x-sidebar.item>
     @endif

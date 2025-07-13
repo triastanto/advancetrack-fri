@@ -87,6 +87,19 @@ class Upload extends WorkflowComponent
     }
 
     /**
+     * Check if current user is HR/Finance staff
+     */
+    protected function isHrFinanceStaff(): bool
+    {
+        $user = Auth::user();
+        if (!$user || !$user->employee) {
+            return false;
+        }
+
+        return in_array($user->employee->role, ['hr_finance_staff', 'head_of_hr_finance']);
+    }
+
+    /**
      * Get employee for document operations
      * For lecturers: returns their own employee record
      * For non-lecturers: returns selected employee
@@ -502,7 +515,8 @@ class Upload extends WorkflowComponent
                     'documents' => $ApprovalDocuments,
                     'completionStatus' => $this->getCompletionStatus(),
                     'activeStudyInfo' => $this->getActiveStudyInfo(),
-                    'canManageWorkflow' => $this->canUserManageWorkflow()
+                    'canManageWorkflow' => $this->canUserManageWorkflow(),
+                    'isHrFinanceStaff' => $this->isHrFinanceStaff()
                 ]);
             }
 
@@ -515,7 +529,8 @@ class Upload extends WorkflowComponent
                     'documents' => collect(),
                     'completionStatus' => ['status' => 'List View', 'details' => []],
                     'activeStudyInfo' => null,
-                    'canManageWorkflow' => false
+                    'canManageWorkflow' => false,
+                    'isHrFinanceStaff' => $this->isHrFinanceStaff()
                 ]);
             } else {
                 // Return management view for selected employee
@@ -527,7 +542,8 @@ class Upload extends WorkflowComponent
                         'documents' => collect(),
                         'completionStatus' => ['status' => 'List View', 'details' => []],
                         'activeStudyInfo' => null,
-                        'canManageWorkflow' => false
+                        'canManageWorkflow' => false,
+                        'isHrFinanceStaff' => $this->isHrFinanceStaff()
                     ]);
                 }
 
@@ -547,7 +563,8 @@ class Upload extends WorkflowComponent
                     'documents' => $ApprovalDocuments,
                     'completionStatus' => $this->getCompletionStatus(),
                     'activeStudyInfo' => $this->getActiveStudyInfo(),
-                    'canManageWorkflow' => $this->canUserManageWorkflow()
+                    'canManageWorkflow' => $this->canUserManageWorkflow(),
+                    'isHrFinanceStaff' => $this->isHrFinanceStaff()
                 ]);
             }
         } catch (\Exception $e) {
@@ -573,7 +590,8 @@ class Upload extends WorkflowComponent
                 'documents' => $emptyPaginator,
                 'completionStatus' => ['status' => 'Error', 'details' => []],
                 'activeStudyInfo' => null,
-                'canManageWorkflow' => false
+                'canManageWorkflow' => false,
+                'isHrFinanceStaff' => $this->isHrFinanceStaff()
             ]);
         }
     }

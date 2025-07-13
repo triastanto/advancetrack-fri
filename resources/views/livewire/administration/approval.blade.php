@@ -151,4 +151,31 @@
 
     {{-- Workflow Transition Modal --}}
     <livewire:components.workflow.workflow-transition-modal />
+
+    <script>
+        // Listen for notification count updates
+        document.addEventListener('livewire:init', () => {
+            Livewire.on('update-sidebar-notification', (data) => {
+                // Find the sidebar item for the specified route
+                const sidebarItem = document.querySelector(`[href*="${data.route}"]`);
+                if (sidebarItem) {
+                    // Find or create the notification badge
+                    let badge = sidebarItem.querySelector('.inline-flex.items-center.justify-center');
+                    if (!badge) {
+                        badge = document.createElement('span');
+                        badge.className = 'inline-flex items-center justify-center px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full min-w-[1.5rem]';
+                        sidebarItem.appendChild(badge);
+                    }
+                    
+                    // Update the count
+                    if (data.count > 0) {
+                        badge.textContent = data.count > 99 ? '99+' : data.count;
+                        badge.style.display = 'inline-flex';
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                }
+            });
+        });
+    </script>
 </div>

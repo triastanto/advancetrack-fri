@@ -55,6 +55,9 @@ class DatabaseSeeder extends Seeder
         // Create study calendar with both verified study requirement and approval documents for one lecturer
         $this->call(LecturerWithCompleteDocumentsSeeder::class);
 
+        // Create study calendar with active study for one lecturer
+        $this->call(LecturerWithActiveStudySeeder::class);
+
         // Add education records for all employees
         $this->call(EducationSeeder::class);
 

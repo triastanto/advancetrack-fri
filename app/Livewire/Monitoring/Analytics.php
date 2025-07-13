@@ -21,11 +21,9 @@ class Analytics extends Component
     use WithPagination;
 
     // Filter properties
-    public $dateRange = '30'; // days
+    public $dateRange = '7'; // days
     public $selectedResearchGroup = '';
     public $selectedResearchLab = '';
-    public $selectedStudyProgram = '';
-    public $selectedRole = '';
 
     // Chart data properties
     public $studyCalendarStats = [];
@@ -36,11 +34,9 @@ class Analytics extends Component
     public $timelineData = [];
 
     protected $queryString = [
-        'dateRange' => ['except' => '30'],
+        'dateRange' => ['except' => '7'],
         'selectedResearchGroup' => ['except' => ''],
         'selectedResearchLab' => ['except' => ''],
-        'selectedStudyProgram' => ['except' => ''],
-        'selectedRole' => ['except' => ''],
     ];
 
     public function mount()
@@ -64,15 +60,9 @@ class Analytics extends Component
         $this->loadAnalytics();
     }
 
-    public function updatedSelectedStudyProgram()
-    {
-        $this->loadAnalytics();
-    }
 
-    public function updatedSelectedRole()
-    {
-        $this->loadAnalytics();
-    }
+
+
 
     public function loadAnalytics()
     {
@@ -264,11 +254,17 @@ class Analytics extends Component
             $dateStr = $currentDate->format('Y-m-d');
             $dayData = $data->get($dateStr, collect());
             
+            $studyCalendarCount = $dayData->where('workflow_name', 'study_calendar')->sum('transition_count');
+            $verificationByStaffCount = $dayData->where('workflow_name', 'verification_by_staff')->sum('transition_count');
+            $verificationByManagementCount = $dayData->where('workflow_name', 'verification_by_management')->sum('transition_count');
+            $totalCount = $studyCalendarCount + $verificationByStaffCount + $verificationByManagementCount;
+            
             $timeline[] = [
                 'date' => $currentDate->format('M d'),
-                'study_calendar' => $dayData->where('workflow_name', 'study_calendar')->sum('transition_count'),
-                'verification_by_staff' => $dayData->where('workflow_name', 'verification_by_staff')->sum('transition_count'),
-                'verification_by_management' => $dayData->where('workflow_name', 'verification_by_management')->sum('transition_count'),
+                'count' => $totalCount,
+                'study_calendar' => $studyCalendarCount,
+                'verification_by_staff' => $verificationByStaffCount,
+                'verification_by_management' => $verificationByManagementCount,
             ];
             
             $currentDate->addDay();
@@ -293,17 +289,9 @@ class Analytics extends Component
             });
         }
 
-        if ($this->selectedStudyProgram) {
-            $query->whereHas('studyDetail', function($q) {
-                $q->where('study_program_id', $this->selectedStudyProgram);
-            });
-        }
 
-        if ($this->selectedRole) {
-            $query->whereHas('employee', function($q) {
-                $q->where('role', $this->selectedRole);
-            });
-        }
+
+
 
         // Use the table name to avoid ambiguity
         $tableName = $query->getModel()->getTable();
@@ -454,30 +442,15 @@ class Analytics extends Component
         return $query->get();
     }
 
-    public function getStudyPrograms()
-    {
-        return StudyProgram::orderBy('name')->get();
-    }
 
-    public function getRoles()
-    {
-        return [
-            'lecturer' => 'Dosen',
-            'hr_finance_staff' => 'Staff HR/Finance',
-            'head_of_hr_finance' => 'Kepala HR/Finance',
-            'fri_vice_dean' => 'Wakil Dekan FRI',
-            'head_of_study_program' => 'Kepala Program Studi',
-            'head_of_research_group' => 'Ketua Kelompok Keilmuan',
-        ];
-    }
+
+
 
     public function render()
     {
         return view('livewire.monitoring.analytics', [
             'researchGroups' => $this->getResearchGroups(),
             'researchLabs' => $this->getResearchLabs(),
-            'studyPrograms' => $this->getStudyPrograms(),
-            'roles' => $this->getRoles(),
         ]);
     }
 }

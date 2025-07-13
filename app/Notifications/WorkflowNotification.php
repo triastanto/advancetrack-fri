@@ -28,7 +28,7 @@ class WorkflowNotification extends Notification implements ShouldQueue
      */
     public function via($notifiable)
     {
-        return ['database']; // Add 'mail' if you want to send as email too
+        return ['database', 'mail'];
     }
 
     /**
@@ -50,151 +50,235 @@ class WorkflowNotification extends Notification implements ShouldQueue
     }
 
     /**
-     * Get notification title based on type and data
+     * Get the notification title.
      */
-    private function getNotificationTitle(): string
+    protected function getNotificationTitle(): string
     {
-        $workflowName = $this->data['workflow_name'] ?? '';
-        $transition = $this->data['transition'] ?? '';
-        $documentType = $this->data['document_type'] ?? '';
+        return match($this->type) {
+            'semester_report_reminder' => 'Pengingat Laporan Semester',
+            'final_report_reminder' => 'Pengingat Laporan Akhir',
+            'document_submitted' => 'Dokumen Dikirim untuk Verifikasi',
+            'document_verified' => 'Dokumen Disetujui',
+            'document_rejected' => 'Dokumen Ditolak',
+            'document_resubmitted' => 'Dokumen Dikirim Ulang',
+            'study_calendar_approved' => 'Kalender Studi Disetujui',
+            'study_calendar_rejected' => 'Kalender Studi Ditolak',
+            'study_started' => 'Studi Dimulai',
+            'study_completed' => 'Studi Selesai',
+            default => 'Notifikasi Sistem'
+        };
+    }
+
+    /**
+     * Get the notification message.
+     */
+    protected function getNotificationMessage(): string
+    {
+        return match($this->type) {
+            'semester_report_reminder' => $this->getSemesterReminderMessage(),
+            'final_report_reminder' => $this->getFinalReminderMessage(),
+            'document_submitted' => "Dokumen {$this->data['document_name']} telah dikirim untuk verifikasi.",
+            'document_verified' => "Dokumen {$this->data['document_name']} telah disetujui.",
+            'document_rejected' => "Dokumen {$this->data['document_name']} ditolak. Silakan perbaiki dan kirim ulang.",
+            'document_resubmitted' => "Dokumen {$this->data['document_name']} telah dikirim ulang untuk verifikasi.",
+            'study_calendar_approved' => 'Kalender studi Anda telah disetujui. Anda dapat memulai studi.',
+            'study_calendar_rejected' => 'Kalender studi Anda ditolak. Silakan perbaiki dan kirim ulang.',
+            'study_started' => 'Studi Anda telah dimulai. Selamat belajar!',
+            'study_completed' => 'Selamat! Studi Anda telah selesai.',
+            default => 'Anda memiliki notifikasi baru.'
+        };
+    }
+
+    /**
+     * Get semester reminder message
+     */
+    protected function getSemesterReminderMessage(): string
+    {
+        $lecturerName = $this->data['lecturer_name'] ?? 'Anda';
+        $semester = $this->data['semester'] ?? '';
+        $missingDocuments = $this->data['missing_documents'] ?? '';
         
-        return match($this->type) {
-            'workflow_updated' => "Status {$workflowName} Diperbarui",
-            'workflow_action_required' => "Aksi Diperlukan - {$workflowName}",
-            'document_approved' => "{$documentType} Disetujui",
-            'document_rejected' => "{$documentType} Ditolak",
-            'document_submitted' => "{$documentType} Dikirim untuk Verifikasi",
-            'study_calendar_approved' => "Kalender Studi Disetujui",
-            'study_calendar_rejected' => "Kalender Studi Ditolak",
-            'study_started' => "Studi Dimulai",
-            'study_completed' => "Studi Selesai",
-            default => "Notifikasi {$workflowName}"
-        };
+        return "Halo {$lecturerName}, Anda belum mengunggah dokumen laporan semester {$semester}. " .
+               "Dokumen yang belum diunggah: {$missingDocuments}. " .
+               "Silakan lengkapi dan unggah dokumen tersebut.";
     }
 
     /**
-     * Get notification message based on type and data
+     * Get final reminder message
      */
-    private function getNotificationMessage(): string
+    protected function getFinalReminderMessage(): string
     {
-        $workflowName = $this->data['workflow_name'] ?? '';
-        $transition = $this->data['transition'] ?? '';
-        $fromState = $this->data['from_state'] ?? '';
-        $toState = $this->data['to_state'] ?? '';
-        $userName = $this->data['user_name'] ?? 'System';
-        $comment = $this->data['comment'] ?? '';
-        $documentName = $this->data['document_name'] ?? '';
-        $documentType = $this->data['document_type'] ?? '';
+        $lecturerName = $this->data['lecturer_name'] ?? 'Anda';
+        $daysUntilCompletion = $this->data['days_until_completion'] ?? 0;
+        $missingDocuments = $this->data['missing_documents'] ?? '';
         
-        $baseMessage = match($this->type) {
-            'workflow_updated' => "{$userName} mengubah status dari '{$fromState}' ke '{$toState}'",
-            'workflow_action_required' => "{$userName} memerlukan aksi Anda untuk {$workflowName}",
-            'document_approved' => "{$userName} menyetujui {$documentType} '{$documentName}'",
-            'document_rejected' => "{$userName} menolak {$documentType} '{$documentName}'",
-            'document_submitted' => "{$userName} mengirim {$documentType} '{$documentName}' untuk verifikasi",
-            'study_calendar_approved' => "{$userName} menyetujui kalender studi Anda",
-            'study_calendar_rejected' => "{$userName} menolak kalender studi Anda",
-            'study_started' => "{$userName} memulai studi Anda",
-            'study_completed' => "{$userName} menyelesaikan studi Anda",
-            default => "{$userName} memperbarui {$workflowName}"
-        };
-
-        if ($comment) {
-            $baseMessage .= ". Catatan: {$comment}";
-        }
-
-        return $baseMessage;
+        return "Halo {$lecturerName}, studi Anda akan selesai dalam {$daysUntilCompletion} hari. " .
+               "Dokumen laporan akhir yang belum diunggah: {$missingDocuments}. " .
+               "Silakan lengkapi dokumen tersebut untuk menyelesaikan studi.";
     }
 
     /**
-     * Get notification icon based on type
+     * Get the notification icon.
      */
-    private function getNotificationIcon(): string
+    protected function getNotificationIcon(): string
     {
         return match($this->type) {
-            'workflow_updated' => 'heroicon-o-check-circle',
-            'workflow_action_required' => 'heroicon-o-exclamation-triangle',
-            'document_approved' => 'heroicon-o-check-circle',
-            'document_rejected' => 'heroicon-o-x-circle',
-            'document_submitted' => 'heroicon-o-arrow-up-tray',
-            'study_calendar_approved' => 'heroicon-o-academic-cap',
-            'study_calendar_rejected' => 'heroicon-o-x-circle',
-            'study_started' => 'heroicon-o-play-circle',
-            'study_completed' => 'heroicon-o-award',
-            default => 'heroicon-o-bell'
+            'semester_report_reminder' => '📚',
+            'final_report_reminder' => '🎓',
+            'document_submitted' => '📤',
+            'document_verified' => '✅',
+            'document_rejected' => '❌',
+            'document_resubmitted' => '🔄',
+            'study_calendar_approved' => '📅',
+            'study_calendar_rejected' => '⚠️',
+            'study_started' => '🚀',
+            'study_completed' => '🏆',
+            default => '🔔'
         };
     }
 
     /**
-     * Get notification color based on type
+     * Get the notification color.
      */
-    private function getNotificationColor(): string
+    protected function getNotificationColor(): string
     {
         return match($this->type) {
-            'workflow_updated', 'document_approved', 'study_calendar_approved', 'study_completed' => 'success',
-            'workflow_action_required', 'document_submitted' => 'warning',
-            'document_rejected', 'study_calendar_rejected' => 'danger',
-            'study_started' => 'info',
+            'semester_report_reminder' => 'warning',
+            'final_report_reminder' => 'danger',
+            'document_submitted' => 'info',
+            'document_verified' => 'success',
+            'document_rejected' => 'danger',
+            'document_resubmitted' => 'info',
+            'study_calendar_approved' => 'success',
+            'study_calendar_rejected' => 'danger',
+            'study_started' => 'success',
+            'study_completed' => 'success',
             default => 'info'
         };
     }
 
     /**
-     * Get action URL for the notification
+     * Get the action URL.
      */
-    private function getActionUrl(): ?string
+    protected function getActionUrl(): string
     {
-        $workflowName = $this->data['workflow_name'] ?? '';
-        $modelId = $this->data['model_id'] ?? null;
-        
-        if (!$modelId) {
-            return null;
-        }
-
-        return match($workflowName) {
-            'verification_by_staff' => route('administrations.verification') . "?document_id={$modelId}",
-            'verification_by_management' => route('administrations.verification') . "?document_id={$modelId}",
-            'study_calendar' => route('study-calendar.manage'),
-            default => null
+        return match($this->type) {
+            'semester_report_reminder' => $this->data['action_url'] ?? route('documents.semester-reports'),
+            'final_report_reminder' => $this->data['action_url'] ?? route('documents.final-reports'),
+            'document_submitted', 'document_verified', 'document_rejected', 'document_resubmitted' => 
+                route('documents.study-requirements'),
+            'study_calendar_approved', 'study_calendar_rejected' => 
+                route('study-calendar.manage'),
+            'study_started', 'study_completed' => 
+                route('study-calendar.manage'),
+            default => route('dashboard')
         };
     }
 
     /**
-     * Get action text for the notification
+     * Get the action text.
      */
-    private function getActionText(): string
+    protected function getActionText(): string
     {
-        $workflowName = $this->data['workflow_name'] ?? '';
-        
-        return match($workflowName) {
-            'verification_by_staff', 'verification_by_management' => 'Lihat Dokumen',
-            'study_calendar' => 'Lihat Kalender',
+        return match($this->type) {
+            'semester_report_reminder' => 'Unggah Dokumen Semester',
+            'final_report_reminder' => 'Unggah Dokumen Akhir',
+            'document_submitted', 'document_verified', 'document_rejected', 'document_resubmitted' => 
+                'Lihat Dokumen',
+            'study_calendar_approved', 'study_calendar_rejected' => 
+                'Kelola Kalender Studi',
+            'study_started', 'study_completed' => 
+                'Lihat Status Studi',
             default => 'Lihat Detail'
         };
     }
 
     /**
-     * Get notification priority
+     * Get the notification priority.
      */
-    private function getNotificationPriority(): string
+    protected function getNotificationPriority(): string
     {
         return match($this->type) {
-            'workflow_action_required' => 'high',
-            'document_rejected', 'study_calendar_rejected' => 'medium',
+            'semester_report_reminder' => 'medium',
+            'final_report_reminder' => 'high',
+            'document_submitted' => 'normal',
+            'document_verified' => 'normal',
+            'document_rejected' => 'high',
+            'document_resubmitted' => 'normal',
+            'study_calendar_approved' => 'normal',
+            'study_calendar_rejected' => 'high',
+            'study_started' => 'normal',
+            'study_completed' => 'normal',
             default => 'normal'
         };
     }
 
     /**
-     * (Optional) Get the mail representation of the notification.
-     * Uncomment and customize if you want to send as email too.
+     * Get the mail representation of the notification.
      */
-    // public function toMail($notifiable)
-    // {
-    //     return (new MailMessage)
-    //         ->subject('Workflow Notification')
-    //         ->line('You have a workflow update.')
-    //         ->line('Type: ' . $this->type)
-    //         ->line('Details: ' . json_encode($this->data));
-    // }
+    public function toMail($notifiable)
+    {
+        // Use specific email templates for reminder notifications
+        if (in_array($this->type, ['semester_report_reminder', 'final_report_reminder'])) {
+            return $this->sendReminderEmail($notifiable);
+        }
+        
+        // Use default mail format for other notifications
+        $subject = $this->getNotificationTitle();
+        $message = $this->getNotificationMessage();
+        $actionUrl = $this->getActionUrl();
+        $actionText = $this->getActionText();
+        
+        $mailMessage = (new MailMessage)
+            ->subject($subject)
+            ->greeting("Halo {$notifiable->name}!")
+            ->line($message);
+            
+        // Add action button if URL is available
+        if ($actionUrl) {
+            $mailMessage->action($actionText, $actionUrl);
+        }
+        
+        // Add additional context based on notification type
+        switch ($this->type) {
+            case 'document_submitted':
+                $mailMessage->line("Dokumen: {$this->data['document_name']}")
+                           ->line("Status: Menunggu Verifikasi");
+                break;
+                
+            case 'document_verified':
+                $mailMessage->line("Dokumen: {$this->data['document_name']}")
+                           ->line("Status: Terverifikasi");
+                break;
+                
+            case 'document_rejected':
+                $rejectionReason = $this->data['rejection_reason'] ?? 'Tidak ada catatan';
+                $mailMessage->line("Dokumen: {$this->data['document_name']}")
+                           ->line("Status: Ditolak")
+                           ->line("Catatan: {$rejectionReason}");
+                break;
+        }
+        
+        $mailMessage->line("Terima kasih telah menggunakan sistem AdvanceTrack.")
+                   ->salutation("Salam,");
+                   
+        return $mailMessage;
+    }
+    
+    /**
+     * Send reminder email using custom template
+     */
+    private function sendReminderEmail($notifiable)
+    {
+        $template = $this->type === 'semester_report_reminder' 
+            ? 'emails.academic-document-reminder' 
+            : 'emails.final-report-reminder';
+            
+        return (new MailMessage)
+            ->subject($this->getNotificationTitle())
+            ->view($template, [
+                'notificationData' => $this->data,
+                'user' => $notifiable
+            ]);
+    }
 }

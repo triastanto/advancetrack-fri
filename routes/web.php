@@ -67,7 +67,6 @@ Route::prefix('administration')->name('administration.')->middleware(['auth', 'v
 
 // Monitoring & Laporan Routes - Non-Lecturer Only
 Route::prefix('monitoring')->name('monitoring.')->middleware(['auth', 'verified', 'non.lecturer.only'])->group(function () {
-    Route::view('analytics', 'pages.monitoring.analytics')->name('analytics');
     Route::view('activity', 'pages.monitoring.activity')->name('activity');
     Route::view('document-status', 'pages.monitoring.document-status')->name('document-status');
     Route::view('audit-log', 'pages.monitoring.audit-log')->name('audit-log');

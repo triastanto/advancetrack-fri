@@ -89,12 +89,6 @@
 │   👥 **Akses**: Staf SDM & Keuangan, Kepala Urusan SDM & Keuangan, Ketua Program Studi, Ketua Kelompok Keilmuan, Wakil Dekan II FRI
 
 ├── 📊 Monitoring & Laporan (Dashboard untuk Non-Dosen)
-│   ├── 📈 Dasbor Analitik
-│   │   ├── Overview Statistik Umum (Grafik jumlah dosen aktif, lulus, dan dropout)
-│   │   ├── Tren Studi Lanjut per Tahun (Analisis tren pertumbuhan studi lanjut)
-│   │   ├── Distribusi Program Studi (Sebaran dosen berdasarkan program yang diambil melalui study calendars)
-│   │   └── Rata-rata Masa Studi (Analisis durasi penyelesaian studi)
-│   👥 **Akses**: Staf SDM & Keuangan, Kepala Urusan SDM & Keuangan, Ketua Program Studi, Ketua Kelompok Keilmuan, Wakil Dekan II FRI
 │   ├── 📋 Laporan Dosen
 │   │   ├── Rekap Dosen Studi Lanjut per Semester (Daftar dosen aktif per periode)
 │   │   ├── Rekap Dosen per Program Studi (Pengelompokan berdasarkan prodi asal melalui study calendars)

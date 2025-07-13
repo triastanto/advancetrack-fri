@@ -45,6 +45,16 @@ class Employee extends Model
         return $this->hasMany(Document::class);
     }
 
+    public function academicDocuments()
+    {
+        return $this->hasMany(AcademicDocument::class);
+    }
+
+    public function approvalDocuments()
+    {
+        return $this->hasMany(ApprovalDocument::class);
+    }
+
     public function semesterReports()
     {
         return $this->hasMany(Document::class)

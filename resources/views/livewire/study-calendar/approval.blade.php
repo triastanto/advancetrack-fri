@@ -30,7 +30,7 @@
                 <x-heroicon-o-information-circle class="w-5 h-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0" />
                 <div class="flex-1">
                     <h3 class="text-sm font-medium text-blue-900 mb-2">
-                        Panduan Workflow Kalender Studi
+                        Panduan Workflow Kalender Studi Lanjut
                     </h3>
                     <div class="text-sm text-blue-800 space-y-2">
                         <div class="flex items-start">

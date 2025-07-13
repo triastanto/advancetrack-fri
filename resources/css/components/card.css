@@ -8,7 +8,7 @@
 }
 
 .card--default {
-    --card-bg: var(--color-bg);
+    --card-bg: white;
     --card-text: var(--color-text-main);
 }
 

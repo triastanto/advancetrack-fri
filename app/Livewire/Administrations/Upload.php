@@ -31,6 +31,12 @@ class Upload extends WorkflowComponent
     public $selectedEmployeeId;
     public $selectedEmployee;
     public $isNonLecturerRole = false;
+    public $viewMode = 'list'; // 'list' or 'management'
+
+    // Filter properties (same as Approval page)
+    public $searchTerm = '';
+    public $statusFilter = '';
+    protected $queryString = ['searchTerm', 'statusFilter'];
 
     protected $listeners = [
         'employeeSelected' => 'handleEmployeeSelected',
@@ -111,6 +117,7 @@ class Upload extends WorkflowComponent
     {
         $this->selectedEmployeeId = $data['employeeId'];
         $this->selectedEmployee = Employee::with(['user'])->find($data['employeeId']);
+        $this->viewMode = 'management';
 
         // Force refresh of the component data
         $this->refreshData();
@@ -123,9 +130,20 @@ class Upload extends WorkflowComponent
     {
         $this->selectedEmployeeId = null;
         $this->selectedEmployee = null;
+        $this->viewMode = 'list';
 
         // Force refresh of the component data
         $this->refreshData();
+    }
+
+    /**
+     * Switch back to list view
+     */
+    public function backToList()
+    {
+        $this->viewMode = 'list';
+        $this->selectedEmployeeId = null;
+        $this->selectedEmployee = null;
     }
 
     /**
@@ -362,6 +380,23 @@ class Upload extends WorkflowComponent
         // Reserved for future enhancements - could trigger filtering
     }
 
+    // Filter Methods (same as Approval page)
+    public function updatedSearchTerm()
+    {
+        $this->resetPage();
+    }
+
+    public function updatedStatusFilter()
+    {
+        $this->resetPage();
+    }
+
+    public function clearFilters()
+    {
+        $this->reset(['searchTerm', 'statusFilter']);
+        $this->resetPage();
+    }
+
     // Override trait methods for custom behavior
     protected function getSuccessMessage(): string
     {
@@ -432,41 +467,72 @@ class Upload extends WorkflowComponent
                 $this->availableDocumentTypes = $this->getapprovalDocumentTypes();
             }
 
-            // Return empty state if non-lecturer hasn't selected an employee
-            if ($this->isNonLecturerRole && !$this->selectedEmployeeId) {
-                // Return empty paginated result
-                $emptyPaginator = new LengthAwarePaginator(
-                    collect(),
-                    0,
-                    10,
-                    1,
-                    ['path' => request()->url()]
-                );
+            // For lecturers, always show management view
+            if (!$this->isNonLecturerRole) {
+                $employee = $this->getEmployeeForDocuments();
+                $documentTypes = $this->getapprovalDocumentTypes();
+                $documentTypeIds = $documentTypes->pluck('id')->toArray();
+
+                $ApprovalDocuments = ApprovalDocument::where('employee_id', $employee->id)
+                    ->whereIn('document_type_id', $documentTypeIds)
+                    ->with(['documentType', 'workflowHistory.user'])
+                    ->orderBy('created_at', 'desc')
+                    ->paginate(10);
 
                 return view('livewire.administrations.upload', [
-                    'documents' => $emptyPaginator,
-                    'completionStatus' => ['status' => 'Pilih Dosen', 'details' => []],
-                    'activeStudyInfo' => null,
-                    'canManageWorkflow' => false
+                    'viewMode' => 'management',
+                    'selectedEmployee' => $employee,
+                    'documents' => $ApprovalDocuments,
+                    'completionStatus' => $this->getCompletionStatus(),
+                    'activeStudyInfo' => $this->getActiveStudyInfo(),
+                    'canManageWorkflow' => $this->canUserManageWorkflow()
                 ]);
             }
 
-            $employee = $this->getEmployeeForDocuments();
-            $documentTypes = $this->getapprovalDocumentTypes();
-            $documentTypeIds = $documentTypes->pluck('id')->toArray();
+            // For non-lecturer roles, handle split view
+            if ($this->viewMode === 'list') {
+                // Return list view
+                return view('livewire.administrations.upload', [
+                    'viewMode' => 'list',
+                    'selectedEmployee' => null,
+                    'documents' => collect(),
+                    'completionStatus' => ['status' => 'List View', 'details' => []],
+                    'activeStudyInfo' => null,
+                    'canManageWorkflow' => false
+                ]);
+            } else {
+                // Return management view for selected employee
+                if (!$this->selectedEmployeeId) {
+                    $this->viewMode = 'list';
+                    return view('livewire.administrations.upload', [
+                        'viewMode' => 'list',
+                        'selectedEmployee' => null,
+                        'documents' => collect(),
+                        'completionStatus' => ['status' => 'List View', 'details' => []],
+                        'activeStudyInfo' => null,
+                        'canManageWorkflow' => false
+                    ]);
+                }
 
-            $ApprovalDocuments = ApprovalDocument::where('employee_id', $employee->id)
-                ->whereIn('document_type_id', $documentTypeIds)
-                ->with(['documentType', 'workflowHistory.user'])
-                ->orderBy('created_at', 'desc')
-                ->paginate(10);
+                $employee = $this->getEmployeeForDocuments();
+                $documentTypes = $this->getapprovalDocumentTypes();
+                $documentTypeIds = $documentTypes->pluck('id')->toArray();
 
-            return view('livewire.administrations.upload', [
-                'documents' => $ApprovalDocuments,
-                'completionStatus' => $this->getCompletionStatus(),
-                'activeStudyInfo' => $this->getActiveStudyInfo(),
-                'canManageWorkflow' => $this->canUserManageWorkflow()
-            ]);
+                $ApprovalDocuments = ApprovalDocument::where('employee_id', $employee->id)
+                    ->whereIn('document_type_id', $documentTypeIds)
+                    ->with(['documentType', 'workflowHistory.user'])
+                    ->orderBy('created_at', 'desc')
+                    ->paginate(10);
+
+                return view('livewire.administrations.upload', [
+                    'viewMode' => 'management',
+                    'selectedEmployee' => $employee,
+                    'documents' => $ApprovalDocuments,
+                    'completionStatus' => $this->getCompletionStatus(),
+                    'activeStudyInfo' => $this->getActiveStudyInfo(),
+                    'canManageWorkflow' => $this->canUserManageWorkflow()
+                ]);
+            }
         } catch (\Exception $e) {
             session()->flash('error', 'Terjadi kesalahan: ' . $e->getMessage());
 
@@ -485,6 +551,8 @@ class Upload extends WorkflowComponent
             );
 
             return view('livewire.administrations.upload', [
+                'viewMode' => 'list',
+                'selectedEmployee' => null,
                 'documents' => $emptyPaginator,
                 'completionStatus' => ['status' => 'Error', 'details' => []],
                 'activeStudyInfo' => null,

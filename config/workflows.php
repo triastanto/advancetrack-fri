@@ -481,7 +481,7 @@ return [
                     'to_state' => 7,   // FINISHED
                     'icon' => 'award',
                     'color' => 'success',
-                    'required_roles' => ['head_of_study_program', 'fri_vice_dean'],
+                    'required_roles' => ['lecturer'], // changed from head_of_study_program, fri_vice_dean
                     'requires_comment' => true,
                 ],
                 9 => [

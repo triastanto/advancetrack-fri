@@ -1,9 +1,15 @@
-@props(['requirementsStatus', 'academicDocumentsWithStates', 'approvalDocumentsWithStates'])
+@props([
+    'requirementsStatus',
+    'academicDocumentsWithStates',
+    'approvalDocumentsWithStates',
+    'finalReportDocumentsWithStates',
+    'semesterReportDocumentsWithStates'
+])
 
     <div class="flex items-center justify-between mb-4">
         <h3 class="text-lg font-semibold text-gray-900 flex items-center">
             <x-heroicon-o-clipboard-document-list class="w-5 h-5 mr-2 text-blue-600" />
-            Ringkasan Persyaratan dan Persetujuan
+            RIngkasan Penyelesaian Dokumen
         </h3>
     </div>
     
@@ -204,6 +210,179 @@
                         @else
                             <div class="text-xs text-gray-500 italic">
                                 Belum ada dokumen persetujuan yang diunggah
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+        {{-- Semester Reports Progress Section --}}
+        <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow duration-200">
+            <div class="flex items-center justify-between mb-3">
+                <h4 class="text-md font-medium text-gray-900 flex items-center">
+                    <x-heroicon-o-document-text class="w-4 h-4 mr-2 text-orange-600" />
+                    Laporan Semester (Semester Reports)
+                </h4>
+            </div>
+            <div class="space-y-3">
+                @php
+                    $semesterReportDocumentsWithStates = $semesterReportDocumentsWithStates ?? [];
+                    $semesterTotal = count($semesterReportDocumentsWithStates);
+                    $semesterUploaded = collect($semesterReportDocumentsWithStates)->where('status', 'uploaded')->count();
+                    $semesterVerified = collect($semesterReportDocumentsWithStates)->where('is_verified', true)->count();
+                    $semesterPercentage = $semesterTotal > 0 ? ($semesterVerified / $semesterTotal) * 100 : 0;
+                @endphp
+                <div class="flex items-center justify-between">
+                    <span class="text-sm text-gray-600">Status Laporan Semester:</span>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-sm font-medium text-gray-900">
+                            {{ $semesterVerified }}/{{ $semesterTotal }}
+                        </span>
+                        @if($semesterTotal > 0 && $semesterVerified === $semesterTotal)
+                            <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-green-100">
+                                <x-heroicon-s-check class="w-3 h-3 text-green-600" />
+                            </span>
+                        @else
+                            <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-yellow-100">
+                                <x-heroicon-s-exclamation-triangle class="w-3 h-3 text-yellow-600" />
+                            </span>
+                        @endif
+                    </div>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div class="h-2 rounded-full transition-all duration-300
+                        @if($semesterPercentage === 100) bg-green-500 @elseif($semesterPercentage > 0) bg-yellow-500 @else bg-gray-300 @endif"
+                         style="width: {{ $semesterPercentage }}%">
+                    </div>
+                </div>
+                <div class="text-xs text-gray-600 bg-gray-50 p-2 rounded">
+                    <div class="flex justify-between">
+                        <span>Total: {{ $semesterTotal }} dokumen</span>
+                        <span>Diunggah: {{ $semesterUploaded }}</span>
+                        <span>Diverifikasi: {{ $semesterVerified }}</span>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <button 
+                        onclick="toggleDocumentList('semester-report-documents')"
+                        class="flex items-center justify-between w-full text-sm font-medium text-gray-700 mb-2 hover:text-gray-900 transition-colors duration-200">
+                        <span>Dokumen Laporan Semester ({{ $semesterTotal }})</span>
+                        <x-heroicon-o-chevron-down id="semester-report-documents-icon" class="w-4 h-4 transition-transform duration-200" />
+                    </button>
+                    <div id="semester-report-documents-list" class="hidden">
+                        @if($semesterTotal > 0)
+                            <ul class="text-xs text-gray-600 space-y-2">
+                                @foreach($semesterReportDocumentsWithStates as $document)
+                                    <li class="flex items-center justify-between p-2 {{ $document['status'] === 'not_uploaded' ? 'bg-red-50 border border-red-200' : 'bg-gray-50' }} rounded">
+                                        <div class="flex items-center">
+                                            @if($document['status'] === 'not_uploaded')
+                                                <x-heroicon-o-document class="w-3 h-3 mr-2 text-red-500" />
+                                            @else
+                                                <x-heroicon-o-document class="w-3 h-3 mr-2 text-orange-500" />
+                                            @endif
+                                            <span class="font-medium {{ $document['status'] === 'not_uploaded' ? 'text-red-700' : 'text-gray-700' }}">{{ $document['name'] }}</span>
+                                        </div>
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
+                                            @if($document['workflow_state_color'] === 'green') bg-green-100 text-green-800
+                                            @elseif($document['workflow_state_color'] === 'yellow') bg-yellow-100 text-yellow-800
+                                            @elseif($document['workflow_state_color'] === 'red') bg-red-100 text-red-800
+                                            @else bg-gray-100 text-gray-800 @endif">
+                                            {{ $document['workflow_state_label'] }}
+                                        </span>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        @else
+                            <div class="text-xs text-gray-500 italic">
+                                Belum ada dokumen laporan semester yang diunggah
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{-- Final Reports Progress Section --}}
+        <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow duration-200">
+            <div class="flex items-center justify-between mb-3">
+                <h4 class="text-md font-medium text-gray-900 flex items-center">
+                    <x-heroicon-o-academic-cap class="w-4 h-4 mr-2 text-purple-600" />
+                    Laporan Akhir Studi (Final Reports)
+                </h4>
+            </div>
+            <div class="space-y-3">
+                @php
+                    $finalReportDocumentsWithStates = $finalReportDocumentsWithStates ?? [];
+                    $finalTotal = count($finalReportDocumentsWithStates);
+                    $finalUploaded = collect($finalReportDocumentsWithStates)->where('status', 'uploaded')->count();
+                    $finalVerified = collect($finalReportDocumentsWithStates)->where('is_verified', true)->count();
+                    $finalPercentage = $finalTotal > 0 ? ($finalVerified / $finalTotal) * 100 : 0;
+                @endphp
+                <div class="flex items-center justify-between">
+                    <span class="text-sm text-gray-600">Status Laporan Akhir:</span>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-sm font-medium text-gray-900">
+                            {{ $finalVerified }}/{{ $finalTotal }}
+                        </span>
+                        @if($finalTotal > 0 && $finalVerified === $finalTotal)
+                            <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-green-100">
+                                <x-heroicon-s-check class="w-3 h-3 text-green-600" />
+                            </span>
+                        @else
+                            <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-yellow-100">
+                                <x-heroicon-s-exclamation-triangle class="w-3 h-3 text-yellow-600" />
+                            </span>
+                        @endif
+                    </div>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div class="h-2 rounded-full transition-all duration-300
+                        @if($finalPercentage === 100) bg-green-500 @elseif($finalPercentage > 0) bg-yellow-500 @else bg-gray-300 @endif"
+                         style="width: {{ $finalPercentage }}%">
+                    </div>
+                </div>
+                <div class="text-xs text-gray-600 bg-gray-50 p-2 rounded">
+                    <div class="flex justify-between">
+                        <span>Total: {{ $finalTotal }} dokumen</span>
+                        <span>Diunggah: {{ $finalUploaded }}</span>
+                        <span>Diverifikasi: {{ $finalVerified }}</span>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <button 
+                        onclick="toggleDocumentList('final-report-documents')"
+                        class="flex items-center justify-between w-full text-sm font-medium text-gray-700 mb-2 hover:text-gray-900 transition-colors duration-200">
+                        <span>Dokumen Laporan Akhir ({{ $finalTotal }})</span>
+                        <x-heroicon-o-chevron-down id="final-report-documents-icon" class="w-4 h-4 transition-transform duration-200" />
+                    </button>
+                    <div id="final-report-documents-list" class="hidden">
+                        @if($finalTotal > 0)
+                            <ul class="text-xs text-gray-600 space-y-2">
+                                @foreach($finalReportDocumentsWithStates as $document)
+                                    <li class="flex items-center justify-between p-2 {{ $document['status'] === 'not_uploaded' ? 'bg-red-50 border border-red-200' : 'bg-gray-50' }} rounded">
+                                        <div class="flex items-center">
+                                            @if($document['status'] === 'not_uploaded')
+                                                <x-heroicon-o-document class="w-3 h-3 mr-2 text-red-500" />
+                                            @else
+                                                <x-heroicon-o-document class="w-3 h-3 mr-2 text-purple-500" />
+                                            @endif
+                                            <span class="font-medium {{ $document['status'] === 'not_uploaded' ? 'text-red-700' : 'text-gray-700' }}">{{ $document['name'] }}</span>
+                                        </div>
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
+                                            @if($document['workflow_state_color'] === 'green') bg-green-100 text-green-800
+                                            @elseif($document['workflow_state_color'] === 'yellow') bg-yellow-100 text-yellow-800
+                                            @elseif($document['workflow_state_color'] === 'red') bg-red-100 text-red-800
+                                            @else bg-gray-100 text-gray-800 @endif">
+                                            {{ $document['workflow_state_label'] }}
+                                        </span>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        @else
+                            <div class="text-xs text-gray-500 italic">
+                                Belum ada dokumen laporan akhir yang diunggah
                             </div>
                         @endif
                     </div>

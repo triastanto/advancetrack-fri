@@ -6,7 +6,7 @@
     @php
         $badge = [
             'type' => 'success',
-            'icon' => '✓',
+            'icon' => 'heroicon-o-check-circle',
             'text' => 'DOKUMEN DIVERIFIKASI'
         ];
         

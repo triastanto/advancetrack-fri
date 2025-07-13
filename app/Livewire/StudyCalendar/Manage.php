@@ -646,6 +646,37 @@ class Manage extends WorkflowComponent
         }
     }
 
+    /**
+     * Check if all Final Reports are verified (workflow_state == 3)
+     */
+    public function hasAllFinalReportsVerified()
+    {
+        $employee = $this->getEmployee();
+        $finalReportNames = \App\Constants\DocumentTypeConstants::getFinalDocumentNames();
+        $finalReportTypeIds = \App\Models\DocumentType::whereIn('name', $finalReportNames)->pluck('id');
+        $finalReports = \App\Models\AcademicDocument::where('employee_id', $employee->id)
+            ->whereIn('document_type_id', $finalReportTypeIds)
+            ->get();
+        // All must exist and be VERIFIED (workflow_state == 3)
+        return $finalReports->count() === count($finalReportNames)
+            && $finalReports->every(fn($doc) => $doc->workflow_state == 3);
+    }
+
+    /**
+     * Override getWorkflowAvailableTransitions to filter COMPLETE_STUDY if not all final reports are verified
+     */
+    public function getWorkflowAvailableTransitions()
+    {
+        $studyCalendar = $this->getStudyCalendarForEmployee();
+        if (!$studyCalendar) return [];
+        $transitions = $studyCalendar->getAvailableTransitions();
+        // Transition 8 = COMPLETE_STUDY
+        if (isset($transitions[8]) && !$this->hasAllFinalReportsVerified()) {
+            unset($transitions[8]);
+        }
+        return $transitions;
+    }
+
     // Override trait methods for custom behavior
     protected function getSuccessMessage(): string
     {
@@ -671,6 +702,16 @@ class Manage extends WorkflowComponent
             // Get document states for display
             $academicDocumentsWithStates = $this->requirementsService->getCompleteStudyRequirementDocuments($employee->id);
             $approvalDocumentsWithStates = $this->requirementsService->getCompleteApprovalDocuments($employee->id);
+            $finalReportNames = \App\Constants\DocumentTypeConstants::getFinalDocumentNames();
+            $finalReportDocumentsWithStates = collect($academicDocumentsWithStates)
+                ->filter(fn($doc) => in_array($doc['type'], $finalReportNames))
+                ->values()
+                ->all();
+            $semesterReportNames = \App\Constants\DocumentTypeConstants::getSemesterDocumentNames();
+            $semesterReportDocumentsWithStates = collect($academicDocumentsWithStates)
+                ->filter(fn($doc) => in_array($doc['type'], $semesterReportNames))
+                ->values()
+                ->all();
 
             // Ensure progress bar gets the actual workflow_state as current_state
             $workflowProgressWithState = array_merge(
@@ -688,6 +729,8 @@ class Manage extends WorkflowComponent
                 'canManageWorkflow' => $this->canUserManageWorkflow(),
                 'academicDocumentsWithStates' => $academicDocumentsWithStates,
                 'approvalDocumentsWithStates' => $approvalDocumentsWithStates,
+                'finalReportDocumentsWithStates' => $finalReportDocumentsWithStates,
+                'semesterReportDocumentsWithStates' => $semesterReportDocumentsWithStates,
             ]);
         } catch (\Exception $e) {
             session()->flash('error', 'Terjadi kesalahan: ' . $e->getMessage());
@@ -716,6 +759,8 @@ class Manage extends WorkflowComponent
                 'canManageWorkflow' => false,
                 'academicDocumentsWithStates' => [],
                 'approvalDocumentsWithStates' => [],
+                'finalReportDocumentsWithStates' => [],
+                'semesterReportDocumentsWithStates' => [],
             ]);
         }
     }

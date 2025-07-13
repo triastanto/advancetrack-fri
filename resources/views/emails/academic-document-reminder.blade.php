@@ -6,7 +6,7 @@
     @php
         $badge = [
             'type' => 'warning',
-            'icon' => '📚',
+            'icon' => 'heroicon-o-paper-airplane',
             'text' => 'PENGINGAT SEMESTER'
         ];
         

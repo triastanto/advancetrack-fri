@@ -6,7 +6,7 @@
     @php
         $badge = [
             'type' => 'danger',
-            'icon' => '🎓',
+            'icon' => 'heroicon-o-paper-airplane',
             'text' => 'PENGINGAT AKHIR'
         ];
         

@@ -45,7 +45,7 @@
                 'url' => $verificationUrl,
                 'text' => 'Verifikasi Dokumen yang Diperbaiki',
                 'type' => 'primary',
-                'icon' => '🔍'
+                'icon' => 'heroicon-o-magnifying-glass'
             ]
         ];
         

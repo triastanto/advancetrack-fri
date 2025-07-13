@@ -6,7 +6,7 @@
     @php
         $badge = [
             'type' => 'warning',
-            'icon' => '⏳',
+            'icon' => 'heroicon-o-clock',
             'text' => 'PERLU VERIFIKASI'
         ];
         
@@ -45,7 +45,7 @@
                 'url' => $verificationUrl,
                 'text' => 'Lihat & Verifikasi Dokumen',
                 'type' => 'primary',
-                'icon' => '🔍'
+                'icon' => 'heroicon-o-magnifying-glass'
             ]
         ];
         

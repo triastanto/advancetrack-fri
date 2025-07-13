@@ -1,7 +1,9 @@
 @props(['studyCalendar', 'requirementsStatus'])
     @php
         $currentState = $studyCalendar->workflow_state;
-        $availableTransitions = $studyCalendar->getAvailableTransitions();
+        $availableTransitions = method_exists($this, 'getWorkflowAvailableTransitions')
+            ? $this->getWorkflowAvailableTransitions()
+            : $studyCalendar->getAvailableTransitions();
     @endphp
 
     @if(count($availableTransitions) > 0)

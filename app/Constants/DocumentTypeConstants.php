@@ -142,8 +142,8 @@ class DocumentTypeConstants
         ],
         [
             'name' => 'study_progress_certificate',
-            'display_name' => 'Surat Keterangan Progres Studi',
-            'description' => 'Surat keterangan kemajuan studi dari institusi atau pembimbing',
+            'display_name' => 'Laporan Kemajuan Semester',
+            'description' => 'Laporan kemajuan semester',
         ],
 
         // 4. Dokumen Laporan Akhir dan Kelulusan (Dosen)

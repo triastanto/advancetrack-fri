@@ -47,7 +47,7 @@
 | 3 | **Surat Keterangan Aktif** | Surat keterangan status mahasiswa aktif dari institusi pendidikan |
 | 4 | **Bukti Unggah Publikasi di iGracias** | Bukti screenshot atau dokumen unggah publikasi ilmiah di sistem iGracias |
 | 5 | **Bukti Pembayaran Biaya Pendidikan** | Bukti pembayaran SPP atau biaya pendidikan lainnya |
-| 6 | **Surat Keterangan Progres Studi** | Surat keterangan kemajuan studi dari institusi atau pembimbing |
+| 6 | **Laporan Kemajuan Semester** | Laporan kemajuan semester |
 
 ---
 

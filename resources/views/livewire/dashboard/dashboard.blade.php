@@ -266,6 +266,44 @@
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
                             @foreach($recentDocuments as $document)
+                                @php
+                                    // Determine document type (class)
+                                    $isAcademic = $document instanceof \App\Models\AcademicDocument;
+                                    $isApproval = $document instanceof \App\Models\ApprovalDocument;
+                                    // Status mapping
+                                    if ($isAcademic) {
+                                        if ($document->workflow_state == 3) {
+                                            $statusLabel = 'Terverifikasi';
+                                            $statusClass = 'bg-green-100 text-green-800';
+                                        } elseif ($document->workflow_state == 2) {
+                                            $statusLabel = 'Menunggu';
+                                            $statusClass = 'bg-yellow-100 text-yellow-800';
+                                        } elseif ($document->workflow_state == 4) {
+                                            $statusLabel = 'Ditolak';
+                                            $statusClass = 'bg-red-100 text-red-800';
+                                        } else {
+                                            $statusLabel = 'Draft';
+                                            $statusClass = 'bg-gray-100 text-gray-800';
+                                        }
+                                    } elseif ($isApproval) {
+                                        if ($document->workflow_state == 4) {
+                                            $statusLabel = 'Terverifikasi';
+                                            $statusClass = 'bg-green-100 text-green-800';
+                                        } elseif ($document->workflow_state == 2 || $document->workflow_state == 3) {
+                                            $statusLabel = 'Menunggu';
+                                            $statusClass = 'bg-yellow-100 text-yellow-800';
+                                        } elseif ($document->workflow_state == 5) {
+                                            $statusLabel = 'Ditolak';
+                                            $statusClass = 'bg-red-100 text-red-800';
+                                        } else {
+                                            $statusLabel = 'Draft';
+                                            $statusClass = 'bg-gray-100 text-gray-800';
+                                        }
+                                    } else {
+                                        $statusLabel = 'Draft';
+                                        $statusClass = 'bg-gray-100 text-gray-800';
+                                    }
+                                @endphp
                                 <tr class="hover:bg-gray-50">
                                     <td class="px-4 py-3 whitespace-nowrap">
                                         <div class="text-sm font-medium text-gray-900">
@@ -278,15 +316,8 @@
                                         </div>
                                     </td>
                                     <td class="px-4 py-3 whitespace-nowrap">
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                            @if($document->workflow_state == 3) bg-green-100 text-green-800
-                                            @elseif($document->workflow_state == 2) bg-yellow-100 text-yellow-800
-                                            @elseif($document->workflow_state == 4) bg-red-100 text-red-800
-                                            @else bg-gray-100 text-gray-800 @endif">
-                                            @if($document->workflow_state == 3) Terverifikasi
-                                            @elseif($document->workflow_state == 2) Menunggu
-                                            @elseif($document->workflow_state == 4) Ditolak
-                                            @else Draft @endif
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statusClass }}">
+                                            {{ $statusLabel }}
                                         </span>
                                     </td>
                                     <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">

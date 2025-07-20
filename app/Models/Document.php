@@ -92,6 +92,18 @@ abstract class Document extends Model
     }
 
     /**
+     * Check if this document is an additional (non-workflow) type
+     */
+    public function isAdditionalType(): bool
+    {
+        if (!$this->relationLoaded('documentType')) {
+            $this->load('documentType');
+        }
+        $typeName = $this->documentType->name ?? null;
+        return in_array($typeName, ['additional_academic', 'additional_approval']);
+    }
+
+    /**
      * Get the workflow name for this model
      */
     abstract public function getWorkflowName(): string;

@@ -167,8 +167,31 @@ class DocumentTypeConstants
             'display_name' => 'Surat Pernyataan Telah Menyelesaikan Studi',
             'description' => 'Surat pernyataan resmi bahwa mahasiswa telah menyelesaikan seluruh program studi',
         ],
-
-        // 5. Dokumen Tambahan (Opsional)
+        // Additional Academic Document
+        [
+            'name' => 'additional_academic',
+            'display_name' => 'Dokumen Tambahan (Akademik)',
+            'description' => 'Dokumen tambahan untuk laporan akademik',
+        ],
+        // Additional for Study Requirements
+        [
+            'name' => 'additional_study_requirement',
+            'display_name' => 'Dokumen Tambahan Persyaratan Studi',
+            'description' => 'Dokumen tambahan untuk persyaratan studi lanjut',
+        ],
+        // Additional for Final Reports
+        [
+            'name' => 'additional_final_report',
+            'display_name' => 'Dokumen Tambahan Laporan Akhir',
+            'description' => 'Dokumen tambahan untuk laporan akhir dan kelulusan',
+        ],
+        // Additional for Approvals (already present, ensure correct)
+        [
+            'name' => 'additional_approval',
+            'display_name' => 'Dokumen Tambahan Persetujuan',
+            'description' => 'Dokumen tambahan untuk dokumen persetujuan',
+        ],
+        // 6. Dokumen Tambahan (Opsional, legacy)
         [
             'name' => 'additional',
             'display_name' => 'Dokumen Tambahan',
@@ -241,7 +264,8 @@ class DocumentTypeConstants
             'management_permit_letter',
             'work_period_certificate',
             'academic_recommendation_letter',
-            'management_recommendation_letter'
+            'management_recommendation_letter',
+            'additional_study_requirement',
         ];
     }
 
@@ -255,7 +279,8 @@ class DocumentTypeConstants
             'application_minutes',
             'approval_minutes',
             'nde',
-            'pid'
+            'pid',
+            'additional_approval',
         ];
     }
 
@@ -272,6 +297,6 @@ class DocumentTypeConstants
      */
     public static function getFinalDocumentNames(): array
     {
-        return ['diploma', 'final_transcript', 'graduation_certificate', 'study_completion_statement'];
+        return ['diploma', 'final_transcript', 'graduation_certificate', 'study_completion_statement', 'additional_final_report'];
     }
 }

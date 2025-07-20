@@ -52,6 +52,11 @@ class StudyRequirements extends WorkflowComponent
             'name'
         );
 
+        // Ensure 'additional_study_requirement' is included
+        if (!in_array('additional_study_requirement', $studyRequirementNames)) {
+            $studyRequirementNames[] = 'additional_study_requirement';
+        }
+
         return DocumentType::whereIn('name', $studyRequirementNames)
             ->orderBy('display_name')
             ->get();

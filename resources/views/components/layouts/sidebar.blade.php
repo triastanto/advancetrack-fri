@@ -105,7 +105,7 @@
                     <x-sidebar.personal-data />
                 @endif
                 <x-sidebar.study-calendar />
-                @if(Auth::user()->employee && Auth::user()->employee->role === 'lecturer')
+                @if(Auth::user()->employee && Auth::user()->employee->role === 'lecturer' && Auth::user()->employee->studyCalendars()->exists())
                     <x-sidebar.documents />
                 @endif
                 @if(Auth::user()->employee && Auth::user()->employee->role !== 'lecturer')

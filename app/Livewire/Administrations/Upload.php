@@ -60,6 +60,11 @@ class Upload extends WorkflowComponent
             'name'
         );
 
+        // Ensure 'additional_approval' is included
+        if (!in_array('additional_approval', $approvalDocumentNames)) {
+            $approvalDocumentNames[] = 'additional_approval';
+        }
+
         return DocumentType::whereIn('name', $approvalDocumentNames)
             ->orderBy('display_name')
             ->get();

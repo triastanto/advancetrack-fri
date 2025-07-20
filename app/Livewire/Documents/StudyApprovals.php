@@ -39,6 +39,11 @@ class StudyApprovals extends WorkflowComponent
             'name'
         );
 
+        // Ensure 'additional_approval' is included
+        if (!in_array('additional_approval', $approvalDocumentNames)) {
+            $approvalDocumentNames[] = 'additional_approval';
+        }
+
         return DocumentType::whereIn('name', $approvalDocumentNames)
             ->orderBy('display_name')
             ->get();
@@ -173,7 +178,8 @@ class StudyApprovals extends WorkflowComponent
                 'documents' => $approvalDocuments,
                 'activeStudyInfo' => $this->getActiveStudyInfoForEmployee(),
                 'completionStatus' => $this->getCompletionStatus(),
-                'canManageWorkflow' => $this->canUserManageWorkflow()
+                'canManageWorkflow' => $this->canUserManageWorkflow(),
+                'additionalApprovalDocuments' => collect() // No longer needed
             ]);
         } catch (\Exception $e) {
             session()->flash('error', 'Terjadi kesalahan: ' . $e->getMessage());

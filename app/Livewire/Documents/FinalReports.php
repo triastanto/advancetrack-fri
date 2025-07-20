@@ -53,6 +53,11 @@ class FinalReports extends WorkflowComponent
             'name'
         );
 
+        // Ensure 'additional_final_report' is included
+        if (!in_array('additional_final_report', $finalDocumentNames)) {
+            $finalDocumentNames[] = 'additional_final_report';
+        }
+
         return DocumentType::whereIn('name', $finalDocumentNames)
             ->orderBy('display_name')
             ->get();
@@ -327,7 +332,8 @@ class FinalReports extends WorkflowComponent
                 'documents' => $finalReports,
                 'completionStatus' => $this->getCompletionStatus(),
                 'activeStudyInfo' => $this->getActiveStudyInfoForEmployee(),
-                'canManageWorkflow' => $this->canUserManageWorkflow()
+                'canManageWorkflow' => $this->canUserManageWorkflow(),
+                'additionalAcademicDocuments' => collect() // No longer managed separately
             ]);
         } catch (\Exception $e) {
             session()->flash('error', 'Terjadi kesalahan: ' . $e->getMessage());

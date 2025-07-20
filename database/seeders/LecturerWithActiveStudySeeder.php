@@ -82,7 +82,7 @@ class LecturerWithActiveStudySeeder extends Seeder
 
         // Set study start in the past, estimated end in the future
         $studyStart = Carbon::now()->subYears(2)->startOfMonth();
-        $estimatedEnd = Carbon::now()->addYear()->endOfMonth();
+        $estimatedEnd = Carbon::now()->firstOfMonth();
 
         $studyCalendar = StudyCalendar::create([
             'employee_id' => $lecturer->id,

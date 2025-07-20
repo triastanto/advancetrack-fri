@@ -189,18 +189,6 @@
                                 <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
-
-                        <div>
-                            <label for="contact_email" class="block text-sm font-medium text-[var(--color-text-main)]">Email Kontak</label>
-                            <div class="mt-1 relative">
-                                <x-heroicon-o-envelope class="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] w-5 h-5" />
-                                <input id="contact_email" name="contact_email" type="email" value="{{ old('contact_email') }}"
-                                       class="appearance-none block w-full pl-10 pr-3 py-3 border border-[var(--color-border)] rounded-md shadow-sm placeholder="email@example.com" focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm">
-                            </div>
-                            @error('contact_email')
-                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
                     </div>
 
                     <div class="mt-4">

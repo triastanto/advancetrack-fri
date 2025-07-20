@@ -11,6 +11,13 @@
                 @endforeach
             </select>
         </div>
+        <!-- Pending Only Toggle for HR/Finance -->
+        @if ($isHrFinanceStaff)
+            <div class="flex items-center gap-2">
+                <input type="checkbox" id="showPendingOnly" wire:model.live="showPendingOnly" class="h-4 w-4 text-green-600 border-gray-300 rounded">
+                <label for="showPendingOnly" class="text-sm font-medium text-gray-700">Tampilkan dosen menunggu validasi</label>
+            </div>
+        @endif
         <!-- Search Bar -->
         <div class="flex items-center w-full md:w-auto">
             <div class="relative w-full md:w-64">
@@ -41,7 +48,18 @@
                         <span class="text-3xl font-bold text-[#009444]">{{ strtoupper(Str::substr($lecturer->user->name, 0, 1)) }}</span>
                     @endif
                 </div>
-                <h2 class="text-lg font-semibold text-center mb-1">{{ $lecturer->user->name }}</h2>
+                <h2 class="text-lg font-semibold text-center mb-1 flex items-center justify-center gap-1">
+                    {{ $lecturer->user->name }}
+                    @if (!$lecturer->is_approved)
+                        <span class="inline-flex items-center px-1 py-0.5 rounded text-xs font-semibold bg-yellow-100 text-yellow-700">
+                            <x-heroicon-o-clock class="w-4 h-4" />
+                        </span>
+                    @else
+                        <span class="inline-flex items-center px-1 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">
+                            <x-heroicon-o-check-circle class="w-4 h-4" />
+                        </span>
+                    @endif
+                </h2>
                 <div class="text-sm text-center text-gray-500 mb-1">NIDN: {{ $lecturer->nidn ?? $lecturer->user->email }}</div>
                 @if (!empty($lecturer->researchLab?->name))
                     <div class="text-xs text-center text-gray-400 mb-1">{{ $lecturer->researchLab->name }}</div>
@@ -49,6 +67,16 @@
                 {{-- Study Calendar Workflow State --}}
                 @php
                     $calendar = $lecturer->studyCalendars->first();
+                    $workflowStateMap = [
+                        1 => 'draft',
+                        2 => 'pending',
+                        3 => 'approved',
+                        4 => 'rejected',
+                        5 => 'active',
+                        6 => 'leave',
+                        7 => 'finished',
+                        8 => 'drop_out',
+                    ];
                     $stateMap = [
                         'draft' => ['label' => 'Draft', 'color' => 'bg-gray-400', 'icon' => 'edit'],
                         'pending' => ['label' => 'Menunggu Persetujuan', 'color' => 'bg-yellow-400', 'icon' => 'clock'],
@@ -59,10 +87,11 @@
                         'finished' => ['label' => 'Selesai', 'color' => 'bg-green-700', 'icon' => 'award'],
                         'drop_out' => ['label' => 'Drop Out', 'color' => 'bg-red-600', 'icon' => 'x-circle'],
                     ];
+                    $status = $calendar ? ($workflowStateMap[$calendar->workflow_state] ?? null) : null;
                 @endphp
                 <div class="mt-2">
-                    @if($calendar && isset($stateMap[$calendar->workflow_state]))
-                        @php $state = $stateMap[$calendar->workflow_state]; @endphp
+                    @if($calendar && isset($stateMap[$status]))
+                        @php $state = $stateMap[$status]; @endphp
                         <span class="inline-flex items-center px-2 py-1 rounded text-xs font-semibold text-white {{ $state['color'] }}">
                             @if($state['icon'] === 'edit')
                                 <x-heroicon-o-pencil-square class="w-4 h-4 mr-1" />

@@ -2,7 +2,7 @@
 // Usage: php artisan tinker --execute="require 'tinker/study_calendar_lookup.php';"
 // Or: php artisan tinker, then: require 'tinker/study_calendar_lookup.php';
 
-$employeeId = 40; // Ganti dengan employee_id yang diinginkan
+$employeeId = 3; // Ganti dengan employee_id yang diinginkan
 
 use App\Models\Employee;
 use App\Models\User;

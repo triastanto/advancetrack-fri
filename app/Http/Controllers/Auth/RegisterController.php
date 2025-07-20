@@ -66,12 +66,13 @@ class RegisterController extends Controller
             'contact_email' => $request->contact_email,
             'research_lab_id' => $request->research_lab_id,
             'is_lab_head' => false, // Default to false
+            'is_approved' => false, // Explicitly set to false
         ]);
 
         // Send email verification
         event(new Registered($user));
 
-        // Redirect to email verification notice
-        return redirect()->route('verification.notice');
+        // Redirect to login with a success message
+        return redirect()->route('login')->with('success', 'Pendaftaran berhasil! Silakan cek email Anda untuk verifikasi.');
     }
 } 

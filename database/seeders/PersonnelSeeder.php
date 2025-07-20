@@ -230,6 +230,9 @@ class PersonnelSeeder extends Seeder
             'contact_phone' => $this->randomPhone(),
             'contact_email' => $userData['email'],
             'photo' => $this->getRandomPhotoPath($userData),
+            'is_approved' => true,
+            'validated_by' => 1,
+            'validated_on' => now(),
         ], $additionalEmployeeData);
 
         return Employee::firstOrCreate(

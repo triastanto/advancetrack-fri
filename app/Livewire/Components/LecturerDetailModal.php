@@ -17,7 +17,8 @@ class LecturerDetailModal extends Component
 
     protected $listeners = [
         'lecturer-detail-modal:open' => 'open',
-        'lecturer-detail-modal:close' => 'close'
+        'lecturer-detail-modal:close' => 'close',
+        'closeLecturerModal' => 'close',
     ];
 
     public function open($lecturerId)
@@ -63,6 +64,11 @@ class LecturerDetailModal extends Component
         $this->educations = [];
         $this->studyCalendars = [];
         $this->courseResponsibilities = [];
+    }
+
+    public function approveLecturer($lecturerId)
+    {
+        $this->dispatch('approveLecturer', $lecturerId);
     }
 
     public function getGenderLabel($gender)

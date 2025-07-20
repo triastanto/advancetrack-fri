@@ -30,10 +30,12 @@ return new class extends Migration
             $table->string('functional_position')->nullable();
             $table->text('origin_address')->nullable();
             $table->string('contact_phone')->nullable();
-            $table->string('contact_email')->nullable();
             $table->string('photo')->nullable();
             $table->foreignId('research_lab_id')->nullable()->constrained('research_labs')->onDelete('set null');
             $table->boolean('is_lab_head')->default(false);
+            $table->boolean('is_approved')->default(false); // HR/Finance approval required
+            $table->foreignId('validated_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->timestamp('validated_on')->nullable();
             $table->timestamps();
 
             // Add indexes for better query performance

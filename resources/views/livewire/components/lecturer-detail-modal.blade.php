@@ -1,5 +1,8 @@
 <div>
     @if($isOpen && $lecturer)
+    @php
+        $isHrFinanceStaff = auth()->check() && in_array(optional(auth()->user()->employee)->role, ['hr_finance_staff', 'head_of_hr_finance']);
+    @endphp
     <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true"
          x-data="{ show: false }"
          x-init="$nextTick(() => { if (@js($isOpen)) { show = true; } })"
@@ -262,6 +265,9 @@
                         >
                             Tutup
                         </button>
+                        @if ($isHrFinanceStaff && isset($lecturer) && !$lecturer->is_approved)
+                            <button wire:click="approveLecturer({{ $lecturer->id }})" class="ml-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition">Validasi Dosen</button>
+                        @endif
                     </div>
                 </div>
             </div>

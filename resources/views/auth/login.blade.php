@@ -9,6 +9,17 @@
             <p class="mt-2 text-sm text-[var(--color-text-muted)]">Masuk ke akun AdvanceTrack FRI Anda</p>
         </div>
 
+        @if (session('success'))
+            <div class="mb-4 p-3 bg-green-100 border border-green-200 rounded-md text-green-800">
+                {{ session('success') }}
+            </div>
+        @endif
+        @if (session('error'))
+            <div class="mb-4 p-3 bg-red-100 border border-red-200 rounded-md text-red-800">
+                {{ session('error') }}
+            </div>
+        @endif
+
         <form method="POST" action="{{ route('login') }}" class="space-y-6">
             @csrf
             <div>

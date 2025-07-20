@@ -26,11 +26,16 @@ class Employee extends Model
         'contact_email',
         'research_lab_id',
         'is_lab_head',
+        'is_approved',
+        'validated_by',
+        'validated_on',
     ];
 
     protected $casts = [
         'birth_date' => 'date',
         'is_lab_head' => 'boolean',
+        'is_approved' => 'boolean',
+        'validated_on' => 'datetime',
     ];
 
     public function user()
@@ -187,5 +192,23 @@ class Employee extends Model
     {
         // For compatibility with whereHas('studyCalendar')
         return $this->hasOne(StudyCalendar::class);
+    }
+
+    public function validatedBy()
+    {
+        return $this->belongsTo(User::class, 'validated_by');
+    }
+
+    public function isPendingApproval()
+    {
+        return !$this->is_approved;
+    }
+
+    public function approve($validatorId)
+    {
+        $this->is_approved = true;
+        $this->validated_by = $validatorId;
+        $this->validated_on = now();
+        $this->save();
     }
 }

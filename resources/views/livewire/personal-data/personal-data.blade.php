@@ -28,56 +28,51 @@
                     <p class="mt-1 text-sm text-gray-500">Format: JPG, PNG, JPEG (Ukuran maksimal 2MB)</p>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Name</label>
-                    <input type="text" wire:model.defer="name" class="mt-1 py-3 px-3 focus:ring-green-500 focus:border-green-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" />
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap</label>
+                    <input type="text" wire:model.defer="name" placeholder="Masukkan nama lengkap" class="mt-1 py-3 px-3 focus:ring-green-500 focus:border-green-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" />
                     @error('name') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">NIDN</label>
-                    <input type="text" wire:model.defer="nidn" class="mt-1 py-3 px-3 focus:ring-green-500 focus:border-green-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" />
+                    <input type="text" wire:model.defer="nidn" placeholder="Masukkan NIDN" class="mt-1 py-3 px-3 focus:ring-green-500 focus:border-green-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" />
                     @error('nidn') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Position</label>
-                    <input type="text" wire:model.defer="position" class="mt-1 py-3 px-3 focus:ring-green-500 focus:border-green-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" />
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Jabatan</label>
+                    <input type="text" wire:model.defer="position" placeholder="Masukkan jabatan" class="mt-1 py-3 px-3 focus:ring-green-500 focus:border-green-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" />
                     @error('position') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Role</label>
-                    <select wire:model.defer="role" class="mt-1 py-3 px-3 focus:ring-green-500 focus:border-green-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
-                        <option value="">Select Role</option>
-                        <option value="lecturer">Lecturer</option>
-                        <option value="hr_finance_staff">HR/Finance Staff</option>
-                        <option value="head_of_hr_finance">Head of HR/Finance</option>
-                        <option value="fri_vice_dean">FRI Vice Dean</option>
-                        <option value="head_of_study_program">Head of Study Program</option>
-                        <option value="head_of_research_group">Head of Research Group</option>
-                    </select>
-                    @error('role') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Birth Place</label>
-                    <input type="text" wire:model.defer="birth_place" class="mt-1 py-3 px-3 focus:ring-green-500 focus:border-green-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" />
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Tempat Lahir</label>
+                    <input type="text" wire:model.defer="birth_place" placeholder="Masukkan tempat lahir" class="mt-1 py-3 px-3 focus:ring-green-500 focus:border-green-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" />
                     @error('birth_place') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Birth Date</label>
-                    <input type="date" wire:model.defer="birth_date" class="mt-1 py-3 px-3 focus:ring-green-500 focus:border-green-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" />
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal Lahir</label>
+                    <input type="date" wire:model.defer="birth_date" placeholder="Masukkan tanggal lahir" class="mt-1 py-3 px-3 focus:ring-green-500 focus:border-green-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" />
                     @error('birth_date') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Gender</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Jenis Kelamin</label>
                     <select wire:model.defer="gender" class="mt-1 py-3 px-3 focus:ring-green-500 focus:border-green-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
-                        <option value="">Select Gender</option>
-                        <option value="male">Male</option>
-                        <option value="female">Female</option>
-                        <option value="other">Other</option>
+                        <option value="">Pilih Jenis Kelamin</option>
+                        <option value="male">Laki-laki</option>
+                        <option value="female">Perempuan</option>
+                        <option value="other">Lainnya</option>
                     </select>
                     @error('gender') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Functional Position</label>
-                    <input type="text" wire:model.defer="functional_position" class="mt-1 py-3 px-3 focus:ring-green-500 focus:border-green-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" />
+                <div class="md:col-span-1">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Jabatan Fungsional</label>
+                    <select wire:model.defer="functional_position" class="mt-1 py-3 px-3 focus:ring-green-500 focus:border-green-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                        <option value="">Pilih jabatan fungsional</option>
+                        <option value="Asisten Ahli">Asisten Ahli</option>
+                        <option value="Lektor">Lektor</option>
+                        <option value="Lektor Kepala">Lektor Kepala</option>
+                        <option value="Profesor">Profesor</option>
+                        <option value="Tenaga Pendidik">Tenaga Pendidik</option>
+                        <option value="Tenaga Kependidikan">Tenaga Kependidikan</option>
+                    </select>
                     @error('functional_position') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
                 </div>
                 <div class="md:col-span-2">
@@ -86,14 +81,9 @@
                     @error('origin_address') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Contact Phone</label>
-                    <input type="text" wire:model.defer="contact_phone" class="mt-1 py-3 px-3 focus:ring-green-500 focus:border-green-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" />
+                    <label class="block text-sm font-medium text-gray-700 mb-2">No. Telepon</label>
+                    <input type="text" wire:model.defer="contact_phone" placeholder="Masukkan nomor telepon" class="mt-1 py-3 px-3 focus:ring-green-500 focus:border-green-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" />
                     @error('contact_phone') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Contact Email</label>
-                    <input type="email" wire:model.defer="contact_email" class="mt-1 py-3 px-3 focus:ring-green-500 focus:border-green-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" />
-                    @error('contact_email') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
                 </div>
             </div>
             <div class="relative px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse mt-6 rounded-b-lg">

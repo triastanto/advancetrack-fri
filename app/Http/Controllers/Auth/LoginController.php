@@ -28,6 +28,14 @@ class LoginController extends Controller
             ]);
         }
 
+        // Restrict login for unapproved lecturers
+        $user = Auth::user();
+        if ($user->hasRole('lecturer') && $user->employee && !$user->employee->is_approved) {
+            Auth::logout();
+            return back()->withInput($request->only('email'))
+                ->with('error', 'Akun Anda belum disetujui oleh HR/Finance. Silakan tunggu persetujuan.');
+        }
+
         $request->session()->regenerate();
 
         return redirect()->intended(RouteServiceProvider::HOME);

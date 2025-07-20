@@ -5,7 +5,6 @@ namespace App\Livewire\PersonalData;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Employee;
 
 class PersonalData extends Component
 {

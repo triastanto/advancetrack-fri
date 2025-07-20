@@ -21,7 +21,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
         $request->fulfill();
-        return redirect()->route('dashboard')->with('success', 'Email berhasil diverifikasi!');
+        return redirect()->route('login')->with('success', 'Email Anda berhasil diverifikasi. Akun Anda akan diperiksa oleh HR/Finance sebelum dapat login.');
     })->middleware(['signed'])->name('verification.verify');
 
     Route::post('email/verification-notification', function (Illuminate\Http\Request $request) {

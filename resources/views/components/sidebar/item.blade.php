@@ -11,7 +11,7 @@
         @endif
         <span class="flex-1">{{ $slot }}</span>
         @if($count && $count > 0)
-            <span class="inline-flex items-center justify-center px-2 py-1 text-xs font-medium bg-green-300 text-white-100 rounded-full min-w-[1.5rem]">
+            <span class="inline-flex items-center justify-center px-2 py-1 text-xs font-medium bg-green-500 text-white rounded-full min-w-[1.5rem]">
                 {{ $count > 99 ? '99+' : $count }}
             </span>
         @endif

@@ -181,9 +181,6 @@
                                 Dosen
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Program Studi
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Status
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -227,9 +224,6 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {{ $studyCalendar->studyDetail->studyProgram->name ?? 'N/A' }}
-                                </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     @php
                                         $state = $workflowStates[$studyCalendar->workflow_state] ?? null;
@@ -250,11 +244,22 @@
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    <div class="space-y-1">
+                                    @if($studyCalendar->workflow_state === 10)
+                                        @php
+                                            $extensionApproval = $this->getExtensionApprovalStatus($studyCalendar);
+                                        @endphp
                                         <div class="flex items-center">
-                                            <x-heroicon-o-document-text class="w-4 h-4 mr-2 {{ $requirements['academic_documents']['complete'] ? 'text-green-500' : 'text-red-500' }}" />
+                                            <x-heroicon-o-document-text class="w-4 h-4 mr-2 {{ $extensionApproval['approved'] ? 'text-green-500' : 'text-red-500' }}" />
                                             <span class="text-xs">
-                                                Persyaratan: {{ $requirements['academic_documents']['verified'] }}/{{ $requirements['academic_documents']['total'] }}
+                                                Perpanjangan: {{ $extensionApproval['approved_count'] }}/{{ $extensionApproval['total'] }} lengkap
+                                            </span>
+                                        </div>
+                                    @else
+                                        <div class="space-y-1">
+                                            <div class="flex items-center">
+                                                <x-heroicon-o-document-text class="w-4 h-4 mr-2 {{ $requirements['academic_documents']['complete'] ? 'text-green-500' : 'text-red-500' }}" />
+                                                <span class="text-xs">
+                                                    Persyaratan: {{ $requirements['academic_documents']['verified'] }}/{{ $requirements['academic_documents']['total'] }}
                                             </span>
                                         </div>
                                         <div class="flex items-center">
@@ -264,6 +269,7 @@
                                             </span>
                                         </div>
                                     </div>
+                                    @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <div class="flex items-center space-x-2">
@@ -303,6 +309,21 @@
                                                     title="Tidak dapat menyetujui karena dokumen persyaratan belum lengkap"
                                                 @endif
                                                 class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 {{ !$requirements['academic_documents']['complete'] ? 'opacity-50 cursor-not-allowed' : '' }}"
+                                            >
+                                                <x-heroicon-o-check class="w-4 h-4 mr-1" />
+                                                Verifikasi
+                                            </button>
+                                        @elseif($studyCalendar->workflow_state === 10 && auth()->user()->employee && in_array(auth()->user()->employee->role, ['head_of_study_program', 'fri_vice_dean', 'hr_finance_staff']))
+                                            @php
+                                                $extensionApproval = $this->getExtensionApprovalStatus($studyCalendar);
+                                            @endphp
+                                            <button
+                                                wire:click="approveExtension({{ $studyCalendar->id }})"
+                                                @if(!$extensionApproval['approved'])
+                                                    disabled
+                                                    title="Tidak dapat menyetujui perpanjangan karena dokumen persetujuan perpanjangan belum lengkap"
+                                                @endif
+                                                class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 {{ !$extensionApproval['approved'] ? 'opacity-50 cursor-not-allowed' : '' }}"
                                             >
                                                 <x-heroicon-o-check class="w-4 h-4 mr-1" />
                                                 Verifikasi

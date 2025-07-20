@@ -73,6 +73,12 @@
                     </form>
                 </div>
             </div>
+            @php
+                $approvalCount = 0;
+                if (Auth::check() && Auth::user()->employee && in_array(Auth::user()->employee->role, ['head_of_study_program', 'fri_vice_dean', 'hr_finance_staff'])) {
+                    $approvalCount = \App\Models\StudyCalendar::whereIn('workflow_state', [2, 10])->count();
+                }
+            @endphp
             @auth
             @php
                 $role = Auth::user()->employee->role ?? null;
@@ -104,7 +110,7 @@
                 @if(Auth::user()->employee && Auth::user()->employee->role === 'lecturer')
                     <x-sidebar.personal-data />
                 @endif
-                <x-sidebar.study-calendar />
+                <x-sidebar.study-calendar :approval-count="$approvalCount" />
                 @if(Auth::user()->employee && Auth::user()->employee->role === 'lecturer' && Auth::user()->employee->studyCalendars()->exists())
                     <x-sidebar.documents />
                 @endif

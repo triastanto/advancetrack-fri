@@ -32,6 +32,8 @@ class Upload extends WorkflowComponent
     public $selectedEmployee;
     public $isNonLecturerRole = false;
     public $viewMode = 'list'; // 'list' or 'management'
+    public $isExtensionUpload = false;
+    public $extensionDocumentTypes;
 
     // Filter properties (same as Approval page)
     public $searchTerm = '';
@@ -134,10 +136,21 @@ class Upload extends WorkflowComponent
     public function handleEmployeeSelected($data)
     {
         $this->selectedEmployeeId = $data['employeeId'];
-        $this->selectedEmployee = Employee::with(['user'])->find($data['employeeId']);
+        $this->selectedEmployee = Employee::with(['user', 'studyCalendar'])->find($data['employeeId']);
         $this->viewMode = 'management';
 
-        // Force refresh of the component data
+        // Check for extension state
+        $studyCalendar = $this->selectedEmployee->studyCalendar ?? null;
+        $this->isExtensionUpload = $studyCalendar && $studyCalendar->workflow_state == 10;
+        if ($this->isExtensionUpload) {
+            $extensionDocNames = \App\Constants\DocumentTypeConstants::getExtensionApprovalDocumentNames();
+            $this->extensionDocumentTypes = \App\Models\DocumentType::whereIn('name', $extensionDocNames)
+                ->orderBy('display_name')
+                ->get();
+        } else {
+            $this->extensionDocumentTypes = collect();
+        }
+
         $this->refreshData();
     }
 
@@ -395,6 +408,53 @@ class Upload extends WorkflowComponent
         }
     }
 
+    public function getExtensionApprovalStatus($studyCalendar)
+    {
+        $employee = $studyCalendar->employee;
+        $extensionDocNames = \App\Constants\DocumentTypeConstants::getExtensionApprovalDocumentNames();
+        $extensionTypeIds = \App\Models\DocumentType::whereIn('name', $extensionDocNames)->pluck('id');
+
+        $extensionDocs = \App\Models\ApprovalDocument::where('employee_id', $employee->id)
+            ->whereIn('document_type_id', $extensionTypeIds)
+            ->get();
+
+        $total = count($extensionTypeIds);
+        $approved = $extensionDocs->where('workflow_state', 4)->count(); // 4 = APPROVED
+
+        return [
+            'approved' => $approved === $total && $total > 0,
+            'approved_count' => $approved,
+            'total' => $total,
+        ];
+    }
+
+    public function getExtensionCompletionStatus()
+    {
+        $employee = $this->selectedEmployee;
+        if (!$employee) {
+            return [
+                'status' => 'Error',
+                'details' => [],
+                'completed_count' => 0,
+                'total_count' => 0
+            ];
+        }
+        $extensionDocNames = \App\Constants\DocumentTypeConstants::getExtensionApprovalDocumentNames();
+        $extensionTypeIds = \App\Models\DocumentType::whereIn('name', $extensionDocNames)->pluck('id');
+        $uploadedDocs = \App\Models\ApprovalDocument::where('employee_id', $employee->id)
+            ->whereIn('document_type_id', $extensionTypeIds)
+            ->get();
+        $completed = $uploadedDocs->where('workflow_state', 4)->count(); // 4 = APPROVED
+        $total = count($extensionTypeIds);
+
+        return [
+            'status' => $completed === $total && $total > 0 ? 'Complete' : 'Incomplete',
+            'details' => [],
+            'completed_count' => $completed,
+            'total_count' => $total
+        ];
+    }
+
     // Livewire Update Methods
     public function updatedSelectedDocumentTypeId()
     {
@@ -553,8 +613,11 @@ class Upload extends WorkflowComponent
                 }
 
                 $employee = $this->getEmployeeForDocuments();
-                $documentTypes = $this->getapprovalDocumentTypes();
-                $documentTypeIds = $documentTypes->pluck('id')->toArray();
+                if ($this->isExtensionUpload) {
+                    $documentTypeIds = $this->extensionDocumentTypes->pluck('id')->toArray();
+                } else {
+                    $documentTypeIds = $this->availableDocumentTypes->pluck('id')->toArray();
+                }
 
                 $ApprovalDocuments = ApprovalDocument::where('employee_id', $employee->id)
                     ->whereIn('document_type_id', $documentTypeIds)

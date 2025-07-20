@@ -6,7 +6,7 @@
 
     @endif
     @if(Auth::user()->employee && Auth::user()->employee->role !== 'lecturer')
-        <x-sidebar.item route="study-calendar.approval" :active="request()->routeIs('study-calendar.approval')" icon="heroicon-o-user">
+        <x-sidebar.item route="study-calendar.approval" :active="request()->routeIs('study-calendar.approval')" icon="heroicon-o-user" :count="$approvalCount ?? null">
             Persetujuan Masa Studi Lanjut
         </x-sidebar.item>
     @endif

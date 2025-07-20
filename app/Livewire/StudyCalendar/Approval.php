@@ -161,6 +161,26 @@ class Approval extends WorkflowComponent
         $this->openWorkflowModal($studyCalendarId, 3); // REJECT_STUDY transition
     }
 
+    public function approveExtension($studyCalendarId)
+    {
+        $studyCalendar = StudyCalendar::find($studyCalendarId);
+        if (!$studyCalendar || $studyCalendar->workflow_state !== 10) { // 10 = PENDING_EXTENSION
+            session()->flash('error', 'Hanya Masa Studi dengan status PENDING_EXTENSION yang dapat diperpanjang.');
+            return;
+        }
+        $this->openWorkflowModal($studyCalendarId, 12); // 12 = APPROVE_EXTENSION
+    }
+
+    public function rejectExtension($studyCalendarId)
+    {
+        $studyCalendar = StudyCalendar::find($studyCalendarId);
+        if (!$studyCalendar || $studyCalendar->workflow_state !== 10) { // 10 = PENDING_EXTENSION
+            session()->flash('error', 'Hanya Masa Studi dengan status PENDING_EXTENSION yang dapat ditolak perpanjangannya.');
+            return;
+        }
+        $this->openWorkflowModal($studyCalendarId, 13); // 13 = REJECT_EXTENSION
+    }
+
     // Requirements Check Methods for specific study calendar
     public function getRequirementsStatusForStudyCalendar($studyCalendar)
     {
@@ -296,6 +316,26 @@ class Approval extends WorkflowComponent
         }
 
         return implode('. ', $messages);
+    }
+
+    public function getExtensionApprovalStatus($studyCalendar)
+    {
+        $employee = $studyCalendar->employee;
+        $extensionDocNames = \App\Constants\DocumentTypeConstants::getExtensionApprovalDocumentNames();
+        $extensionTypeIds = \App\Models\DocumentType::whereIn('name', $extensionDocNames)->pluck('id');
+
+        $extensionDocs = \App\Models\ApprovalDocument::where('employee_id', $employee->id)
+            ->whereIn('document_type_id', $extensionTypeIds)
+            ->get();
+
+        $total = count($extensionTypeIds);
+        $approved = $extensionDocs->where('workflow_state', 4)->count(); // 4 = APPROVED
+
+        return [
+            'approved' => $approved === $total && $total > 0,
+            'approved_count' => $approved,
+            'total' => $total,
+        ];
     }
 
     // Data Retrieval Methods

@@ -1,6 +1,12 @@
 @props(['progress', 'studyCalendar'])
 
 @php
+    $extensionStates = [
+        ['id' => 9, 'name' => 'Kedaluwarsa', 'label' => 'EXPIRED', 'icon' => 'alert-triangle', 'color' => 'danger', 'terminal' => false],
+        ['id' => 10, 'name' => 'Menunggu Perpanjangan', 'label' => 'PENDING_EXTENSION', 'icon' => 'clock', 'color' => 'warning', 'terminal' => false],
+        ['id' => 11, 'name' => 'Perpanjangan Disetujui', 'label' => 'EXTENDED', 'icon' => 'refresh-cw', 'color' => 'success', 'terminal' => false],
+        ['id' => 7, 'name' => 'Selesai', 'label' => 'FINISHED', 'icon' => 'award', 'color' => 'success', 'terminal' => true],
+    ];
     $baseStates = [
         ['id' => 1, 'name' => 'Draft', 'label' => 'DRAFT', 'icon' => 'pencil', 'color' => 'secondary', 'terminal' => false],
         ['id' => 2, 'name' => 'Menunggu Persetujuan', 'label' => 'PENDING_APPROVAL', 'icon' => 'clock', 'color' => 'warning', 'terminal' => false],
@@ -12,21 +18,30 @@
     $leaveState = ['id' => 6, 'name' => 'Cuti', 'label' => 'LEAVE', 'icon' => 'pause-circle', 'color' => 'warning', 'terminal' => false];
     $dropoutState = ['id' => 8, 'name' => 'Drop Out', 'label' => 'DROP_OUT', 'icon' => 'x-circle', 'color' => 'danger', 'terminal' => true];
     $currentState = $progress['current_state'] ?? 1;
-    if ($currentState == 4) {
-        // Only show up to Menunggu Persetujuan, then Ditolak
-        $states = array_filter($baseStates, fn($s) => $s['id'] <= 2);
-        $states[] = $rejectedState;
+    // Extension flow: only show if in EXPIRED or PENDING_EXTENSION
+    if (in_array($currentState, [9, 10])) {
+        $states = $extensionStates;
     } else {
-        $states = $baseStates;
-        if ($currentState == 6 || $currentState > 6) {
-            array_splice($states, 5, 0, [$leaveState]);
-        }
-        if ($currentState == 8) {
-            $states[] = $dropoutState;
+        if ($currentState == 4) {
+            // Only show up to Menunggu Persetujuan, then Ditolak
+            $states = array_filter($baseStates, fn($s) => $s['id'] <= 2);
+            $states[] = $rejectedState;
+        } else {
+            $states = $baseStates;
+            if ($currentState == 6 || $currentState > 6) {
+                array_splice($states, 5, 0, [$leaveState]);
+            }
+            if ($currentState == 8) {
+                $states[] = $dropoutState;
+            }
         }
     }
     $current = collect($states)->firstWhere('id', $currentState) ?? $states[0];
     function stateStatus($stateId, $currentState) {
+        // Only mark FINISHED as completed if we are in FINISHED
+        if ($stateId == 7) {
+            return $currentState == 7 ? 'completed' : 'pending';
+        }
         if ($currentState > $stateId) return 'completed';
         if ($currentState == $stateId) return 'current';
         return 'pending';
@@ -90,7 +105,9 @@
                     {{-- State Circle --}}
                     <div class="relative group">
                         <div class="w-9 h-9 rounded-full flex items-center justify-center text-sm font-medium border-2 transition-all duration-200
-                            @if(stateStatus($state['id'], $currentState) === 'completed')
+                            @if($state['id'] == 9)
+                                bg-red-500 text-white border-red-500 shadow-lg
+                            @elseif(stateStatus($state['id'], $currentState) === 'completed')
                                 bg-green-500 text-white border-green-500 shadow-lg
                             @elseif(stateStatus($state['id'], $currentState) === 'current')
                                 bg-blue-500 text-white border-blue-500 ring-4 ring-blue-100 shadow-lg
@@ -122,6 +139,12 @@
                                 @case('award')
                                     <x-heroicon-s-academic-cap class="w-5 h-5" />
                                     @break
+                                @case('alert-triangle')
+                                    <x-heroicon-o-exclamation-circle class="w-5 h-5" />
+                                    @break
+                                @case('refresh-cw')
+                                    <x-heroicon-o-arrow-path class="w-5 h-5" />
+                                    @break
                                 @default
                                     {{ $state['id'] }}
                             @endswitch
@@ -145,7 +168,9 @@
                         {{-- State Label --}}
                         <div class="absolute top-11 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
                             <span class="text-xs font-medium transition-colors duration-200
-                                @if(stateStatus($state['id'], $currentState) === 'completed')
+                                @if($state['id'] == 9)
+                                    text-red-600
+                                @elseif(stateStatus($state['id'], $currentState) === 'completed')
                                     text-green-600
                                 @elseif(stateStatus($state['id'], $currentState) === 'current')
                                     text-blue-600

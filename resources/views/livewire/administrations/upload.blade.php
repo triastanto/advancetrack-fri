@@ -33,12 +33,14 @@
                 :key="'study-info-lecturer'" />
 
             {{-- Document Completion Status Card --}}
-            <x-documents.completion-status-card
-                :available-document-types="$availableDocumentTypes"
-                :completion-status="$completionStatus"
-                title="Status Kelengkapan"
-                :supports-semester="false"
-                :key="'completion-status-lecturer'" />
+            @if(!$isExtensionUpload)
+                <x-documents.completion-status-card
+                    :available-document-types="$availableDocumentTypes"
+                    :completion-status="$completionStatus"
+                    title="Status Kelengkapan"
+                    :supports-semester="false"
+                    :key="'completion-status-lecturer'" />
+            @endif
 
             {{-- Upload Section --}}
             <x-documents.document-upload-section
@@ -194,22 +196,43 @@
                     :study-info="$activeStudyInfo"
                     :key="'study-info-' . $selectedEmployee->id" />
 
-                {{-- Document Completion Status Card --}}
-                <x-documents.completion-status-card
-                    :available-document-types="$availableDocumentTypes"
-                    :completion-status="$completionStatus"
-                    title="Status Kelengkapan"
-                    :supports-semester="false"
-                    :key="'completion-status-' . $selectedEmployee->id" />
+
+                {{-- Completion Status Card for Extension Approval Documents --}}
+                @if($isExtensionUpload)
+                    <x-documents.completion-status-card
+                        :available-document-types="$extensionDocumentTypes"
+                        :completion-status="$this->getExtensionCompletionStatus()"
+                        title="Status Kelengkapan Dokumen Perpanjangan"
+                        :supports-semester="false"
+                        :key="'completion-status-extension-' . $selectedEmployee->id" />
+                @else
+                    {{-- Document Completion Status Card --}}
+                    <x-documents.completion-status-card
+                        :available-document-types="$availableDocumentTypes"
+                        :completion-status="$completionStatus"
+                        title="Status Kelengkapan"
+                        :supports-semester="false"
+                        :key="'completion-status-' . $selectedEmployee->id" />
+                @endif
 
                 {{-- Upload Section --}}
-                <x-documents.document-upload-section
-                    :available-document-types="$availableDocumentTypes"
-                    :selected-document-type-id="$selectedDocumentTypeId"
-                    :completion-status="$completionStatus"
-                    title="Unggah Dokumen"
-                    upload-button-text="Unggah Dokumen"
-                    :key="'upload-section-' . $selectedEmployee->id" />
+                @if($isExtensionUpload)
+                    <x-documents.document-upload-section
+                        :available-document-types="$extensionDocumentTypes"
+                        :selected-document-type-id="$selectedDocumentTypeId"
+                        :completion-status="$completionStatus"
+                        title="Unggah Dokumen Perpanjangan"
+                        upload-button-text="Unggah Dokumen Perpanjangan"
+                        :key="'upload-section-extension-' . $selectedEmployee->id" />
+                @else
+                    <x-documents.document-upload-section
+                        :available-document-types="$availableDocumentTypes"
+                        :selected-document-type-id="$selectedDocumentTypeId"
+                        :completion-status="$completionStatus"
+                        title="Unggah Dokumen"
+                        upload-button-text="Unggah Dokumen"
+                        :key="'upload-section-' . $selectedEmployee->id" />
+                @endif
 
                 {{-- Documents table --}}
                 <x-documents.documents-table-enhanced

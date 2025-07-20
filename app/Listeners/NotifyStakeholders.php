@@ -363,11 +363,17 @@ class NotifyStakeholders
         $owner = $this->getModelOwner($model);
 
         if ($owner) {
+            $specificType = $this->determineNotificationType($notificationData);
             $this->sendNotificationToUser(
                 $owner,
-                'workflow_updated',
+                $specificType,
                 $notificationData
             );
+        } else {
+            Log::warning('NotifyStakeholders: No model owner found', [
+                'model_id' => $model->id,
+                'model_class' => get_class($model),
+            ]);
         }
     }
 
@@ -376,6 +382,15 @@ class NotifyStakeholders
      */
     private function getModelOwner($model): ?User
     {
+        // For StudyCalendar
+        if ($model instanceof \App\Models\StudyCalendar) {
+            if (!$model->relationLoaded('employee') || !$model->employee) {
+                $model->load('employee.user');
+            }
+            if ($model->employee && $model->employee->user) {
+                return $model->employee->user;
+            }
+        }
         // Handle Document model
         if ($model instanceof Document && $model->employee && $model->employee->user) {
             return $model->employee->user;
@@ -485,6 +500,7 @@ class NotifyStakeholders
                 7 => 'workflow_updated', // RETURN_FROM_LEAVE
                 8 => 'study_completed',
                 9, 10 => 'workflow_updated', // DROP_OUT
+                14 => 'study_calendar_expired', // EXPIRE
                 default => 'workflow_updated'
             };
         }

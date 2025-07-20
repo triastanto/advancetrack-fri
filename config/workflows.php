@@ -402,6 +402,33 @@ return [
                     'is_terminal' => true,
                     'is_initial' => false,
                 ],
+                9 => [
+                    'name' => 'EXPIRED',
+                    'type' => 'expired',
+                    'label' => 'Expired',
+                    'color' => 'danger',
+                    'icon' => 'alert-triangle',
+                    'is_terminal' => false,
+                    'is_initial' => false,
+                ],
+                10 => [
+                    'name' => 'PENDING_EXTENSION',
+                    'type' => 'pending_extension',
+                    'label' => 'Pending Extension Approval',
+                    'color' => 'warning',
+                    'icon' => 'clock',
+                    'is_terminal' => false,
+                    'is_initial' => false,
+                ],
+                11 => [
+                    'name' => 'EXTENDED',
+                    'type' => 'extended',
+                    'label' => 'Perpanjangan Disetujui',
+                    'color' => 'success',
+                    'icon' => 'refresh-cw',
+                    'is_terminal' => false,
+                    'is_initial' => false,
+                ],
             ],
             'transitions' => [
                 1 => [
@@ -504,6 +531,46 @@ return [
                     'required_roles' => ['head_of_study_program', 'fri_vice_dean'],
                     'requires_comment' => true,
                 ],
+                11 => [
+                    'name' => 'EXTEND_STUDY',
+                    'label' => 'Ajukan Perpanjangan Studi',
+                    'from_state' => 9, // EXPIRED
+                    'to_state' => 10,  // PENDING_EXTENSION
+                    'icon' => 'repeat',
+                    'color' => 'primary',
+                    'required_roles' => ['lecturer'],
+                    'requires_comment' => true,
+                ],
+                12 => [
+                    'name' => 'APPROVE_EXTENSION',
+                    'label' => 'Setujui Perpanjangan Studi',
+                    'from_state' => 10, // PENDING_EXTENSION
+                    'to_state' => 11,    // EXTENDED
+                    'icon' => 'check-circle',
+                    'color' => 'success',
+                    'required_roles' => ['head_of_study_program', 'fri_vice_dean', 'hr_finance_staff'],
+                    'requires_comment' => true,
+                ],
+                13 => [
+                    'name' => 'REJECT_EXTENSION',
+                    'label' => 'Tolak Perpanjangan Studi',
+                    'from_state' => 10, // PENDING_EXTENSION
+                    'to_state' => 8,    // DROP_OUT
+                    'icon' => 'x-circle',
+                    'color' => 'danger',
+                    'required_roles' => ['head_of_study_program', 'fri_vice_dean', 'hr_finance_staff'],
+                    'requires_comment' => true,
+                ],
+                14 => [
+                    'name' => 'EXPIRE',
+                    'label' => 'Tandai Sebagai Kedaluwarsa',
+                    'from_state' => 5, // ACTIVE
+                    'to_state' => 9,   // EXPIRED
+                    'icon' => 'alert-triangle',
+                    'color' => 'danger',
+                    'required_roles' => [], // allow any context
+                    'requires_comment' => false,
+                ],
             ],
             'guards' => [
                 'role_based' => ['enabled' => true],
@@ -528,6 +595,10 @@ return [
                     8 => ['lecturer', 'head_of_study_program', 'fri_vice_dean', 'head_of_hr_finance', 'hr_finance_staff'], // COMPLETE_STUDY - notify student, supervisors, and admin
                     9 => ['lecturer', 'head_of_study_program', 'fri_vice_dean', 'head_of_hr_finance', 'hr_finance_staff'], // DROP_OUT_ACTIVE - notify student, supervisors, and admin
                     10 => ['lecturer', 'head_of_study_program', 'fri_vice_dean', 'head_of_hr_finance', 'hr_finance_staff'], // DROP_OUT_LEAVE - notify student, supervisors, and admin
+                    11 => ['lecturer'], // EXTEND_STUDY - notify student
+                    12 => ['head_of_study_program', 'fri_vice_dean'], // APPROVE_EXTENSION - notify student and supervisors
+                    13 => ['head_of_study_program', 'fri_vice_dean'], // REJECT_EXTENSION - notify student and supervisors
+                    14 => ['model_owner'], // EXPIRE - notify only the owner (lecturer)
                 ],
                 'approver_roles' => ['head_of_study_program', 'fri_vice_dean', 'hr_finance_staff'],
                 'supervisor_roles' => ['head_of_study_program', 'fri_vice_dean'],
@@ -543,6 +614,10 @@ return [
                     8 => 'emails.study-completed',
                     9 => 'emails.study-discontinued',
                     10 => 'emails.study-discontinued',
+                    11 => 'emails.study-extended',
+                    12 => 'emails.study-extension-approved',
+                    13 => 'emails.study-extension-rejected',
+                    14 => 'emails.study-expired', // New template for expiration
                 ],
             ],
         ],

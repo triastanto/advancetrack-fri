@@ -53,7 +53,10 @@ class ApprovalDocument extends Document
      */
     public static function getAllowedTypes(): array
     {
-        return DocumentTypeConstants::getApprovalDocumentNames();
+        return array_merge(
+            \App\Constants\DocumentTypeConstants::getApprovalDocumentNames(),
+            \App\Constants\DocumentTypeConstants::getExtensionApprovalDocumentNames()
+        );
     }
 
     /**

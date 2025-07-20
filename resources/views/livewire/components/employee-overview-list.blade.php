@@ -128,28 +128,40 @@
 
                         {{-- Approval Documents Status --}}
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="space-y-1">
-                                <div class="flex items-center justify-between">
-                                    <span class="text-sm text-gray-600">Progress:</span>
-                                    <span class="text-sm font-medium text-gray-900">
-                                        {{ $approvalStatus['uploaded'] }}/{{ $approvalStatus['total'] }}
+                            @if($studyCalendar && $studyCalendar->workflow_state === 10)
+                                @php
+                                    $extensionApproval = $this->getExtensionApprovalStatus($studyCalendar);
+                                @endphp
+                                <div class="flex items-center">
+                                    <x-heroicon-o-document-text class="w-4 h-4 mr-2 {{ $extensionApproval['approved'] ? 'text-green-500' : 'text-red-500' }}" />
+                                    <span class="text-xs">
+                                        Perpanjangan: {{ $extensionApproval['approved_count'] }}/{{ $extensionApproval['total'] }} lengkap
                                     </span>
                                 </div>
-                                <div class="w-full bg-gray-200 rounded-full h-2">
-                                    <div class="h-2 rounded-full transition-all duration-300
-                                        @if($approvalStatus['completion_percentage'] === 100) bg-green-500
-                                        @elseif($approvalStatus['completion_percentage'] > 0) bg-yellow-500
-                                        @else bg-gray-300 @endif"
-                                         style="width: {{ $approvalStatus['completion_percentage'] }}%">
+                            @else
+                                <div class="space-y-1">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm text-gray-600">Progress:</span>
+                                        <span class="text-sm font-medium text-gray-900">
+                                            {{ $approvalStatus['uploaded'] }}/{{ $approvalStatus['total'] }}
+                                        </span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                        <div class="h-2 rounded-full transition-all duration-300
+                                            @if($approvalStatus['completion_percentage'] === 100) bg-green-500
+                                            @elseif($approvalStatus['completion_percentage'] > 0) bg-yellow-500
+                                            @else bg-gray-300 @endif"
+                                             style="width: {{ $approvalStatus['completion_percentage'] }}%">
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between text-xs text-gray-500">
+                                        <span>Disetujui: {{ $approvalStatus['approved'] }}/{{ $approvalStatus['total'] }}</span>
+                                        @if($approvalStatus['missing'] > 0)
+                                            <span class="text-red-600">{{ $approvalStatus['missing'] }} belum diunggah</span>
+                                        @endif
                                     </div>
                                 </div>
-                                <div class="flex items-center justify-between text-xs text-gray-500">
-                                    <span>Disetujui: {{ $approvalStatus['approved'] }}/{{ $approvalStatus['total'] }}</span>
-                                    @if($approvalStatus['missing'] > 0)
-                                        <span class="text-red-600">{{ $approvalStatus['missing'] }} belum diunggah</span>
-                                    @endif
-                                </div>
-                            </div>
+                            @endif
                         </td>
 
                         {{-- Last Updated --}}

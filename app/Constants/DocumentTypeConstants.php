@@ -197,6 +197,16 @@ class DocumentTypeConstants
             'display_name' => 'Dokumen Tambahan',
             'description' => 'Dokumen opsional lain yang diperlukan di luar kategori yang telah ditentukan',
         ],
+        [
+            'name' => 'extension_request_letter',
+            'display_name' => 'Surat Permohonan Perpanjangan',
+            'description' => 'Surat permohonan resmi untuk perpanjangan masa studi',
+        ],
+        [
+            'name' => 'extension_approval_minutes',
+            'display_name' => 'Berita Acara Perpanjangan',
+            'description' => 'Berita acara resmi untuk proses persetujuan perpanjangan masa studi',
+        ],
     ];
 
     /**
@@ -298,5 +308,16 @@ class DocumentTypeConstants
     public static function getFinalDocumentNames(): array
     {
         return ['diploma', 'final_transcript', 'graduation_certificate', 'study_completion_statement', 'additional_final_report'];
+    }
+
+    /**
+     * Get extension approval document type names for extension process
+     */
+    public static function getExtensionApprovalDocumentNames(): array
+    {
+        return [
+            'extension_request_letter', // Surat Permohonan Perpanjangan
+            'extension_approval_minutes', // Berita Acara Perpanjangan
+        ];
     }
 }

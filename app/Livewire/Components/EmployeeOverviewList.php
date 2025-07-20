@@ -148,6 +148,26 @@ class EmployeeOverviewList extends Component
         }
     }
 
+    public function getExtensionApprovalStatus($studyCalendar)
+    {
+        $employee = $studyCalendar->employee;
+        $extensionDocNames = \App\Constants\DocumentTypeConstants::getExtensionApprovalDocumentNames();
+        $extensionTypeIds = \App\Models\DocumentType::whereIn('name', $extensionDocNames)->pluck('id');
+
+        $extensionDocs = \App\Models\ApprovalDocument::where('employee_id', $employee->id)
+            ->whereIn('document_type_id', $extensionTypeIds)
+            ->get();
+
+        $total = count($extensionTypeIds);
+        $approved = $extensionDocs->where('workflow_state', 4)->count(); // 4 = APPROVED
+
+        return [
+            'approved' => $approved === $total && $total > 0,
+            'approved_count' => $approved,
+            'total' => $total,
+        ];
+    }
+
     public function getWorkflowStateLabel($state)
     {
         return match($state) {
@@ -158,6 +178,10 @@ class EmployeeOverviewList extends Component
             5 => 'On Leave',
             6 => 'Completed',
             7 => 'Rejected',
+            8 => 'Drop Out',
+            9 => 'Expired',
+            10 => 'Pending Extension Approval',
+            11 => 'Extended',
             default => 'Unknown'
         };
     }

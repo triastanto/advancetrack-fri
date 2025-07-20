@@ -67,6 +67,7 @@ class WorkflowNotification extends Notification implements ShouldQueue
             'study_completed' => 'Studi Selesai',
             'workflow_action_required' => 'Aksi Diperlukan pada Workflow',
             'workflow_updated' => 'Workflow Diperbarui',
+            'study_calendar_expired' => 'Masa Studi Kedaluwarsa',
             default => 'Notifikasi Sistem'
         };
     }
@@ -89,6 +90,7 @@ class WorkflowNotification extends Notification implements ShouldQueue
             'study_completed' => 'Selamat! Studi Anda telah selesai.',
             'workflow_action_required' => 'Ada aksi yang perlu Anda lakukan pada workflow.',
             'workflow_updated' => 'Status workflow telah diperbarui.',
+            'study_calendar_expired' => 'Masa studi telah melewati tanggal akhir yang ditetapkan dan kini berstatus kedaluwarsa.',
             default => 'Anda memiliki notifikasi baru.'
         };
     }
@@ -137,7 +139,8 @@ class WorkflowNotification extends Notification implements ShouldQueue
             'study_calendar_rejected' => '⚠️',
             'study_started' => '🚀',
             'study_completed' => '🏆',
-            default => '🔔'
+            'study_calendar_expired' => '⏰',
+            default => '��'
         };
     }
 
@@ -157,6 +160,7 @@ class WorkflowNotification extends Notification implements ShouldQueue
             'study_calendar_rejected' => 'danger',
             'study_started' => 'success',
             'study_completed' => 'success',
+            'study_calendar_expired' => 'danger',
             default => 'info'
         };
     }

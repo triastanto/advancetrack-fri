@@ -99,16 +99,16 @@
                                             <p class="text-sm font-medium text-gray-900">
                                                 @switch($transitionName)
                                                     @case('SUBMIT_STUDY')
-                                                        Kalender Studi Diajukan
+                                                        Masa Studi Diajukan
                                                         @break
                                                     @case('APPROVE_STUDY')
-                                                        Kalender Studi Disetujui
+                                                        Masa Studi Disetujui
                                                         @break
                                                     @case('REJECT_STUDY')
-                                                        Kalender Studi Ditolak
+                                                        Masa Studi Ditolak
                                                         @break
                                                     @case('RESUBMIT_STUDY')
-                                                        Kalender Studi Diajukan Ulang
+                                                        Masa Studi Diajukan Ulang
                                                         @break
                                                     @case('START_STUDY')
                                                         Studi Dimulai

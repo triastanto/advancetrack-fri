@@ -120,7 +120,8 @@ The dashboard displays real-time reminders for lecturers:
 - Surat Keterangan Aktif
 - Bukti Unggah Publikasi di iGracias
 - Bukti Pembayaran Biaya Pendidikan
-- Surat Keterangan Progres Studi
+-Laporan Kemajuan Semester
+
 
 ### Final Report Reminders
 

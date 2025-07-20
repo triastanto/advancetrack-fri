@@ -134,7 +134,7 @@ class Activity extends Component
                     'type' => 'study_calendar',
                     'action' => 'created',
                     'employee' => $calendar->employee,
-                    'description' => 'Membuat kalender studi',
+                    'description' => 'Membuat Masa Studi',
                     'date' => $calendar->created_at,
                     'details' => [
                         'study_start' => $calendar->study_start,

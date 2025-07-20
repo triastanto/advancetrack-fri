@@ -18,7 +18,7 @@ PHASE 1: INITIAL SETUP & DOCUMENT SUBMISSION
 │ └── Riwayat Pendidikan (Upload background)                                   │
 │                                                                               │
 │ Week 3-4: Study Calendar Creation                                            │
-│ ├── Kalender Studi → Kelola Kalender Studi Lanjut                           │
+│ ├── Masa Studi → Kelola Masa Studi Lanjut                           │
 │ ├── Create study calendar (DRAFT state)                                      │
 │ ├── Define timeline and milestones                                           │
 │ └── Select study program from available options                              │
@@ -58,7 +58,7 @@ PHASE 2: APPROVAL & STUDY PREPARATION
 │ 🎯 HEAD OF STUDY PROGRAM JOURNEY                                             │
 ├─────────────────────────────────────────────────────────────────────────────────┤
 │ Weekly: Study Calendar Review                                                │
-│ ├── Kalender Studi → Persetujuan Kalender Studi Lanjut                      │
+│ ├── Masa Studi → Persetujuan Masa Studi Lanjut                      │
 │ ├── Review submitted calendars with study program details                     │
 │ ├── Approve/reject (PENDING_APPROVAL → APPROVED/REJECTED)                   │
 │ └── Provide academic guidance                                                │
@@ -86,7 +86,7 @@ PHASE 2: APPROVAL & STUDY PREPARATION
 │ 🏛️ VICE DEAN JOURNEY (Alternative Path)                                     │
 ├─────────────────────────────────────────────────────────────────────────────────┤
 │ As Needed: Executive Decisions                                               │
-│ ├── Kalender Studi → Persetujuan Kalender Studi Lanjut                      │
+│ ├── Masa Studi → Persetujuan Masa Studi Lanjut                      │
 │ ├── Administrasi Dokumen → Persetujuan Manajemen                            │
 │ ├── Approve/reject study calendars (Level 1)                                │
 │ ├── Provide final approval (Level 2)                                        │
@@ -99,7 +99,7 @@ PHASE 3: STUDY COMMENCEMENT
 │ 🎓 LECTURER JOURNEY (Continued)                                             │
 ├─────────────────────────────────────────────────────────────────────────────────┤
 │ Week 15-16: Study Start                                                      │
-│ ├── Kalender Studi → Kelola Kalender Studi Lanjut                           │
+│ ├── Masa Studi → Kelola Masa Studi Lanjut                           │
 │ ├── Request study start (APPROVED → ACTIVE)                                 │
 │ ├── Begin actual study program                                               │
 │ └── Start regular semester reporting                                         │
@@ -117,7 +117,7 @@ PHASE 4: ACTIVE STUDY PERIOD
 │ └── Track verification status                                                │
 │                                                                               │
 │ As Needed: Leave Management                                                  │
-│ ├── Kalender Studi → Kelola Kalender Studi Lanjut                           │
+│ ├── Masa Studi → Kelola Masa Studi Lanjut                           │
 │ ├── Request leave (ACTIVE → LEAVE)                                          │
 │ ├── Return from leave (LEAVE → ACTIVE)                                      │
 │ └── Track leave status                                                       │
@@ -146,7 +146,7 @@ PHASE 5: STUDY COMPLETION
 │ └── Track verification status                                                │
 │                                                                               │
 │ Completion: Study Finalization                                               │
-│ ├── Kalender Studi → Kelola Kalender Studi Lanjut                           │
+│ ├── Masa Studi → Kelola Masa Studi Lanjut                           │
 │ ├── Request completion (ACTIVE → FINISHED)                                  │
 │ ├── Or request discontinuation (ACTIVE → DROP_OUT)                          │
 │ └── Complete study program                                                   │

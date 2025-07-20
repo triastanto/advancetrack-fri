@@ -69,13 +69,13 @@
                             <p class="text-sm text-gray-600">
                                 @switch($transition['name'])
                                     @case('SUBMIT_STUDY')
-                                        Ajukan kalender studi untuk memulai proses verifikasi dokumen Persetujuan Studi Lanjut oleh HR/Finance Staff.
+                                        Ajukan Masa Studi untuk memulai proses verifikasi dokumen Persetujuan Studi Lanjut oleh HR/Finance Staff.
                                         @break
                                     @case('RESUBMIT_STUDY')
-                                        Revisi dan ajukan ulang kalender studi setelah ditolak.
+                                        Revisi dan ajukan ulang Masa Studi setelah ditolak.
                                         @break
                                     @case('START_STUDY')
-                                        Mulai program studi setelah semua persyaratan terpenuhi dan kalender disetujui.
+                                        Mulai program studi setelah semua persyaratan terpenuhi dan masa studi disetujui.
                                         @break
                                     @case('TAKE_LEAVE')
                                         Ambil cuti resmi dari studi.
@@ -142,9 +142,9 @@
             <div class="flex items-start">
                 <x-heroicon-o-information-circle class="w-5 h-5 text-blue-600 mr-3 mt-0.5" />
                 <div>
-                    <h4 class="text-sm font-medium text-blue-800">Langkah Selanjutnya: Ajukan Kalender Studi</h4>
+                    <h4 class="text-sm font-medium text-blue-800">Langkah Selanjutnya: Ajukan Masa Studi</h4>
                     <p class="text-sm text-blue-700 mt-1">
-                        Setelah semua dokumen Persyaratan Studi Lanjut diverifikasi, Anda dapat mengajukan kalender studi. 
+                        Setelah semua dokumen Persyaratan Studi Lanjut diverifikasi, Anda dapat mengajukan Masa Studi. 
                         Pengajuan ini akan memulai proses verifikasi dokumen Persetujuan Studi Lanjut oleh HR/Finance Staff.
                     </p>
                     <div class="mt-2 text-xs text-blue-600">
@@ -161,7 +161,7 @@
                 <div>
                     <h4 class="text-sm font-medium text-yellow-800">Menunggu Persetujuan</h4>
                     <p class="text-sm text-yellow-700 mt-1">
-                        Kalender studi Anda telah diajukan dan sedang menunggu persetujuan dari supervisor. 
+                        Masa Studi Anda telah diajukan dan sedang menunggu persetujuan dari supervisor. 
                         Setelah disetujui, HR/Finance Staff akan mulai memproses dokumen Persetujuan Studi Lanjut.
                     </p>
                     <div class="mt-2 text-xs text-yellow-600">
@@ -176,9 +176,9 @@
             <div class="flex items-start">
                 <x-heroicon-o-check-circle class="w-5 h-5 text-green-600 mr-3 mt-0.5" />
                 <div>
-                    <h4 class="text-sm font-medium text-green-800">Kalender Studi Disetujui</h4>
+                    <h4 class="text-sm font-medium text-green-800">Masa Studi Disetujui</h4>
                     <p class="text-sm text-green-700 mt-1">
-                        Kalender studi Anda telah disetujui! HR/Finance Staff sedang memproses dokumen Persetujuan Studi Lanjut. 
+                        Masa Studi Anda telah disetujui! HR/Finance Staff sedang memproses dokumen Persetujuan Studi Lanjut. 
                         Setelah semua dokumen persetujuan disetujui, Anda dapat memulai studi.
                     </p>
                     <div class="mt-2 text-xs text-green-600">

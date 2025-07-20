@@ -95,7 +95,7 @@
                     <x-heroicon-o-academic-cap class="w-7 h-7 text-blue-500" />
                 </div>
                 <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-500">Total Kalender Studi</p>
+                    <p class="text-sm font-medium text-gray-500">Total Masa Studi</p>
                     <p class="text-xl font-semibold text-gray-900">{{ $studyCalendarStats['total'] ?? 0 }}</p>
                     <p class="text-sm text-gray-500">
                         {{ $studyCalendarStats['active_studies'] ?? 0 }} aktif, 
@@ -161,7 +161,7 @@
         <x-ui.card>
             <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                 <x-heroicon-o-chart-bar class="w-5 h-5 mr-3 text-blue-600" />
-                Distribusi Status Kalender Studi
+                Distribusi Status Masa Studi
             </h3>
             <div class="space-y-3">
                 @if(isset($studyCalendarStats['by_state']))

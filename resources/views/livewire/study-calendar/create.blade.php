@@ -1,4 +1,4 @@
-<x-ui.page-container title="Kelola Kalender Studi Lanjut">
+<x-ui.page-container title="Kelola Masa Studi Lanjut">
     <x-ui.alert-message />
 
     {{-- Form Section --}}
@@ -6,7 +6,7 @@
         <div class="px-6 py-4 border-b border-[var(--color-border)]">
             <h3 class="text-lg font-semibold text-gray-900 flex items-center">
                 <x-heroicon-o-calendar class="w-5 h-5 mr-2 text-blue-600" />
-                Formulir Kalender Studi Lanjut
+                Formulir Masa Studi Lanjut
             </h3>
         </div>
         
@@ -158,7 +158,7 @@
                         </div>
                         <div class="mb-4 flex items-center">
                             <input type="checkbox" id="agreement" wire:model.defer="agreed" class="mr-2 @error('agreed') border-red-500 @enderror" />
-                            <label for="agreement" class="text-sm">Saya menyetujui syarat dan ketentuan pembuatan kalender studi.</label>
+                            <label for="agreement" class="text-sm">Saya menyetujui syarat dan ketentuan pembuatan Masa Studi.</label>
                         </div>
                         @error('agreed') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                     </div>

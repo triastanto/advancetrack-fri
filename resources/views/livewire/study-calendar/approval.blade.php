@@ -8,10 +8,10 @@
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 flex items-center">
                     <x-heroicon-o-academic-cap class="w-8 h-8 mr-3 text-blue-600" />
-                    Persetujuan Kalender Studi Lanjut
+                    Persetujuan Masa Studi Lanjut
                 </h1>
                 <p class="text-gray-600 mt-1">
-                    Review dan persetujuan kalender studi lanjut dosen
+                    Review dan persetujuan Masa Studi Lanjut dosen
                 </p>
             </div>
             <div class="flex items-center space-x-2">
@@ -30,25 +30,25 @@
                 <x-heroicon-o-information-circle class="w-5 h-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0" />
                 <div class="flex-1">
                     <h3 class="text-sm font-medium text-blue-900 mb-2">
-                        Panduan Workflow Kalender Studi Lanjut
+                        Panduan Workflow Masa Studi Lanjut
                     </h3>
                     <div class="text-sm text-blue-800 space-y-2">
                         <div class="flex items-start">
                             <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mr-2 mt-0.5">1</span>
                             <div>
-                                <strong>Draft:</strong> Dosen telah membuat kalender studi. HR/Finance perlu mengunggah 5 dokumen persetujuan: Dokumen Kesesuaian Studi Lanjut, Berita Acara Pengajuan, Berita Acara Persetujuan, NDE, dan PID.
+                                <strong>Draft:</strong> Dosen telah membuat Masa Studi. HR/Finance perlu mengunggah 5 dokumen persetujuan: Dokumen Kesesuaian Studi Lanjut, Berita Acara Pengajuan, Berita Acara Persetujuan, NDE, dan PID.
                             </div>
                         </div>
                         <div class="flex items-start">
                             <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mr-2 mt-0.5">2</span>
                             <div>
-                                <strong>Pending Approval:</strong> Dosen telah mengirim kalender studi untuk persetujuan. Supervisor dapat menyetujui atau menolak setelah semua dokumen persyaratan diverifikasi.
+                                <strong>Pending Approval:</strong> Dosen telah mengirim Masa Studi untuk persetujuan. Supervisor dapat menyetujui atau menolak setelah semua dokumen persyaratan diverifikasi.
                             </div>
                         </div>
                         <div class="flex items-start">
                             <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mr-2 mt-0.5">3</span>
                             <div>
-                                <strong>Approved:</strong> Kalender studi disetujui. Dosen dapat memulai studi setelah semua dokumen persetujuan disetujui oleh manajemen.
+                                <strong>Approved:</strong> Masa Studi disetujui. Dosen dapat memulai studi setelah semua dokumen persetujuan disetujui oleh manajemen.
                             </div>
                         </div>
                     </div>
@@ -168,7 +168,7 @@
         <div class="px-6 py-4 border-b border-gray-200">
             <h3 class="text-lg font-semibold text-gray-900 flex items-center">
                 <x-heroicon-o-academic-cap class="w-5 h-5 mr-2 text-blue-600" />
-                Daftar Kalender Studi
+                Daftar Masa Studi
             </h3>
         </div>
 
@@ -324,10 +324,10 @@
             {{-- Empty State --}}
             <div class="text-center py-12">
                 <x-heroicon-o-academic-cap class="w-20 h-20 mx-auto text-gray-300 mb-6" />
-                <h3 class="text-xl font-semibold text-gray-900 mb-3">Tidak Ada Kalender Studi</h3>
+                <h3 class="text-xl font-semibold text-gray-900 mb-3">Tidak Ada Masa Studi</h3>
                 <p class="text-gray-600 mb-6 leading-relaxed">
-                    Belum ada kalender studi yang diajukan untuk persetujuan.
-                    <br>Dosen dapat mengajukan kalender studi mereka melalui halaman kelola kalender studi.
+                    Belum ada Masa Studi yang diajukan untuk persetujuan.
+                    <br>Dosen dapat mengajukan Masa Studi mereka melalui halaman kelola Masa Studi.
                 </p>
             </div>
         @endif

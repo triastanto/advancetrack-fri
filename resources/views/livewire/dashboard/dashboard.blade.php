@@ -156,10 +156,10 @@
                     @else
                         <div class="text-center py-8">
                             <x-heroicon-o-calendar class="w-12 h-12 mx-auto text-gray-400 mb-3" />
-                            <p class="text-sm text-gray-500 mb-4">Belum ada kalender studi</p>
+                            <p class="text-sm text-gray-500 mb-4">Belum ada Masa Studi</p>
                             <a href="{{ route('study-calendar.create') }}" 
                                class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">
-                                Buat Kalender Studi
+                                Buat Masa Studi
                             </a>
                         </div>
                     @endif

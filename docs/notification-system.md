@@ -41,8 +41,8 @@ The in-app notification system provides personalized, real-time notifications to
 
 | Type | Trigger | Recipients | Content |
 |------|---------|------------|---------|
-| `study_calendar_approved` | Study calendar approved | Student | "Kalender Studi Disetujui" |
-| `study_calendar_rejected` | Study calendar rejected | Student | "Kalender Studi Ditolak" |
+| `study_calendar_approved` | Study calendar approved | Student | "Masa Studi Disetujui" |
+| `study_calendar_rejected` | Study calendar rejected | Student | "Masa Studi Ditolak" |
 | `study_started` | Study program started | Student, Supervisors, Admin | "Studi Dimulai" |
 | `study_completed` | Study completed | Student, Supervisors, Admin | "Studi Selesai" |
 

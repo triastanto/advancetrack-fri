@@ -28,8 +28,8 @@
         </div>
 
         <div class="bg-white rounded-2xl shadow-md p-6">
-            <h3 class="text-xl font-semibold text-[#222222] mb-3">Kalender Akademik</h3>
-            <p class="text-[#222222]">Pantau jadwal penting dan deadline akademik dalam satu kalender terintegrasi.</p>
+            <h3 class="text-xl font-semibold text-[#222222] mb-3">Masa Studi Lanjut Akademik</h3>
+            <p class="text-[#222222]">Pantau jadwal penting dan deadline akademik dalam satu Masa Studi Lanjut terintegrasi.</p>
         </div>
     </div>
 </div>

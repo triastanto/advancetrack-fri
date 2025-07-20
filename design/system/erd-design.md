@@ -31,7 +31,7 @@
 | year                      | tahun                         |
 | service_bond_agreements   | perjanjian ikatan dinas       |
 | upload_date               | tanggal unggah                |
-| study_calendars           | kalender studi                |
+| study_calendars           | Masa Studi                |
 | study_start               | awal studi                    |
 | estimated_study_end       | estimasi akhir studi          |
 | graduation_date           | tanggal kelulusan             |

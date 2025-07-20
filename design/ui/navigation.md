@@ -37,9 +37,9 @@
 │   └── Riwayat Pendidikan
 │   👥 **Akses**: Dosen (lecturer)
 
-├── 📅 Kalender Studi Lanjut (Workflow Utama)
-│   ├── Kelola Kalender Studi Lanjut (Dosen)
-│   └── Persetujuan Kalender Studi Lanjut (Supervisor)
+├── 📅 Masa Studi Lanjut (Workflow Utama)
+│   ├── Kelola Masa Studi Lanjut (Dosen)
+│   └── Persetujuan Masa Studi Lanjut (Supervisor)
 │   👥 **Akses**: 
 │   - Kelola: Dosen (lecturer)
 │   - Persetujuan: Ketua Program Studi, Wakil Dekan II FRI
@@ -62,7 +62,8 @@
 │   │   ├── Surat Keterangan Aktif
 │   │   ├── Bukti Unggah Publikasi di Igracias
 │   │   ├── Bukti Pembayaran Biaya Pendidikan
-│   │   └── Surat Keterangan Progres Studi
+│   │   └──Laporan Kemajuan Semester
+
 │   ├── 📂 Laporan Akhir & Kelulusan
 │   │   ├── Ijazah
 │   │   ├── Transkrip Nilai Akhir
@@ -130,8 +131,8 @@
 | Dashboard (Lecturer) | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
 | Dashboard (Analytics) | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Data Pribadi | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| Kalender Studi (Kelola) | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| Kalender Studi (Persetujuan) | ❌ | ❌ | ❌ | ✅ | ❌ | ✅ |
+| Masa Studi (Kelola) | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Masa Studi (Persetujuan) | ❌ | ❌ | ❌ | ✅ | ❌ | ✅ |
 | Dokumen Akademik | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
 | Persetujuan Studi Lanjut | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
 | Administrasi Dokumen | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ |
@@ -154,9 +155,9 @@
 - **Wakil Dekan**: Persetujuan Level 1 & 2
 - **Status**: DRAFT → PENDING_L1 → PENDING_L2 → APPROVED/REJECTED
 
-#### 📅 Kalender Studi Lanjut (study_calendar)
-- **Dosen**: Submit kalender studi dengan detail program studi
-- **Ketua Prodi & Wakil Dekan**: Persetujuan kalender
+#### 📅 Masa Studi Lanjut (study_calendar)
+- **Dosen**: Submit Masa Studi dengan detail program studi
+- **Ketua Prodi & Wakil Dekan**: Persetujuan Masa Studi
 - **Status**: DRAFT → PENDING_APPROVAL → APPROVED → ACTIVE → FINISHED/DROP_OUT
 
 ---

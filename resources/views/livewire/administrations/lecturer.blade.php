@@ -112,7 +112,7 @@
                         </span>
                     @else
                         <span class="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-gray-200 text-gray-600">
-                            Tidak ada kalender studi
+                            Tidak ada Masa Studi
                         </span>
                     @endif
                 </div>

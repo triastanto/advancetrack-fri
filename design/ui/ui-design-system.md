@@ -11,6 +11,6 @@
 ## 2. Typography
 - **Font**: Modern sans-serif (e.g., Inter, Arial, or similar)
 - **Title Size**: 24-32px (e.g., "Dosen Studi Lanjut FRI", "Laporan dan Rekapitulasi")
-- **Subtitle Size**: 18-20px (e.g., "Kalender Studi Lanjut")
+- **Subtitle Size**: 18-20px (e.g., "Masa Studi Lanjut")
 - **Body Text**: 14-16px
 - **Sidebar & Label Text**: 14px, bold for active menu

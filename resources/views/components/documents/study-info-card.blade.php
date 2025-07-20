@@ -56,7 +56,7 @@
         </h3>
         <a href="{{ route('study-calendar.manage') }}" class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 hover:border-blue-300 transition-colors duration-200">
             <x-heroicon-o-arrow-right class="w-4 h-4 mr-1.5" />
-            Kelola Kalender
+            Kelola Masa Studi
         </a>
     </div>
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">

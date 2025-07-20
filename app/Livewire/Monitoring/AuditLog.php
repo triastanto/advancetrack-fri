@@ -264,7 +264,7 @@ class AuditLog extends Component
     protected function getWorkflowDisplayName($workflowName)
     {
         return match($workflowName) {
-            'study_calendar' => 'Kalender Studi',
+            'study_calendar' => 'Masa Studi',
             'verification_by_staff' => 'Verifikasi oleh Staff',
             'verification_by_management' => 'Verifikasi oleh Manajemen',
             default => ucwords(str_replace('_', ' ', $workflowName))

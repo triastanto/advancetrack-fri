@@ -92,7 +92,7 @@ class Manage extends WorkflowComponent
     // Event Handlers
     public function handleTransitionApplied($data)
     {
-        session()->flash('success', $data['message'] ?? 'Status kalender studi berhasil diperbarui.');
+        session()->flash('success', $data['message'] ?? 'Status Masa Studi berhasil diperbarui.');
         $this->refreshData();
     }
 
@@ -430,7 +430,7 @@ class Manage extends WorkflowComponent
 
         if (!$requirements['academic_documents']['complete']) {
             $missingCount = $requirements['academic_documents']['total'] - $requirements['academic_documents']['verified'];
-            session()->flash('error', "Tidak dapat mengajukan kalender studi. Masih ada {$missingCount} dokumen persyaratan yang belum diverifikasi.");
+            session()->flash('error', "Tidak dapat mengajukan Masa Studi. Masih ada {$missingCount} dokumen persyaratan yang belum diverifikasi.");
             return;
         }
 
@@ -449,7 +449,7 @@ class Manage extends WorkflowComponent
         // START_STUDY: Only allowed if Study Calendar is APPROVED, all AcademicDocuments are VERIFIED, and all ApprovalDocuments are APPROVED
         $studyCalendar = StudyCalendar::find($studyCalendarId);
         if (!$studyCalendar || $studyCalendar->workflow_state !== 3) { // 3 = APPROVED
-            session()->flash('error', 'Kalender studi harus berstatus APPROVED sebelum memulai studi.');
+            session()->flash('error', 'Masa Studi harus berstatus APPROVED sebelum memulai studi.');
             return;
         }
         
@@ -680,7 +680,7 @@ class Manage extends WorkflowComponent
     // Override trait methods for custom behavior
     protected function getSuccessMessage(): string
     {
-        return 'Status kalender studi lanjut berhasil diperbarui.';
+        return 'Status masa studi lanjut berhasil diperbarui.';
     }
 
     protected function getSuccessFlashKey(): string

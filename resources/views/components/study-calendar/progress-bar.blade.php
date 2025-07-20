@@ -37,7 +37,7 @@
     <div class="px-6 py-4 border-b border-[var(--color-border)]">
         <h3 class="text-lg font-semibold text-gray-900 flex items-center">
             <x-heroicon-o-academic-cap class="w-5 h-5 mr-2 text-blue-600" />
-            Timeline Kalender Studi
+            Timeline Masa Studi
         </h3>
     </div>
     
@@ -168,15 +168,15 @@
         <div class="flex items-start">
             <x-heroicon-o-light-bulb class="w-5 h-5 text-blue-600 mr-3 mt-0.5" />
             <div>
-                <h4 class="text-sm font-medium text-gray-900 mb-2">Proses Workflow Kalender Studi</h4>
+                <h4 class="text-sm font-medium text-gray-900 mb-2">Proses Workflow Masa Studi</h4>
                 <div class="text-xs text-gray-600 space-y-1">
                     <div class="flex items-center">
                         <span class="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
-                        <strong>Draft:</strong> Siapkan dokumen Persyaratan Studi Lanjut dan ajukan kalender studi
+                        <strong>Draft:</strong> Siapkan dokumen Persyaratan Studi Lanjut dan ajukan Masa Studi
                     </div>
                     <div class="flex items-center">
                         <span class="w-2 h-2 bg-yellow-500 rounded-full mr-2"></span>
-                        <strong>Menunggu Persetujuan:</strong> Supervisor memverifikasi kalender studi
+                        <strong>Menunggu Persetujuan:</strong> Supervisor memverifikasi Masa Studi
                     </div>
                     <div class="flex items-center">
                         <span class="w-2 h-2 bg-green-500 rounded-full mr-2"></span>

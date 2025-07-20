@@ -49,7 +49,7 @@
                             </div>
                             <div class="flex-1">
                                 <h3 class="text-xl font-semibold text-gray-900 mb-1">
-                                    Detail Kalender Studi
+                                    Detail Masa Studi
                                 </h3>
                                 <div class="text-sm text-gray-600">
                                     <div class="font-medium">{{ $name }}</div>

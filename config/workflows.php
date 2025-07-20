@@ -406,7 +406,7 @@ return [
             'transitions' => [
                 1 => [
                     'name' => 'SUBMIT_STUDY',
-                    'label' => 'Kirim Kalender Studi',
+                    'label' => 'Kirim Masa Studi',
                     'from_state' => 1, // DRAFT
                     'to_state' => 2,   // PENDING_APPROVAL
                     'icon' => 'upload',
@@ -416,7 +416,7 @@ return [
                 ],
                 2 => [
                     'name' => 'APPROVE_STUDY',
-                    'label' => 'Setujui Kalender Studi',
+                    'label' => 'Setujui Masa Studi',
                     'from_state' => 2, // PENDING_APPROVAL
                     'to_state' => 3,   // APPROVED
                     'icon' => 'check-circle',
@@ -426,7 +426,7 @@ return [
                 ],
                 3 => [
                     'name' => 'REJECT_STUDY',
-                    'label' => 'Tolak Kalender Studi',
+                    'label' => 'Tolak Masa Studi',
                     'from_state' => 2, // PENDING_APPROVAL
                     'to_state' => 4,   // REJECTED
                     'icon' => 'x-circle',
@@ -436,7 +436,7 @@ return [
                 ],
                 4 => [
                     'name' => 'RESUBMIT_STUDY',
-                    'label' => 'Revisi Kalender Studi',
+                    'label' => 'Revisi Masa Studi',
                     'from_state' => 4, // REJECTED
                     'to_state' => 2,   // PENDING_APPROVAL
                     'icon' => 'refresh-cw',
@@ -446,7 +446,7 @@ return [
                 ],
                 5 => [
                     'name' => 'START_STUDY',
-                    'label' => 'Mulai Kalender Studi',
+                    'label' => 'Mulai Masa Studi',
                     'from_state' => 3, // APPROVED
                     'to_state' => 5,   // ACTIVE
                     'icon' => 'play-circle',
@@ -476,7 +476,7 @@ return [
                 ],
                 8 => [
                     'name' => 'COMPLETE_STUDY',
-                    'label' => 'Selesai Kalender Studi',
+                    'label' => 'Selesai Masa Studi',
                     'from_state' => 5, // ACTIVE
                     'to_state' => 7,   // FINISHED
                     'icon' => 'award',
@@ -486,7 +486,7 @@ return [
                 ],
                 9 => [
                     'name' => 'DROP_OUT_ACTIVE',
-                    'label' => 'Keluar Kalender Studi',
+                    'label' => 'Keluar Masa Studi',
                     'from_state' => 5, // ACTIVE
                     'to_state' => 8,   // DROP_OUT
                     'icon' => 'x-circle',
@@ -496,7 +496,7 @@ return [
                 ],
                 10 => [
                     'name' => 'DROP_OUT_LEAVE',
-                    'label' => 'Keluar Kalender Studi (dari Cuti)',
+                    'label' => 'Keluar Masa Studi (dari Cuti)',
                     'from_state' => 6, // LEAVE
                     'to_state' => 8,   // DROP_OUT
                     'icon' => 'x-circle',

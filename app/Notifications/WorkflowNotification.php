@@ -61,8 +61,8 @@ class WorkflowNotification extends Notification implements ShouldQueue
             'document_verified' => 'Dokumen Disetujui',
             'document_rejected' => 'Dokumen Ditolak',
             'document_resubmitted' => 'Dokumen Dikirim Ulang',
-            'study_calendar_approved' => 'Kalender Studi Disetujui',
-            'study_calendar_rejected' => 'Kalender Studi Ditolak',
+            'study_calendar_approved' => 'Masa Studi Disetujui',
+            'study_calendar_rejected' => 'Masa Studi Ditolak',
             'study_started' => 'Studi Dimulai',
             'study_completed' => 'Studi Selesai',
             'workflow_action_required' => 'Aksi Diperlukan pada Workflow',
@@ -83,8 +83,8 @@ class WorkflowNotification extends Notification implements ShouldQueue
             'document_verified' => "Dokumen {$this->data['document_name']} telah disetujui.",
             'document_rejected' => "Dokumen {$this->data['document_name']} ditolak. Silakan perbaiki dan kirim ulang.",
             'document_resubmitted' => "Dokumen {$this->data['document_name']} telah dikirim ulang untuk verifikasi.",
-            'study_calendar_approved' => 'Kalender studi Anda telah disetujui. Anda dapat memulai studi.',
-            'study_calendar_rejected' => 'Kalender studi Anda ditolak. Silakan perbaiki dan kirim ulang.',
+            'study_calendar_approved' => 'Masa Studi Anda telah disetujui. Anda dapat memulai studi.',
+            'study_calendar_rejected' => 'Masa Studi Anda ditolak. Silakan perbaiki dan kirim ulang.',
             'study_started' => 'Studi Anda telah dimulai. Selamat belajar!',
             'study_completed' => 'Selamat! Studi Anda telah selesai.',
             'workflow_action_required' => 'Ada aksi yang perlu Anda lakukan pada workflow.',
@@ -197,7 +197,7 @@ class WorkflowNotification extends Notification implements ShouldQueue
             'document_submitted', 'document_verified', 'document_rejected', 'document_resubmitted' => 
                 'Lihat Dokumen',
             'study_calendar_approved', 'study_calendar_rejected' => 
-                'Kelola Kalender Studi',
+                'Kelola Masa Studi',
             'study_started', 'study_completed' => 
                 'Lihat Status Studi',
             default => 'Lihat Detail'

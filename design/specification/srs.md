@@ -48,11 +48,11 @@ Sistem akan digunakan oleh Lecturer, hr_finance_staff, head_of_hr_finance, fri_v
 - [ ] Semua peran melihat riwayat workflow persetujuan dan menerima notifikasi perubahan status (sesuai hak akses)
 
 ### 2.6 Study Calendar Workflow
-- [ ] lecturer membuat/mengedit kalender studi dan submit untuk persetujuan
-- [ ] head_of_study_program dan fri_vice_dean approve/reject kalender studi
-- [ ] lecturer merevisi dan resubmit kalender studi
+- [ ] lecturer membuat/mengedit Masa Studi dan submit untuk persetujuan
+- [ ] head_of_study_program dan fri_vice_dean approve/reject Masa Studi
+- [ ] lecturer merevisi dan resubmit Masa Studi
 - [ ] lecturer, head_of_study_program, fri_vice_dean memulai studi, cuti, kembali dari cuti, menyelesaikan, atau mengundurkan diri dari studi
-- [ ] Semua peran melihat riwayat workflow kalender studi dan menerima notifikasi perubahan status studi (sesuai hak akses)
+- [ ] Semua peran melihat riwayat workflow Masa Studi dan menerima notifikasi perubahan status studi (sesuai hak akses)
 
 ### 2.7 Study Details & Academic Tracking
 - [ ] lecturer, hr_finance_staff, head_of_hr_finance, fri_vice_dean, head_of_study_program, head_of_research_group menambah/mengedit detail studi, promotor, supervisor, dan tanggung jawab pengajaran

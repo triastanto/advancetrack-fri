@@ -334,7 +334,7 @@ class Create extends Component
             Log::info('StudyDetail created successfully');
 
             DB::commit();
-            session()->flash('success', 'Kalender studi berhasil dibuat!');
+            session()->flash('success', 'Masa Studi berhasil dibuat!');
             return redirect()->route('study-calendar.manage');
         } catch (\Exception $e) {
             DB::rollBack();

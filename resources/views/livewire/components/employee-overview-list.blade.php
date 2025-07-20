@@ -2,7 +2,7 @@
     {{-- Header with Search and Filters --}}
     <div class="px-6 py-4 border-b border-gray-200">
         <div class="flex items-center justify-between">
-            <h3 class="text-lg font-medium text-gray-900">Daftar Dosen dengan Kalender Studi Lanjut</h3>
+            <h3 class="text-lg font-medium text-gray-900">Daftar Dosen dengan Masa Studi Lanjut</h3>
             <div class="flex items-center space-x-4">
                 {{-- Search --}}
                 <div class="relative">
@@ -52,7 +52,7 @@
                     </th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" wire:click="sortBy('status')">
                         <div class="flex items-center">
-                            Status Kalender
+                            Status Masa Studi
                             @if($sortBy === 'status')
                                 <x-heroicon-o-chevron-up class="w-4 h-4 ml-1" />
                             @else
@@ -122,7 +122,7 @@
                                     {{ $this->getWorkflowStateLabel($studyCalendar->workflow_state) }}
                                 </span>
                             @else
-                                <span class="text-gray-400 text-sm">Tidak ada kalender</span>
+                                <span class="text-gray-400 text-sm">Tidak ada masa studi</span>
                             @endif
                         </td>
 
@@ -176,7 +176,7 @@
                             @if($searchTerm || $statusFilter)
                                 Tidak ada dosen yang sesuai dengan filter yang dipilih.
                             @else
-                                Belum ada dosen dengan kalender studi.
+                                Belum ada dosen dengan Masa Studi.
                             @endif
                         </td>
                     </tr>

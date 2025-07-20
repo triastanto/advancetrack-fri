@@ -147,7 +147,7 @@
                                             <div class="flex items-center">
                                                 <x-heroicon-o-information-circle class="w-4 h-4 text-yellow-600 mr-2" />
                                                 <span class="text-xs text-yellow-800">
-                                                    <strong>Kalender Studi:</strong> Status Draft - Upload 5 dokumen persetujuan untuk melanjutkan proses
+                                                    <strong>Masa Studi:</strong> Status Draft - Upload 5 dokumen persetujuan untuk melanjutkan proses
                                                 </span>
                                             </div>
                                         </div>

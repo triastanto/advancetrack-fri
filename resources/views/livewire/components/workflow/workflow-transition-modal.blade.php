@@ -24,7 +24,7 @@
                         <!-- Document Info -->
                         <div class="mb-4">
                             @if($document instanceof \App\Models\StudyCalendar)
-                                <div class="font-semibold text-base mb-1">Informasi Kalender Studi</div>
+                                <div class="font-semibold text-base mb-1">Informasi Masa Studi</div>
                                 <div class="text-sm text-gray-600 mb-1">Semester: <span class="font-semibold">{{ $document->semester ?? 'N/A' }}</span></div>
                                 <div class="text-sm text-gray-600 mb-1">Periode: <span class="font-semibold">{{ $document->study_period ?? 'N/A' }}</span></div>
                                 <div class="text-sm text-gray-600 mb-1">Status Saat Ini: <span class="inline-flex rounded-full px-2 py-1 text-xs font-semibold @if($document->getCurrentState() === 1) bg-yellow-100 text-yellow-800 @elseif($document->getCurrentState() === 2) bg-blue-100 text-blue-800 @elseif($document->getCurrentState() === 3) bg-green-100 text-green-800 @elseif($document->getCurrentState() === 4) bg-red-100 text-red-800 @elseif($document->getCurrentState() === 5) bg-green-100 text-green-800 @else bg-gray-100 text-gray-800 @endif">{{ $document->getCurrentStateName() }}</span></div>

@@ -58,7 +58,7 @@ class StudyCalendarViewModal extends Component
             ])->find($studyCalendarId);
 
             if (!$this->studyCalendar) {
-                session()->flash('error', 'Kalender studi tidak ditemukan.');
+                session()->flash('error', 'Masa Studi tidak ditemukan.');
                 return;
             }
 
@@ -74,7 +74,7 @@ class StudyCalendarViewModal extends Component
                 'study_calendar_id' => $studyCalendarId,
                 'error' => $e->getMessage()
             ]);
-            session()->flash('error', 'Terjadi kesalahan saat membuka detail kalender studi.');
+            session()->flash('error', 'Terjadi kesalahan saat membuka detail Masa Studi.');
         }
     }
 

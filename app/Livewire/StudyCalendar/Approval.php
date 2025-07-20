@@ -64,7 +64,7 @@ class Approval extends WorkflowComponent
     // Event Handlers
     public function handleTransitionApplied($data)
     {
-        session()->flash('success', $data['message'] ?? 'Status kalender studi berhasil diperbarui.');
+        session()->flash('success', $data['message'] ?? 'Status Masa Studi berhasil diperbarui.');
         $this->refreshData();
     }
 
@@ -132,7 +132,7 @@ class Approval extends WorkflowComponent
         // Validate that the study calendar is in PENDING_APPROVAL state
         $studyCalendar = StudyCalendar::find($studyCalendarId);
         if (!$studyCalendar || $studyCalendar->workflow_state !== 2) { // 2 = PENDING_APPROVAL
-            session()->flash('error', 'Hanya kalender studi dengan status PENDING_APPROVAL yang dapat disetujui.');
+            session()->flash('error', 'Hanya Masa Studi dengan status PENDING_APPROVAL yang dapat disetujui.');
             return;
         }
 
@@ -140,7 +140,7 @@ class Approval extends WorkflowComponent
         $requirements = $this->getRequirementsStatusForStudyCalendar($studyCalendar);
         if (!$requirements['academic_documents']['complete']) {
             $missingCount = $requirements['academic_documents']['total'] - $requirements['academic_documents']['verified'];
-            session()->flash('error', "Tidak dapat menyetujui kalender studi. Masih ada {$missingCount} dokumen persyaratan yang belum diverifikasi.");
+            session()->flash('error', "Tidak dapat menyetujui Masa Studi. Masih ada {$missingCount} dokumen persyaratan yang belum diverifikasi.");
             return;
         }
 
@@ -154,7 +154,7 @@ class Approval extends WorkflowComponent
         // Validate that the study calendar is in PENDING_APPROVAL state
         $studyCalendar = StudyCalendar::find($studyCalendarId);
         if (!$studyCalendar || $studyCalendar->workflow_state !== 2) { // 2 = PENDING_APPROVAL
-            session()->flash('error', 'Hanya kalender studi dengan status PENDING_APPROVAL yang dapat ditolak.');
+            session()->flash('error', 'Hanya Masa Studi dengan status PENDING_APPROVAL yang dapat ditolak.');
             return;
         }
 
@@ -439,7 +439,7 @@ class Approval extends WorkflowComponent
     // Override trait methods for custom behavior
     protected function getSuccessMessage(): string
     {
-        return 'Status kalender studi berhasil diperbarui.';
+        return 'Status Masa Studi berhasil diperbarui.';
     }
 
     protected function getSuccessFlashKey(): string

@@ -221,7 +221,7 @@ class WorkflowTransitionModal extends Component
             // Determine what type of model we're working with
             $modelName = 'Item';
             if ($this->document instanceof StudyCalendar) {
-                $modelName = 'Kalender studi';
+                $modelName = 'Masa Studi';
             } elseif ($this->document instanceof Document) {
                 $modelName = 'Dokumen';
             }

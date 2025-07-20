@@ -13,7 +13,7 @@
 - **Permissions**: Read/Write own profile data
 
 #### **Week 3-4: Study Calendar Creation**
-- **Navigation Access**: Kalender Studi Lanjut → Kelola Kalender Studi Lanjut
+- **Navigation Access**: Masa Studi Lanjut → Kelola Masa Studi Lanjut
 - **Actions**:
   - Create initial study calendar (DRAFT state)
   - Define study timeline and milestones
@@ -39,7 +39,7 @@
 - **Permissions**: Upload documents, submit for verification, view own document status
 
 #### **Week 9-10: Study Calendar Submission**
-- **Navigation Access**: Kalender Studi Lanjut → Kelola Kalender Studi Lanjut
+- **Navigation Access**: Masa Studi Lanjut → Kelola Masa Studi Lanjut
 - **Actions**:
   - Finalize study calendar with study program details
   - Submit for approval (DRAFT → PENDING_APPROVAL)
@@ -49,7 +49,7 @@
 ### 📋 Phase 2: Approval & Study Preparation
 
 #### **Week 11-14: Wait for Approvals**
-- **Navigation Access**: Dashboard, Kalender Studi Lanjut → Linimasa Kalender Studi Lanjut
+- **Navigation Access**: Dashboard, Masa Studi Lanjut → Linimasa Masa Studi Lanjut
 - **Actions**:
   - Monitor approval status
   - Respond to any rejection comments
@@ -57,7 +57,7 @@
 - **Permissions**: View approval status, revise and resubmit
 
 #### **Week 15-16: Study Commencement**
-- **Navigation Access**: Kalender Studi Lanjut → Kelola Kalender Studi Lanjut
+- **Navigation Access**: Masa Studi Lanjut → Kelola Masa Studi Lanjut
 - **Actions**:
   - Once all approvals received, request to start study
   - Transition to ACTIVE state
@@ -75,13 +75,14 @@
     - Surat Keterangan Aktif
     - Bukti Unggah Publikasi di Igracias
     - Bukti Pembayaran Biaya Pendidikan
-    - Surat Keterangan Progres Studi
+    -Laporan Kemajuan Semester
+
   - Submit for verification
   - Track verification status
 - **Permissions**: Upload semester reports, submit for verification
 
 #### **As Needed: Leave Management**
-- **Navigation Access**: Kalender Studi Lanjut → Kelola Kalender Studi Lanjut
+- **Navigation Access**: Masa Studi Lanjut → Kelola Masa Studi Lanjut
 - **Actions**:
   - Request official leave (ACTIVE → LEAVE)
   - Return from leave (LEAVE → ACTIVE)
@@ -101,7 +102,7 @@
 - **Permissions**: Upload final reports, submit for verification
 
 #### **Completion: Study Finalization**
-- **Navigation Access**: Kalender Studi Lanjut → Kelola Kalender Studi Lanjut
+- **Navigation Access**: Masa Studi Lanjut → Kelola Masa Studi Lanjut
 - **Actions**:
   - Request study completion (requires all final reports verified)
   - Or request study discontinuation if needed
@@ -209,7 +210,7 @@
 ### 📋 Phase 1: Study Calendar Approval
 
 #### **Weekly: Calendar Review**
-- **Navigation Access**: Kalender Studi Lanjut → Persetujuan Kalender Studi Lanjut
+- **Navigation Access**: Masa Studi Lanjut → Persetujuan Masa Studi Lanjut
 - **Actions**:
   - Review submitted study calendars with study program details
   - Approve or reject study plans (PENDING_APPROVAL → APPROVED/REJECTED)
@@ -229,7 +230,7 @@
 ### 📋 Phase 3: Study Management
 
 #### **As Needed: Study Status Management**
-- **Navigation Access**: Kalender Studi Lanjut → Persetujuan Kalender Studi Lanjut
+- **Navigation Access**: Masa Studi Lanjut → Persetujuan Masa Studi Lanjut
 - **Actions**:
   - Approve study start requests (APPROVED → ACTIVE)
   - Approve leave requests (ACTIVE → LEAVE)
@@ -289,7 +290,7 @@
 
 #### **As Needed: Executive Decisions**
 - **Navigation Access**: 
-  - Kalender Studi Lanjut → Persetujuan Kalender Studi Lanjut
+  - Masa Studi Lanjut → Persetujuan Masa Studi Lanjut
   - Administrasi Dokumen → Persetujuan Manajemen
 - **Actions**:
   - Approve/reject study calendars (Level 1 authority)
@@ -355,8 +356,8 @@
 |--------------|----------|-------|---------|------------|---------|-----------|
 | Dashboard | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Data Pribadi | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| Kalender Studi (Kelola) | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| Kalender Studi (Persetujuan) | ❌ | ❌ | ❌ | ✅ | ❌ | ✅ |
+| Masa Studi (Kelola) | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Masa Studi (Persetujuan) | ❌ | ❌ | ❌ | ✅ | ❌ | ✅ |
 | Dokumen Akademik | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
 | Persetujuan Studi Lanjut | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
 | Administrasi Dokumen | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ |

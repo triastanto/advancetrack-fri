@@ -337,5 +337,5 @@
     <livewire:components.workflow.workflow-transition-modal />
 
     {{-- Study Calendar View Modal --}}
-    <livewire:components.study-calendar.study-calendar-view-modal />
+    <livewire:components.study-calendar.study-calendar-view-modal :is-open="$isStudyCalendarModalOpen" :study-calendar-id="$studyCalendarId" />
 </div>

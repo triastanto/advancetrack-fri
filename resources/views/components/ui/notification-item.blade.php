@@ -42,7 +42,11 @@
 
 <div class="flex items-start p-4 rounded-lg hover:bg-gray-50 transition-colors duration-200 {{ $notification->read_at ? 'opacity-75' : 'bg-white shadow-sm' }} {{ $priorityClass }}">
     <div class="flex-shrink-0 mr-3">
-        <x-dynamic-component :component="$icon" class="w-6 h-6 {{ $colorClass }}" />
+        @if(Str::startsWith($icon, 'heroicon-'))
+            <x-dynamic-component :component="$icon" class="w-6 h-6 {{ $colorClass }}" />
+        @else
+            <span class="w-6 h-6 flex items-center justify-center text-2xl {{ $colorClass }}">{{ $icon }}</span>
+        @endif
     </div>
     
     <div class="flex-1 min-w-0">

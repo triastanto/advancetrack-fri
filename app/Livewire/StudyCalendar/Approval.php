@@ -29,13 +29,18 @@ class Approval extends WorkflowComponent
     // Filter properties
     public $searchTerm = '';
     public $statusFilter = '';
-    protected $queryString = ['searchTerm', 'statusFilter'];
+    protected $queryString = ['searchTerm', 'statusFilter', 'studyCalendarId'];
 
     public $workflowStates = [];
 
+    // Modal for direct access
+    public $studyCalendarId = null;
+    public $isStudyCalendarModalOpen = false;
+
     protected $listeners = [
         'workflow:transition-applied' => 'handleTransitionApplied',
-        'study-calendar:refresh' => 'refreshData'
+        'study-calendar:refresh' => 'refreshData',
+        'openStudyCalendarModal' => 'showStudyCalendarModal',
     ];
 
     protected $rules = [];
@@ -45,6 +50,15 @@ class Approval extends WorkflowComponent
     {
         parent::mount(...$parameters);
         $this->workflowStates = WorkflowDefinition::getAllStates('study_calendar');
+        Log::debug('Approval mount', [
+            'queryString' => request()->query(),
+            'studyCalendarId' => $this->studyCalendarId
+        ]);
+        // If studyCalendarId is present in the query string, open the modal
+        if ($this->studyCalendarId) {
+            Log::debug('Opening modal from mount', ['studyCalendarId' => $this->studyCalendarId]);
+            $this->showStudyCalendarModal(['studyCalendarId' => $this->studyCalendarId]);
+        }
     }
 
     // Event Handlers
@@ -87,6 +101,27 @@ class Approval extends WorkflowComponent
             ]);
             session()->flash('error', $e->getMessage());
         }
+    }
+
+    public function showStudyCalendarModal($params = null)
+    {
+        Log::debug('showStudyCalendarModal called', ['params' => $params]);
+        if (is_array($params)) {
+            $this->studyCalendarId = $params['studyCalendarId'] ?? null;
+        } elseif ($params !== null) {
+            $this->studyCalendarId = $params;
+        }
+        $this->isStudyCalendarModalOpen = true;
+        Log::debug('Modal state after showStudyCalendarModal', [
+            'studyCalendarId' => $this->studyCalendarId,
+            'isStudyCalendarModalOpen' => $this->isStudyCalendarModalOpen
+        ]);
+    }
+
+    public function closeStudyCalendarModal()
+    {
+        $this->isStudyCalendarModalOpen = false;
+        $this->studyCalendarId = null;
     }
 
     // Approval Operations

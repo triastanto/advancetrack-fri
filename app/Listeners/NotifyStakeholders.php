@@ -109,6 +109,10 @@ class NotifyStakeholders
             $baseData['document_name'] = $event->model->file_name;
             $baseData['document_type'] = $event->model->documentType->display_name ?? 'Unknown';
         }
+        // Add study_calendar_id for StudyCalendar models
+        if ($event->model instanceof \App\Models\StudyCalendar) {
+            $baseData['study_calendar_id'] = $event->model->id;
+        }
 
         return $baseData;
     }

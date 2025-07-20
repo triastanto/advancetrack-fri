@@ -65,6 +65,8 @@ class WorkflowNotification extends Notification implements ShouldQueue
             'study_calendar_rejected' => 'Kalender Studi Ditolak',
             'study_started' => 'Studi Dimulai',
             'study_completed' => 'Studi Selesai',
+            'workflow_action_required' => 'Aksi Diperlukan pada Workflow',
+            'workflow_updated' => 'Workflow Diperbarui',
             default => 'Notifikasi Sistem'
         };
     }
@@ -85,6 +87,8 @@ class WorkflowNotification extends Notification implements ShouldQueue
             'study_calendar_rejected' => 'Kalender studi Anda ditolak. Silakan perbaiki dan kirim ulang.',
             'study_started' => 'Studi Anda telah dimulai. Selamat belajar!',
             'study_completed' => 'Selamat! Studi Anda telah selesai.',
+            'workflow_action_required' => 'Ada aksi yang perlu Anda lakukan pada workflow.',
+            'workflow_updated' => 'Status workflow telah diperbarui.',
             default => 'Anda memiliki notifikasi baru.'
         };
     }
@@ -162,6 +166,13 @@ class WorkflowNotification extends Notification implements ShouldQueue
      */
     protected function getActionUrl(): string
     {
+        // For study calendar notifications, link to approval page with studyCalendarId if available
+        if (in_array($this->type, ['study_calendar_approved', 'study_calendar_rejected', 'study_started', 'study_completed', 'workflow_action_required', 'workflow_updated'])) {
+            $studyCalendarId = $this->data['study_calendar_id'] ?? null;
+            if ($studyCalendarId) {
+                return url('/study-calendar/approval?studyCalendarId=' . $studyCalendarId);
+            }
+        }
         return match($this->type) {
             'semester_report_reminder' => $this->data['action_url'] ?? route('documents.semester-reports'),
             'final_report_reminder' => $this->data['action_url'] ?? route('documents.final-reports'),

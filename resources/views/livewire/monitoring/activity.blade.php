@@ -266,32 +266,4 @@
             </div>
         </x-ui.card>
     </div>
-
-    <!-- Activity Timeline -->
-    <x-ui.card class="mt-6">
-        <h3 class="text-lg font-medium text-gray-900 mb-4">Timeline Aktivitas</h3>
-        <div class="overflow-x-auto">
-            <div class="min-w-full">
-                <div class="grid grid-cols-{{ count($activityTimeline) }} gap-1">
-                    @foreach($activityTimeline as $day)
-                        <div class="text-center">
-                            <div class="text-xs text-gray-500 mb-1">
-                                {{ \Carbon\Carbon::parse($day['date'])->format('d/m') }}
-                            </div>
-                            <div class="h-8 bg-gray-200 rounded relative">
-                                @if($day['total'] > 0)
-                                    @php
-                                        $maxActivity = max(array_column($activityTimeline, 'total'));
-                                        $height = $maxActivity > 0 ? ($day['total'] / $maxActivity) * 100 : 0;
-                                    @endphp
-                                    <div class="absolute bottom-0 left-0 right-0 bg-blue-500 rounded" style="height: {{ $height }}%"></div>
-                                @endif
-                            </div>
-                            <div class="text-xs text-gray-600 mt-1">{{ $day['total'] }}</div>
-                        </div>
-                    @endforeach
-                </div>
-            </div>
-        </div>
-    </x-ui.card>
 </x-ui.page-container>

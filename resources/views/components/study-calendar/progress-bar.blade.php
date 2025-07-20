@@ -8,15 +8,22 @@
         ['id' => 5, 'name' => 'Aktif Studi', 'label' => 'ACTIVE', 'icon' => 'book-open', 'color' => 'success', 'terminal' => false],
         ['id' => 7, 'name' => 'Selesai', 'label' => 'FINISHED', 'icon' => 'award', 'color' => 'success', 'terminal' => true],
     ];
+    $rejectedState = ['id' => 4, 'name' => 'Ditolak', 'label' => 'REJECTED', 'icon' => 'x-circle', 'color' => 'danger', 'terminal' => true];
     $leaveState = ['id' => 6, 'name' => 'Cuti', 'label' => 'LEAVE', 'icon' => 'pause-circle', 'color' => 'warning', 'terminal' => false];
     $dropoutState = ['id' => 8, 'name' => 'Drop Out', 'label' => 'DROP_OUT', 'icon' => 'x-circle', 'color' => 'danger', 'terminal' => true];
     $currentState = $progress['current_state'] ?? 1;
-    $states = $baseStates;
-    if ($currentState == 6 || $currentState > 6) {
-        array_splice($states, 4, 0, [$leaveState]);
-    }
-    if ($currentState == 8) {
-        $states[] = $dropoutState;
+    if ($currentState == 4) {
+        // Only show up to Menunggu Persetujuan, then Ditolak
+        $states = array_filter($baseStates, fn($s) => $s['id'] <= 2);
+        $states[] = $rejectedState;
+    } else {
+        $states = $baseStates;
+        if ($currentState == 6 || $currentState > 6) {
+            array_splice($states, 5, 0, [$leaveState]);
+        }
+        if ($currentState == 8) {
+            $states[] = $dropoutState;
+        }
     }
     $current = collect($states)->firstWhere('id', $currentState) ?? $states[0];
     function stateStatus($stateId, $currentState) {

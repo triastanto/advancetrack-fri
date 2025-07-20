@@ -15,11 +15,37 @@ class StudyCalendarViewModal extends Component
     public $isOpen = false;
     public $studyCalendar = null;
     public $showWorkflowHistory = false;
+    public $studyCalendarId = null;
 
     protected $listeners = [
         'openStudyCalendarModal' => 'openModal',
         'closeStudyCalendarModal' => 'closeModal'
     ];
+
+    public function mount($isOpen = false, $studyCalendarId = null)
+    {
+        $this->isOpen = $isOpen;
+        $this->studyCalendarId = $studyCalendarId;
+        if ($this->isOpen && $this->studyCalendarId) {
+            $this->openModal($this->studyCalendarId);
+        }
+    }
+
+    public function updatedIsOpen($value)
+    {
+        if ($value && $this->studyCalendarId) {
+            $this->openModal($this->studyCalendarId);
+        } elseif (!$value) {
+            $this->closeModal();
+        }
+    }
+
+    public function updatedStudyCalendarId($value)
+    {
+        if ($this->isOpen && $value) {
+            $this->openModal($value);
+        }
+    }
 
     public function openModal($studyCalendarId = null)
     {
@@ -57,6 +83,7 @@ class StudyCalendarViewModal extends Component
         $this->isOpen = false;
         $this->studyCalendar = null;
         $this->showWorkflowHistory = false;
+        // No emit here; parent will be notified via Alpine.js in the Blade view
     }
 
     public function toggleWorkflowHistory()

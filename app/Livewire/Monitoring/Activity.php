@@ -29,7 +29,6 @@ class Activity extends Component
     public $activityStats = [];
     public $recentActivities = [];
     public $topActiveLecturers = [];
-    public $activityTimeline = [];
 
     protected $queryString = [
         'dateRange' => ['except' => '30'],
@@ -75,7 +74,6 @@ class Activity extends Component
         $this->activityStats = $this->getActivityStats();
         $this->recentActivities = $this->getRecentActivities();
         $this->topActiveLecturers = $this->getTopActiveLecturers();
-        $this->activityTimeline = $this->getActivityTimeline();
     }
 
     public function getActivityStats()
@@ -266,36 +264,6 @@ class Activity extends Component
         });
 
         return $lecturers->sortByDesc('total_activity')->take(10);
-    }
-
-    public function getActivityTimeline()
-    {
-        $startDate = Carbon::now()->subDays($this->dateRange);
-        $endDate = Carbon::now();
-        
-        $timeline = [];
-        $currentDate = $startDate->copy();
-
-        while ($currentDate <= $endDate) {
-            $date = $currentDate->format('Y-m-d');
-            
-            $studyCalendarCount = StudyCalendar::whereDate('created_at', $date)->count();
-            $documentCount = AcademicDocument::whereDate('created_at', $date)->count() + 
-                           ApprovalDocument::whereDate('created_at', $date)->count();
-            $workflowCount = WorkflowHistory::whereDate('created_at', $date)->count();
-
-            $timeline[] = [
-                'date' => $date,
-                'study_calendars' => $studyCalendarCount,
-                'documents' => $documentCount,
-                'workflows' => $workflowCount,
-                'total' => $studyCalendarCount + $documentCount + $workflowCount,
-            ];
-
-            $currentDate->addDay();
-        }
-
-        return $timeline;
     }
 
     protected function applyFilters($query)

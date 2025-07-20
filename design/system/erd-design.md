@@ -92,7 +92,6 @@
 - functional_position (nullable)
 - origin_address (nullable)
 - contact_phone (nullable)
-- contact_email (nullable)
 - research_lab_id (FK → research_labs.id, nullable, set null)
 - is_lab_head (boolean, default: false, indexed)
 - created_at

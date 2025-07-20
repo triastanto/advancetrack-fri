@@ -228,7 +228,6 @@ class PersonnelSeeder extends Seeder
             'functional_position' => $this->determineFunctionalPosition($userData['name'], $role),
             'origin_address' => $this->randomAddress(),
             'contact_phone' => $this->randomPhone(),
-            'contact_email' => $userData['email'],
             'photo' => $this->getRandomPhotoPath($userData),
             'is_approved' => true,
             'validated_by' => 1,

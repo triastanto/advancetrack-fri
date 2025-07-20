@@ -40,7 +40,6 @@ class RegisterController extends Controller
             'functional_position' => ['nullable', 'string', 'max:255'],
             'origin_address' => ['nullable', 'string', 'max:500'],
             'contact_phone' => ['nullable', 'string', 'max:50'],
-            'contact_email' => ['nullable', 'email', 'max:255'],
             'research_lab_id' => ['nullable', 'exists:research_labs,id'],
         ]);
 
@@ -63,7 +62,6 @@ class RegisterController extends Controller
             'functional_position' => $request->functional_position,
             'origin_address' => $request->origin_address,
             'contact_phone' => $request->contact_phone,
-            'contact_email' => $request->contact_email,
             'research_lab_id' => $request->research_lab_id,
             'is_lab_head' => false, // Default to false
             'is_approved' => false, // Explicitly set to false

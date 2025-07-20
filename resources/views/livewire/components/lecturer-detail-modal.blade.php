@@ -93,10 +93,6 @@
                                     <label class="block text-sm font-medium text-gray-700">Telepon</label>
                                     <p class="mt-1 text-sm text-gray-900">{{ $lecturer->contact_phone ?? 'Tidak tersedia' }}</p>
                                 </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700">Email Kontak</label>
-                                    <p class="mt-1 text-sm text-gray-900">{{ $lecturer->contact_email ?? 'Tidak tersedia' }}</p>
-                                </div>
                             </div>
                         </div>
 

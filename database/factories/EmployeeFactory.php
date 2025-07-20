@@ -33,7 +33,6 @@ class EmployeeFactory extends Factory
             ]),
             'origin_address' => $this->faker->optional(0.8)->address(),
             'contact_phone' => $this->faker->optional(0.9)->phoneNumber(),
-            'contact_email' => $this->faker->optional(0.8)->email,
         ];
     }
 

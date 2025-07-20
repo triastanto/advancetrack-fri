@@ -20,7 +20,6 @@ class PersonalData extends Component
     public $functional_position;
     public $origin_address;
     public $contact_phone;
-    public $contact_email;
     public $employee;
     public $photo;
     public $photo_preview;
@@ -40,7 +39,6 @@ class PersonalData extends Component
             $this->functional_position = $this->employee->functional_position;
             $this->origin_address = $this->employee->origin_address;
             $this->contact_phone = $this->employee->contact_phone;
-            $this->contact_email = $this->employee->contact_email;
             $this->photo_preview = $this->employee->photo ?? null;
         }
     }
@@ -66,7 +64,6 @@ class PersonalData extends Component
             'functional_position' => 'nullable|string|max:255',
             'origin_address' => 'nullable|string|max:255',
             'contact_phone' => 'nullable|string|max:50',
-            'contact_email' => 'nullable|email|max:255',
             'photo' => 'nullable|image|max:2048',
         ]);
 
@@ -84,7 +81,6 @@ class PersonalData extends Component
             $this->employee->functional_position = $this->functional_position;
             $this->employee->origin_address = $this->origin_address;
             $this->employee->contact_phone = $this->contact_phone;
-            $this->employee->contact_email = $this->contact_email;
             if ($this->photo) {
                 $path = $this->photo->store('photos', 'public');
                 $this->employee->photo = $path;

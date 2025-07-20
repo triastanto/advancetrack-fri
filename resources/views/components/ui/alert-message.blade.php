@@ -1,11 +1,12 @@
 @props(['message' => null, 'type' => 'success'])
 
 @php
-    $flashMessage = $message ?? session('success') ?? session('message') ?? session('error') ?? session('warning');
+    $flashMessage = $message ?? session('success') ?? session('message') ?? session('error') ?? session('warning') ?? session('email_success');
     $flashType = session()->has('success') ? 'success'
                : (session()->has('error') ? 'error'
                : (session()->has('warning') ? 'warning'
-               : $type));
+               : (session()->has('email_success') ? 'success'
+               : $type)));
 @endphp
 
 @if ($flashMessage)

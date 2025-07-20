@@ -23,7 +23,6 @@ class Employee extends Model
         'functional_position',
         'origin_address',
         'contact_phone',
-        'contact_email',
         'research_lab_id',
         'is_lab_head',
         'is_approved',

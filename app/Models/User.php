@@ -71,6 +71,14 @@ class User extends Authenticatable implements MustVerifyEmail
             ->select('role');
     }
 
+    /**
+     * Send the pending email verification notification.
+     */
+    public function sendPendingEmailVerificationNotification()
+    {
+        $this->notify(new \App\Notifications\VerifyPendingEmailNotification($this));
+    }
+
     // Relationships
     public function employee()
     {

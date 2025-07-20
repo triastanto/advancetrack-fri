@@ -89,3 +89,7 @@ Route::prefix('study-calendar')->name('study-calendar.')->middleware(['auth', 'v
 
     Route::view('approval', 'pages.study-calendar.approval')->name('approval');
 });
+
+Route::get('pending-email/verify/{id}/{hash}', [App\Http\Controllers\Auth\PendingEmailController::class, 'verify'])
+    ->middleware(['signed'])
+    ->name('pending-email.verify');
